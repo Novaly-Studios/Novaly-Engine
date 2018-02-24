@@ -1,7 +1,7 @@
 local Func = require(game:GetService("ReplicatedStorage").Import)
 setfenv(1, Func())
 
-Wrapper                     = {}
+local Wrapper               = {}
 Wrapper.ObjectItems         = {}
 Wrapper.WrapperCache        = {}
 Wrapper.OldInstance         = Instance

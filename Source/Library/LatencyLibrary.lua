@@ -1,8 +1,8 @@
 local Func = require(game:GetService("ReplicatedStorage").Import)
 setfenv(1, Func())
 
-Client = {}
-Server = {}
+local Client = {}
+local Server = {}
 
 function Client.GetRenderLatency()
     local OldTick = tick()

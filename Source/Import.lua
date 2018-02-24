@@ -23,13 +23,13 @@ local PreDefinedObjects     = {
     
     {Functions, {
         
-        {"RemoteFunction", Name = "Test"};
+        
         
     }};
     
     {Events, {
         
-        {"RemoteEvent", Name = "DeathEffect"};
+
         
     }};
     
@@ -60,6 +60,7 @@ Env["Events"]           = ReplicatedStorage.Events
 Env["Functions"]        = ReplicatedStorage.Functions
 Env["Assets"]           = ReplicatedStorage.Assets
 Env["Modules"]          = ReplicatedStorage.Modules
+Env["Classes"]          = ReplicatedStorage.Classes
 
 local function AddObjects(Data)
     

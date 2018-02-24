@@ -1,7 +1,7 @@
 local Func = require(game:GetService("ReplicatedStorage").Import)
 setfenv(1, Func())
 
-GUI = {}
+local GUI = {}
 
 function GUI.V2U(VecScale, VecOffset)
     VecScale = VecScale or Vector2.new()

@@ -1,7 +1,7 @@
 local Func = require(game:GetService("ReplicatedStorage").Import)
 setfenv(1, Func())
 
-Graphics                            = {}
+local Graphics                      = {}
 Graphics.ParticleEmitters           = {}
 Graphics.CullCollections            = {}
 Graphics.LensFlareItems             = {}
