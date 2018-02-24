@@ -3,7 +3,7 @@
 return
 {
     "TableLibrary";
-    "StructureLibrary";
+    "ClassLibrary";
     "ImportClasses";
     "MathematicsLibrary";
     "StringLibrary";
