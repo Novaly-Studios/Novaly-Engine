@@ -4,6 +4,7 @@ return
 {
     "TableLibrary";
     "StructureLibrary";
+    "ImportClasses";
     "MathematicsLibrary";
     "StringLibrary";
     "EnumLibrary";

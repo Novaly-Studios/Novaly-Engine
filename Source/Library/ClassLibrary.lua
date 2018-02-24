@@ -88,19 +88,6 @@ function Class.FromPreConstructor(PreConstructor)
 
 end
 
-function Class.__main()
-
-    local ClassItems = Classes:GetChildren()
-
-    for Item = 1, #ClassItems do
-
-        local Item = ClassItems[Item]
-        Structures[Item.Name] = require(Item)
-
-    end
-
-end
-
 return {
     Client = {Class = Class};
     Server = {Class = Class};
