@@ -15,6 +15,16 @@ function Table.Find(Array, Item)
     return false
 end
 
+
+function Table.ShallowClone(Array)
+    local Result = {}
+    for Key, Value in next, Array do
+        Result[Key] = Value
+    end
+    return Result
+end
+
+
 function Table.PrintTable(Arr, Layer)
     local Layer = Layer or 1
     local Tab = ("    "):rep(Layer)

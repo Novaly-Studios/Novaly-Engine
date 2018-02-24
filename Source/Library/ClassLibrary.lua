@@ -3,20 +3,6 @@ setfenv(1, Func())
 
 local Class = {}
 
-function ShallowClone(Array)
-
-    local Result = {}
-
-    for Key, Value in next, Array do
-
-        Result[Key] = Value
-
-    end
-
-    return Result
-
-end
-
 function Class.NewIndexHandler(Self, Key, Value)
 
     rawget(Self, Key, Value)
@@ -46,7 +32,7 @@ function Class.new(StaticTable, InstanceTable)
         -- ... are constructor arguments
         -- Clone instance table so each instance has a copy
 
-        local NewObject = ShallowClone(InstanceTable)
+        local NewObject = table.ShallowClone(InstanceTable)
         NewObject.Class = ResultClass
 
         -- Pre-constructor activates before metamethods
@@ -102,21 +88,20 @@ function Class.FromPreConstructor(PreConstructor)
 
 end
 
--- Import classes
+function Class.__main()
 
-local Structures = {}
-local ClassItems = Classes:GetChildren()
+    local ClassItems = Classes:GetChildren()
 
-for Item = 1, #ClassItems do
+    for Item = 1, #ClassItems do
 
-    local Item = ClassItems[Item]
-    Structures[Item.Name] = require(Item)
+        local Item = ClassItems[Item]
+        Structures[Item.Name] = require(Item)
+
+    end
 
 end
 
-Structures.Class = Class
-
 return {
-    Client = Structures;
-    Server = Structures;
+    Client = {Class = Class};
+    Server = {Class = Class};
 }
