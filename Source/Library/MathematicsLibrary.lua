@@ -1,13 +1,11 @@
 local Func = require(game:GetService("ReplicatedStorage").Import)
 setfenv(1, Func())
 
-Curve = {}
-
-Maths = setmetatable({}, {__index = function(Self, Key)
+local Maths = setmetatable({}, {__index = function(Self, Key)
     return rawget(Self, Key) or OriginalEnv["math"][Key]
 end})
 
-Quaternion = {}
+local Curve = {}
 
 function Maths.Lerp(P0, P1, Mul)
     return P0 + (P1 - P0) * Mul
@@ -98,118 +96,6 @@ end
     )
 end]]
 
-function Quaternion.Neg(q)
-    return Quaternion.new(q.w, -q.x, -q.y, -q.z)
-end
-
-function Quaternion.Norm(q)
-    return math.sqrt((q * Quaternion.Neg(q)).w)
-end
-
-function Quaternion.Sgn(q)
-    local n = Quaternion.Norm(q)
-    return n == 0 and Quaternion.New(0, 0, 0, 0) or q/n
-end
-
-function Quaternion.Arg(q)
-    local n = Quaternion.Norm(q)
-    return n == 0 and 0 or math.acos(q.w/n)
-end
-
-function Quaternion.Exp(q)
-    local u = (q - Quaternion.Neg(q))/2
-    local n = Quaternion.Norm(u)
-    return math.exp(q.w) * Quaternion.FromVector(math.cos(n), (Quaternion.Sgn(u) * math.sin(n)):ToVector3())
-end
-
-function Quaternion.Qln(q)
-    local u = (q - Quaternion.Neg(q)) / 2
-    local n = Quaternion.Norm(q)
-    return Quaternion.FromVector(math.log(n), (Quaternion.Sgn(u) * Quaternion.Arg(q)):ToVector3())
-end
-
-function Quaternion.new(w, x, y, z)
-    return setmetatable(
-        {
-            w = w, x = x, y = y, z = z,
-            ToVector3 = function(self)
-                return Vector3.new(x, y, z)
-            end,
-            ToRotationMatrix = function(self)
-                local n = Quaternion.Norm(self)
-                local s = n == 0 and 0 or 2/n
-                local xx, yy, zz = s*self.x*self.x, s*self.y*self.y, s*self.z*self.z
-                local wx, wy, wz = s*self.w*self.x, s*self.w*self.y, s*self.w*self.z
-                local xy, xz, yz = s*self.x*self.y, s*self.x*self.z, s*self.y*self.z
-                return 1 - yy - zz, xy - wz, xz + wy,
-                    xy + wz, 1 - xx - zz, yz - wx,
-                    xz - wy, yz + wx, 1 - xx - yy
-            end
-        },
-        {
-            __index = function(t, k, v)
-                return v
-            end,
-            __unm = function(a)
-                return -1*a
-            end,
-            __add = function(a, b)
-                return Quaternion.new(a.w + b.w, a.x + b.x, a.y + b.y, a.z + b.z)
-            end,
-            __sub = function(a, b)
-                return a + b* - 1
-            end,
-            __mul = function(a, b)
-                if type(b) == 'number' then
-                    return Quaternion.new(a.w*b, a.x*b, a.y*b, a.z*b)
-                elseif type(a) == 'number' then
-                    return Quaternion.new(a*b.w, a*b.x, a*b.y, a*b.z)
-                else
-                    local r1, r2 = a.w, b.w
-                    local v1, v2 = a:ToVector3(), b:ToVector3()
-                    
-                    return Quaternion.FromVector(r1*r2-v1:Dot(v2),
-                        r1*v2 + r2*v1 + v1:Cross(v2))
-                end
-            end,
-            __div = function(a, b)
-                return a * b ^ -1
-            end,
-            __pow = function(a, b)
-                return Quaternion.Exp(b * Quaternion.Qln(a))
-            end
-        }
-    )
-end
-
-function Quaternion.FromVector(w, v)
-    return Quaternion.new(w, v.x, v.y, v.z)
-end
-
-function Quaternion.FromCFrame(CFObject)
-    local _, _, _, M00, M01, M02, M10, M11, M12, M20, M21, M22 = CFObject:components()
-    local t = M00 + M11 + M22
-    if t > 0 then
-        local r = math.sqrt(1 + t)
-        local s = 0.5 / r
-        return Quaternion.new(0.5 * r, (M21 - M12) * s, (M02 - M20) * s, (M10 - M01) * s)
-    else
-        if M00 > M11 and M00 > M12 then
-            local r = math.sqrt(1 + M00 - M11 - M22)
-            local s = 0.5 / r
-            return Quaternion.new((M21 - M12) * s, 0.5 * r, (M01 + M10) * s, (M02 + M20) * s)
-        elseif M11 > M00 and M11 > M22 then
-            local r = math.sqrt(1 - M00 + M11 - M22)
-            local s = 0.5 / r
-            return Quaternion.new((M02 - M20) * s, (M01 + M10) * s, 0.5 * r, (M12 + M21) * s)
-        else
-            local r = math.sqrt(1 - M00 - M11 + M22)
-            local s = 0.5 / r
-            return Quaternion.new((M10 - M01) * s, (M02 + M20) * s, (M12 + M21) * s, 0.5 * r)
-        end
-    end
-end
-
 --[[
     Maths.HermiteInterpolate
     
@@ -248,7 +134,9 @@ function Maths.HermiteInterpolateCFrame(P0, P1, P2, P3, Mul, Tension, Bias)
     P1 = Quaternion.FromCFrame(P1)
     P2 = Quaternion.FromCFrame(P2)
     P3 = Quaternion.FromCFrame(P3)
-    local M00, M01, M02, M10, M11, M12, M20, M21, M22 = Maths.HermiteInterpolate(P0, P1, P2, P3, Mul, Tension, Bias):ToRotationMatrix()
+    local qua = Maths.HermiteInterpolate(P0, P1, P2, P3, Mul, Tension, Bias)
+    print(qua)
+    local M00, M01, M02, M10, M11, M12, M20, M21, M22 = Quaternion.ToRotationMatrix(qua)--:ToRotationMatrix()
     local Position = Maths.HermiteInterpolate(P0P, P1P, P2P, P3P, Mul, Tension, Bias)
     return CFrame.new(Position.X, Position.Y, Position.Z, M00, M01, M02, M10, M11, M12, M20, M21, M22)
 end
@@ -363,7 +251,7 @@ Maths["Inf"]            = 1/0
 Maths["Radian"]         = math.pi / 180
 Maths["Tau"]            = 2 * math.pi
 
-Final = {math = Maths, Curve = Curve, Quaternion = Quaternion}
+Final = {math = Maths, Curve = Curve}
 
 Func({
     Client = Final;

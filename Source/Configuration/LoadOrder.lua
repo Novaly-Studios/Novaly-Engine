@@ -2,6 +2,7 @@
 
 return
 {
+    "LoggingLibrary";
     "TableLibrary";
     "ClassLibrary";
     "ImportClasses";

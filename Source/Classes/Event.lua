@@ -37,6 +37,12 @@ function Event:Connect(EventHandler)
 
 end
 
+function Event:Destroy()
+
+    self.EventHandlers:Flush()
+
+end
+
 function Event:Fire()
 
     self.EventHandlers:HeadForeach(function(Handler)

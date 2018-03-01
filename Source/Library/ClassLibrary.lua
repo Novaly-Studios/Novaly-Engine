@@ -3,29 +3,41 @@ setfenv(1, Func())
 
 local Class = {}
 
-function Class.NewIndexHandler(Self, Key, Value)
+function Class.InstanceIndex(Self, Key)
 
-    rawget(Self, Key, Value)
+    local ClassPointer = rawget(Self, "Class")
+
+    if ClassPointer then
+
+        -- An instance is being indexed
+        return rawget(Self, Key) or ClassPointer[Key]
+
+    else
+
+        -- A class is being indexed
+        return rawget(Self, Key)
+
+    end
 
 end
 
-Class.InstanceMetatable = {
-
-    __index = function(Self, Key)
-
-        return rawget(Self, Key) or rawget(Self, "Class")[Key]
-
-    end;
-
-}
-
 function Class.new(StaticTable, InstanceTable)
 
-    StaticTable = StaticTable or {}
+    --[[
+        We need StaticTable to maintain the same
+        metatable while being applicable to both
+        the class and its instances so that
+        metamethods like __eq, __lq, etc work.
+    ]]
 
-    local ResultClass = StaticTable
+    StaticTable = StaticTable or {}
+    StaticTable.__index = StaticTable.__index or Class.InstanceIndex
+    --[[StaticTable.__newindex = function(Self, Key, Value)
+        rawset(Self, Key, Value)
+    end]]
     InstanceTable = InstanceTable or {}
-    ResultClass.Instances = {}
+    
+    local ResultClass = StaticTable
 
     local function Constructor(...)
 
@@ -35,26 +47,15 @@ function Class.new(StaticTable, InstanceTable)
         local NewObject = table.ShallowClone(InstanceTable)
         NewObject.Class = ResultClass
 
-        -- Pre-constructor activates before metamethods
-
-        StaticTable.PreConstructor(NewObject, ...)
-        setmetatable(NewObject, Class.InstanceMetatable)
-
-        for Key, Value in next, StaticTable do
-
-            getmetatable(NewObject)[Key] = Value
-
-        end
-
-        -- Post-constructor activates after metamethods
-
-        StaticTable.PostConstructor(NewObject, ...)
-        table.insert(ResultClass.Instances, NewObject)
-
+        -- Pre-constructor activates before metamethods, post-constructor after
+        NewObject = StaticTable.PreConstructor(NewObject, ...) or NewObject
+        setmetatable(NewObject, StaticTable)
+        NewObject = StaticTable.PostConstructor(NewObject, ...) or NewObject
         return NewObject
 
     end
 
+    setmetatable(ResultClass, StaticTable)
     ResultClass.new = Constructor
 
     return ResultClass
@@ -88,7 +89,9 @@ function Class.FromPreConstructor(PreConstructor)
 
 end
 
-return {
+Func({
     Client = {Class = Class};
     Server = {Class = Class};
-}
+})
+
+return true

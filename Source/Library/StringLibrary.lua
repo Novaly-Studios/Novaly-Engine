@@ -75,15 +75,25 @@ function String.Uncompress(Str, Method, ...)
 end
 
 function String.NumberComma(Input)
+
     local Formatted = Input
-    local i = 0
-    while true do  
-        Formatted, i = string.gsub(Formatted, "^(-?%d+)(%d%d%d)", '%1,%2')
-        if (i == 0) then
+
+    local Index = 0
+
+    while true do
+
+        Formatted, Index = string.gsub(Formatted, "^(-?%d+)(%d%d%d)", '%1,%2')
+
+        if (Index == 0) then
+
             break
+
         end
+
     end
+
     return Formatted
+
 end
 
 Func({

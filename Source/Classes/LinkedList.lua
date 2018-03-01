@@ -141,4 +141,4 @@ function LinkedList:TailForeach(Func)
 
 end
 
-return LinkedNode
+return LinkedList
