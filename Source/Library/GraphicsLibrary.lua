@@ -15,10 +15,14 @@ function Graphics.NewRenderWait(Func, WaitFunc)
     WaitFunc = WaitFunc or rswait
     
     Sub(function()
+
         while true do
+
             Func()
             WaitFunc()
+
         end
+
     end)
     
 end
@@ -59,22 +63,26 @@ end
 
 function Graphics.DetectPlayer()
     
-    if Players.LocalPlayer == nil then
-        return
-    end
+    if Players.LocalPlayer == nil then return end
     
     local Char = Players.LocalPlayer.Character
     
     if Char then
         
         local Head = Char.Head
+
         if Head then
+
             if (Head.Position - Graphics.Camera.CFrame.p).magnitude < 0.8 then
+
                 Graphics.PlayerIgnore = Char
+
             end
+
         end
         
     end
+
 end
 
 function Graphics.StabiliseParticles()
@@ -82,16 +90,23 @@ function Graphics.StabiliseParticles()
     if CONFIG.gEnableParticleStabilisation == true then
         
         local CurrentFPS = 1 / Latency.GetRenderLatency()
+
         for x = 1, #Graphics.ParticleEmitters do
+
             local Target = Graphics.ParticleEmitters[x][1]
             
             if Target.Parent == nil then
+
                 Graphics.ParticleEmitters[x] = nil
+
             elseif Target:IsA("ParticleEmitter") then
+
                 Target.Rate = math.floor((CurrentFPS / CONFIG._TargetFramerate) * Graphics.ParticleEmitters[x][2])
+
             end
             
             rswait()
+
         end
         
     end
@@ -128,16 +143,20 @@ function Graphics.UpdateLensFlares()
                             Value[7] = workspace:FindPartOnRayWithIgnoreList(Ray.new(CamCF.p, Diff.unit * Dist), {Temp, Graphics.PlayerIgnore}) == nil
                             
                         else
+
                             Value[7] = true
+
                         end
                         
                         if Value[7] then
                             
                             if Value[9] and Value[6] ~= 0 then
+
                                 local Scalar = 1 - Dist / Value[6]
                                 local ScaledSize = Value[10] * Scalar
                                 Value[2].Size = GUI.V2U(nil, ScaledSize)
                                 Value[8] = ScaledSize / 2
+
                             end
                             
                             local ScreenPosVec3 = Camera:WorldToScreenPoint(Adornee.Position)
@@ -146,28 +165,36 @@ function Graphics.UpdateLensFlares()
                             Value[2].Position = GUI.V2U(nil, math.Lerp(ScreenPos, CentrePos, Value[3]) - Value[8])
                             
                             if Value[5] then
+
                                 local Diff = ScreenPos - CentrePos
                                 Value[2].Rotation = math.deg(math.atan2(Diff.y, Diff.x))
+
                             end
                             
                         end
                         
                     else
+
                         Value[7] = false
+
                     end
                 else
+
                     Value[7] = false
+
                 end
+
             end
+
         end
+
     end
+
 end
 
 function c__main()
     
-    if CONFIG.gEnableGraphics == false then
-        return
-    end
+    if CONFIG.gEnableGraphics == false then return end
     
     local Player = Players.LocalPlayer
     local PlayerGui = Player:WaitForChild("PlayerGui")
@@ -179,18 +206,24 @@ function c__main()
     Graphics.UpdateFoV()
     
     workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
+
         Graphics.Camera = workspace.CurrentCamera
+
     end)
     
     if CONFIG.gEnableLensFlare == true then
+
         local FlareFrame = Instance.new("Frame", GraphicsGui)
         FlareFrame.Name = "LensFlare"
         Graphics.GraphicsGui = GraphicsGui
+
     end
     
     if CONFIG.gEnableParticleStabilisation == true then
+
         --Recursive(workspace, Graphics.AddParticleEmitter)
         workspace.DescendantAdded:Connect(Graphics.AddParticleEmitter)
+
     end
     
     Graphics.NewRenderWait(Graphics.StabiliseParticles)
@@ -198,21 +231,39 @@ function c__main()
     Graphics.NewRenderWait(Graphics.DetectPlayer, wait)
     
     Graphics.Camera.Changed:Connect(function(Property)
+
         if Property == "ViewportSize" or Property == "FieldOfView" then
+
             Graphics.UpdateAspectRatio()
             Graphics.UpdateFoV()
+
         end
+
     end)
     
     GraphicsGui.Name = "GraphicsGui"
     LensFlareFrame.Name = "LensFlareFrame"
+
 end
 
 function Graphics.IsVisible(Subject, Target, Tolerance)
+
     return math.acos(Subject.lookVector:Dot((Target - Subject.p).unit)) <= Tolerance
+
+end
+
+function Graphics.AccurateIsVisible(Target, Bounds)
+
+    local Camera = Graphics.Camera
+    local Position = Camera:WorldToScreenPoint(Subject)
+    local ScreenDimensions = Camera.ViewportSize
+
+    return (Position.X <= ScreenDimensions.X and Position.X > 0) and (Position.Y <= ScreenDimensions.Y and Position.Y > 0)
+
 end
 
 function Graphics.NewFlare(ImageID, Offset, Size, Raycast, Distance, Scale, Rotate)
+
     return {
         IsFlare = true;
         ImageID = "rbxassetid://" .. ImageID;
@@ -224,6 +275,7 @@ function Graphics.NewFlare(ImageID, Offset, Size, Raycast, Distance, Scale, Rota
         Scale = Scale; -- Todo, scale image size with distance
         Rotate = Rotate; -- Todo, rotate image around adornee
     }
+
 end
 
 function Graphics.RegisterFlare(CollectionName, FadeTime, Flares)
@@ -231,6 +283,7 @@ function Graphics.RegisterFlare(CollectionName, FadeTime, Flares)
     local FlareObjects = {}
     
     for x = 1, #Flares do
+
         local Value = Flares[x]
         local Adornee = Value[1]
         local FlareData = Value[2]
@@ -240,12 +293,14 @@ function Graphics.RegisterFlare(CollectionName, FadeTime, Flares)
         Object.Image = FlareData.ImageID
         Object.Parent = Graphics.GraphicsGui.LensFlareFrame
         FlareObjects[x] = {Adornee, Object, FlareData.Offset, FlareData.Raycast, FlareData.Rotate, FlareData.Distance, false, FlareData.Size / 2, FlareData.Scale, FlareData.Size}
+        
         local Ref = FlareObjects[x]
         local Name = CollectionName .. x
         Sequence.New(Name, FadeTime, Enum.SequenceType.Conditional, function() return Ref[7] end)
         Sequence.NewAnim(Name, Enum.AnimationType.TwoPoint, Enum.AnimationControlPointState.Static, 0, Object, "ImageTransparency", {1, 0}, "linear", FadeTime)
         Sequence.PreRender(Name, CONFIG._TargetFramerate)
         Sequence.Start(Name)
+
     end
     
     Graphics.LensFlareItems[CollectionName] = FlareObjects
@@ -257,8 +312,10 @@ function Graphics.RemoveFlare(CollectionName)
     local Target = Graphics.LensFlareItems[CollectionName]
     
     for x = 1, #Target do
+
         pcall(Sequence.Delete, CollectionName .. x)
         Target[x][2]:Destroy()
+
     end
     
     Graphics.LensFlareItems[CollectionName] = nil
@@ -270,7 +327,9 @@ function Graphics.SetFlareColour(CollectionName, Colours)
     local Target = Graphics.LensFlareItems[CollectionName]
     
     for x = 1, #Colours do
+
         Target[x][2].ImageColor3 = Colours[x]
+
     end
     
 end

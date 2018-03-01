@@ -32,9 +32,6 @@ function Class.new(StaticTable, InstanceTable)
 
     StaticTable = StaticTable or {}
     StaticTable.__index = StaticTable.__index or Class.InstanceIndex
-    --[[StaticTable.__newindex = function(Self, Key, Value)
-        rawset(Self, Key, Value)
-    end]]
     InstanceTable = InstanceTable or {}
     
     local ResultClass = StaticTable

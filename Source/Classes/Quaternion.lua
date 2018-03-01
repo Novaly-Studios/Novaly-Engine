@@ -52,18 +52,18 @@ function Quaternion.Qln(Subject)
 
 end
 
-function Quaternion:ToVector3(self)
+function Quaternion:ToVector3()
 
     return Vector3.new(self.X, self.Y, self.Z)
 
 end
 
-function Quaternion:ToRotationMatrix(self)
-    print(self, "<<<")
+function Quaternion:ToRotationMatrix()
+
     local Norm = Quaternion.Norm(self)
     local s = Norm == 0 and 0 or 2 / Norm
     local xx, yy, zz = s * self.X * self.X, s * self.Y * self.Y, s * self.Z * self.Z
-    local wx, wy, wz = s * self.w * self.X, s * self.w * self.Y, s * self.w * self.Z
+    local wx, wy, wz = s * self.W * self.X, s * self.W * self.Y, s * self.W * self.Z
     local xy, xz, yz = s * self.X * self.Y, s * self.X * self.Z, s * self.Y * self.Z
 
     return  1 - yy - zz, xy - wz, xz + wy,
@@ -71,12 +71,6 @@ function Quaternion:ToRotationMatrix(self)
             xz - wy, yz + wx, 1 - xx - yy
 
 end
-
---[[function Quaternion:__index(_, Value)
-
-    return Value
-
-end]]
 
 function Quaternion:__tostring()
 
