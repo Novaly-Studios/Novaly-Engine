@@ -1,4 +1,4 @@
-local Func = require(game:GetService("ReplicatedStorage").Import)
+Func = require(game:GetService("ReplicatedStorage").Import)
 setfenv(1, Func())
 
 local Graphics                      = {}
@@ -52,7 +52,9 @@ function Graphics.AddParticleEmitter(Object)
         Object.Parent.ChildRemoved:Connect(function(Child)
             
             if Child == Object then
+
                 Graphics.ParticleEmitters[Index] = nil
+
             end
             
         end)
@@ -137,9 +139,13 @@ function Graphics.UpdateLensFlares()
                         if Value[4] then
                             
                             local Temp = Adornee
+
                             if Temp.Parent == nil then
+
                                 Temp = nil
+
                             end
+
                             Value[7] = workspace:FindPartOnRayWithIgnoreList(Ray.new(CamCF.p, Diff.unit * Dist), {Temp, Graphics.PlayerIgnore}) == nil
                             
                         else
@@ -159,9 +165,9 @@ function Graphics.UpdateLensFlares()
 
                             end
                             
-                            local ScreenPosVec3 = Camera:WorldToScreenPoint(Adornee.Position)
+                            local ScreenPosVec3 = Graphics.Camera:WorldToScreenPoint(Adornee.Position)
                             local ScreenPos = Vector2.new(ScreenPosVec3.X, ScreenPosVec3.Y)
-                            local CentrePos = Camera.ViewportSize / 2
+                            local CentrePos = Graphics.Camera.ViewportSize / 2
                             Value[2].Position = GUI.V2U(nil, math.Lerp(ScreenPos, CentrePos, Value[3]) - Value[8])
                             
                             if Value[5] then
@@ -262,23 +268,13 @@ function Graphics.AccurateIsVisible(Target, Bounds)
 
 end
 
-function Graphics.NewFlare(ImageID, Offset, Size, Raycast, Distance, Scale, Rotate)
+--[[
+    Parameter [String] 'CollectionName' - Specifies the flare collection name
+    Parameter [Array{Instance, LensFlare}] 'Flares' - A collection of lens flare objects and adornee instances
+    Parameter [Number] 'FadeTime' - The time which the flares take to fade out when not visible
+]]
 
-    return {
-        IsFlare = true;
-        ImageID = "rbxassetid://" .. ImageID;
-        Offset = Offset;
-        Size = Size;
-        HalfSize = Size / 2;
-        Raycast = Raycast;
-        Distance = Distance;
-        Scale = Scale; -- Todo, scale image size with distance
-        Rotate = Rotate; -- Todo, rotate image around adornee
-    }
-
-end
-
-function Graphics.RegisterFlare(CollectionName, FadeTime, Flares)
+function Graphics.RegisterFlare(CollectionName, Flares, FadeTime)
     
     local FlareObjects = {}
     
@@ -306,6 +302,14 @@ function Graphics.RegisterFlare(CollectionName, FadeTime, Flares)
     Graphics.LensFlareItems[CollectionName] = FlareObjects
     
 end
+
+--[[
+    Graphics.RemoveFlare
+    
+    Removes a registered flare
+
+    Parameter [String] 'CollectionName' - Specifies the flare collection name
+]]
 
 function Graphics.RemoveFlare(CollectionName)
     
