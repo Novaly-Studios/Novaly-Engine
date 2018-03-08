@@ -16,7 +16,20 @@ local EnvironmentMT         = {
     
 }
 
-Env["Assets"]           = ReplicatedStorage.Assets or Instance.new("Folder", ReplicatedStorage)
+if Server then
+
+    Env["Assets"] = ReplicatedStorage:FindFirstChild("Assets") or Instance.new("Folder", ReplicatedStorage)
+
+else
+
+    coroutine.resume(coroutine.create(function()
+
+        Env["Assets"] = ReplicatedStorage:WaitForChild("Assets")
+
+    end))
+
+end
+
 Env["Modules"]          = ReplicatedStorage.Modules
 Env["Classes"]          = ReplicatedStorage.Classes
 Env["Assets"].Name      = "Assets"
