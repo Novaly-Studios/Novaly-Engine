@@ -3,6 +3,7 @@ setfenv(1, Func())
 
 --[[
     Prefixes:
+    co - Communication Library
     g - Graphics Library
     w - Wrapper Library
     s - Sequence Library
@@ -13,6 +14,9 @@ setfenv(1, Func())
 Config = {
     
     _TargetFramerate = 60;
+
+    coMaxTries = 60;
+    coPollInterval = 0.5;
     
     gEnableGraphics = true;
     gEnableLensFlare = true;

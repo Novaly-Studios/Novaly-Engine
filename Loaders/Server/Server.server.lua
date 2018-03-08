@@ -1,6 +1,3 @@
-repeat wait() until _G["Loaded"]
+while not _G["Loaded"] do wait() end
 local Func = require(game:GetService("ReplicatedStorage").Import)
 setfenv(1, Func())
-
-print(Time.GetCurrentTime(tick()))
-print(Date.GetCurrentDate(tick()))

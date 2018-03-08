@@ -55,7 +55,7 @@ function GetNewIndexHandler(IsServer)
         
         if IsServer then
             
-            FireAllClients("ReplicateData", NewKeys, Send)
+            Broadcast("ReplicateData", NewKeys, Send)
             
         end
         
@@ -219,12 +219,13 @@ end
 function s__main()
     
     -- Wrap top level of replicated data table; the rest will be recursive
+
     SWrapReplicatedData({}, ReplicatedData)
     ReplicatedData.TransferCheck = true
-    
-    BindEvent("GetReplicatedData", function(Player)
-        
-        FireEvent("GetReplicatedData", Player, StripReplicatedData(ReplicatedData))
+
+    BindRemoteEvent("GetReplicatedData", function(Player)
+
+        FireRemoteEvent("GetReplicatedData", Player, StripReplicatedData(ReplicatedData))
         
     end)
     
@@ -249,7 +250,7 @@ function c__main()
     
     CWrapReplicatedData({}, ReplicatedData)
     
-    BindEvent("ReplicateData", function(Keys, Value)
+    BindRemoteEvent("ReplicateData", function(Keys, Value)
         
         if type(Keys) == "table" then
             
@@ -270,9 +271,9 @@ function c__main()
         end
         
     end)
-    
+
     -- Client downloads all data when they join
-    BindEvent("GetReplicatedData", function(Data)
+    BindRemoteEvent("GetReplicatedData", function(Data)
         
         for Key, Value in next, Data do
             
@@ -283,7 +284,7 @@ function c__main()
     end)
     
     -- Client requests data download
-    FireEvent("GetReplicatedData")
+    FireRemoteEvent("GetReplicatedData")
     
 end
 

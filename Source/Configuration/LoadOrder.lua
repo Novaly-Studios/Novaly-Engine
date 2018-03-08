@@ -12,14 +12,10 @@ return
     "WrapperLibrary";
     "CoreLibrary";
     "DataStructureLibrary";
-    "DateLibrary";
-    "TimeLibrary";
     "CommunicationLibrary";
-    "LatencyLibrary";
+    --"LatencyLibrary";
     "SequenceAnimationLibrary";
     "GraphicsLibrary";
-    "GamePlaceLibrary";
-    "SoundLibrary";
     "GUILibrary";
     "ReplicationLibrary";
     "PlayerDataLibrary";

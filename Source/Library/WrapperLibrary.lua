@@ -12,10 +12,9 @@ Wrapper.ToWrap              = {
     ["Game"]                = true;
     ["workspace"]           = true;
     ["Workspace"]           = true;
-    ["Events"]              = true;
-    ["Functions"]           = true;
     ["Assets"]              = true;
     ["Modules"]             = true;
+    ["Classes"]             = true;
 }
 
 -- Storing as external metatables will allow metamethods such as __eq to function correctly
@@ -311,23 +310,15 @@ function Wrapper.RecursiveWrapObjects(Array)
 end
 
 function Wrapper.Wrap(Object)
-
+    
     -- If wrapped objects are wrapped again it will cause problems
     assert(not Wrapper.DoesExist(Object, "Object"), "Error: Wrapped objects cannot be wrapped again!")
     local Cache = Wrapper.WrapperCache
-    local CacheCount = #Cache
-    
-    -- Slighly faster object accessing; maybe I will upgrade to an access frequency cache in future since indexing wrapped objects is very slow
-    for Index = 1, CacheCount do
+    local Cached = Cache[Object]
 
-        local Value = Cache[Index]
+    if Cached then
 
-        if Value.Object == Object then
-
-            Cache[1], Cache[Index] = Cache[Index], Cache[1] -- Move recently indexed object to the top of the cache
-            return Value
-
-        end
+    	return Cached
 
     end
     
@@ -341,9 +332,10 @@ function Wrapper.Wrap(Object)
     local Wrapped = setmetatable({table.Clone(Items.Properties), Items.Methods, Object = Object}, Wrapper.Metatable)
     
     -- Add to cache
-    Cache[CacheCount + 1] = Wrapped
+    Cache[Object] = Wrapped
     
     return Wrapped
+
 end
 
 -- Easy game service access (e.g. Svc["Workspace"]/Svc("Workspace") instead of game:GetService("Workspace"))
@@ -415,6 +407,14 @@ if CONFIG.wEnableObjectWrapping == true then
         
     end
     
+    -- Ensure items are de-referenced
+    setmetatable(Wrapper.WrapperCache, {__mode = "k"})
+    game.DescendantRemoving:Connect(function(Object)
+
+    	Wrapper.WrapperCache[Object] = nil
+
+    end)
+
 end
 
 -- This wrapper is compatible with both the client and the server

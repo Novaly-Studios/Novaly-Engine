@@ -108,11 +108,13 @@ function GUI.RippleEffect(Parent, Position, RippleImage, StartRadius, EndRadius,
     Style = Style or "linear"
     
     local Name = Sequence.GetUniqueName()
-    local RippleImage = (RippleImage or Assets.Engine.RippleEffect:Clone())
+    local RippleImage = Instance.new("ImageLabel")
     RippleImage.Size = UDim2.new(0, StartRadius * 2, 0, StartRadius * 2)
     RippleImage.Position = Position - UDim2.new(0, StartRadius, 0, StartRadius)
     RippleImage.ImageTransparency = StartTransparency
     RippleImage.ImageColor3 = StartColour
+    RippleImage.Image = "rbxassetid://426424851"
+    RippleImage.BackgroundTransparency = 1
     RippleImage.Parent = Parent
     Sequence.New(Name, Time)
     Sequence.NewAnim(Name, Enum.AnimationType.TwoPoint, Enum.AnimationControlPointState.Static, 0, RippleImage, "Position", {RippleImage.Position, UDim2.new(0, Position.X.Offset - EndRadius, 0, Position.Y.Offset - EndRadius)}, Style, Time)

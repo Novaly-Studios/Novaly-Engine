@@ -3,9 +3,6 @@ local Svc                   = setmetatable({}, {__index = function(_, Key) retur
 local ReplicatedStorage     = Svc.ReplicatedStorage;
 local RunService            = Svc.RunService;
 local Server                = RunService:IsServer();
-
-local Functions             = ReplicatedStorage["Functions"]
-local Events                = ReplicatedStorage["Events"]
 local Library               = ReplicatedStorage["Library"]
 
 local Env                   = {}
@@ -19,91 +16,18 @@ local EnvironmentMT         = {
     
 }
 
-local PreDefinedObjects     = {
-    
-    {Functions, {
-        
-        
-        
-    }};
-    
-    {Events, {
-        
-
-        
-    }};
-    
-}
-
-local CoreObjects           = {
-    
-    {Functions, {
-        
-        {"RemoteFunction", Name = "PingLatency"};
-        {"RemoteFunction", Name = "WaitLatency"};
-        {"RemoteFunction", Name = "JoinServer"};
-        
-    }};
-    
-    {Events, {
-        
-        {"RemoteEvent", Name = "ReplicateData"};
-        {"RemoteEvent", Name = "GetReplicatedData"};
-        
-    }};
-    
-}
-
-Env["OriginalEnv"]      = getfenv()
-
-Env["Events"]           = ReplicatedStorage.Events
-Env["Functions"]        = ReplicatedStorage.Functions
-Env["Assets"]           = ReplicatedStorage.Assets
+Env["Assets"]           = ReplicatedStorage.Assets or Instance.new("Folder", ReplicatedStorage)
 Env["Modules"]          = ReplicatedStorage.Modules
 Env["Classes"]          = ReplicatedStorage.Classes
-
-local function AddObjects(Data)
-    
-    for Key, Value in next, Data do
-        
-        local Parent = Value[1] 
-        
-        for Key, Value in next, Value[2] do
-            
-            local Object = Instance.new(Value[1])
-            
-            for Key, Value in next, Value do
-                
-                if Key ~= 1 then
-                    
-                    Object[Key] = Value
-                    
-                end
-                
-            end
-            
-            local Old = Parent:FindFirstChild(Object.Name)
-            
-            if Old ~= nil then
-                
-                Old:Destroy()
-                
-            end
-            
-            Object.Parent = Parent
-            
-        end
-        
-    end
-    
-end
+Env["Assets"].Name      = "Assets"
+Env["OriginalEnv"]      = getfenv()
 
 local function AddPlugin(Plugin)
     
     local Object = (Server and Plugin.Server or Plugin.Client)
     
     for Key, Value in next, Object do
-        
+
         if Key == "__main" then
             
             Value()
@@ -115,13 +39,6 @@ local function AddPlugin(Plugin)
         end
         
     end
-    
-end
-
-if Server then
-    
-    AddObjects(CoreObjects)
-    AddObjects(PreDefinedObjects)
     
 end
 

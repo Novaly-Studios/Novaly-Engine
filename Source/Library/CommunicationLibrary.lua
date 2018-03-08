@@ -1,187 +1,208 @@
 local Func = require(game:GetService("ReplicatedStorage").Import)
 setfenv(1, Func())
 
+local Mutual            = {}
 local Client            = {}
-local Server            = {}
-local BroadcastRules    = {}
-local BroadcastFunc     = {}
+local Server            = {
+    TransmissionReady   = {};
+}
+local Binds             = {
+    Events              = {};
+    Functions           = {};
+}
 
-function Client.FireEvent(Name, ...)
+function Mutual.BindRemoteEvent(Name, Handler)
 
-    assert(Events:FindFirstChild(Name), "Could not find event '" .. Name .. "'")
-    local Event = Events[Name]
-
-    if Event:IsA("RemoteEvent") then
-        Event:FireServer(...)
-    elseif Event:IsA("BindableEvent") then
-        Event:Fire(...)
-    end
+    Binds.Events[Name] = Handler
 
 end
 
-function Server.FireEvent(Name, ...)
+function Mutual.BindRemoteFunction(Name, Handler)
 
-    assert(Events:FindFirstChild(Name), "Could not find event '" .. Name .. "'")
-
-    local Event = Events[Name]
-
-    if Event:IsA("RemoteEvent") then
-
-        Event:FireClient(...)
-
-    elseif Event:IsA("BindableEvent") then
-
-        Event:Fire(...)
-
-    end
+    Binds.Functions[Name] = Handler
 
 end
 
-function Client.InvokeFunction(Name, ...)
+function Client.FireRemoteEvent(...)
 
-    assert(Functions:FindFirstChild(Name), "Could not find function '" .. Name .. "'")
-
-    local Function = Functions[Name]
-
-    if Function:IsA("RemoteFunction") then
-
-        return Function:InvokeServer(...)
-
-    elseif Function:IsA("BindableFunction") then
-
-        Function:Invoke(...)
-
-    end
+    Client.RemoteEvent:FireServer(...)
 
 end
 
-function Server.InvokeFunction(Name, ...)
+function Client.InvokeRemoteFunction(...)
 
-    assert(Functions:FindFirstChild(Name), "Could not find function '" .. Name .. "'")
-
-    local Function = Functions[Name]
-
-    if Function:IsA("RemoteFunction") then
-
-        return Function:InvokeClient(...)
-
-    elseif Function:IsA("BindableFunction") then
-
-        Function:Invoke(...)
-
-    end
-end
-
-function Client.BindEvent(Name, EventFunction)
-
-    assert(Events:FindFirstChild(Name), "Could not find event '" .. Name .. "'")
-    local Event = Events[Name]
-    Event.OnClientEvent:connect(EventFunction)
+    return Client.RemoteFunction:InvokeServer(...)
 
 end
 
-function Server.BindEvent(Name, EventFunction)
+function Client.__main()
 
-    assert(Events:FindFirstChild(Name), "Could not find event '" .. Name .. "'")
-    local Event = Events[Name]
-    Event.OnServerEvent:connect(EventFunction)
+    local RemoteEvent = ReplicatedStorage:WaitForChild("RemoteEvent")
+    local RemoteFunction = ReplicatedStorage:WaitForChild("RemoteFunction")
+    Client.RemoteEvent = RemoteEvent
+    Client.RemoteFunction = RemoteFunction
 
-end
+    RemoteEvent.OnClientEvent:Connect(function(Name, ...)
 
-function BindEventB(Name, Func)
+        local Event = Binds.Events[Name]
 
-    assert(Events:FindFirstChild(Name), "Could not find event '" .. Name .. "'")
-    Events[Name].Event = Func
+        if type(Name) ~= "string" then
 
-end
+            Log(0, "Warning, server has sent an empty or non-string request name.")
+        
+        elseif Event == nil then
 
-function BindFunctionB(Name, Func)
+            Log(0, "Warning, no event '" .. Name .. "' found in event collection.")
 
-    assert(Functions:FindFirstChild(Name), "Could not find function '" .. Name .. "'")
-    Function[Name].Invoke = Func
+        else
 
-end
+            Event(...)
 
-function Client.BindFunction(Name, InvokeFunction)
-
-    assert(Functions:FindFirstChild(Name), "Could not find function '" .. Name .. "'")
-    local Function = Functions[Name]
-    Function.OnClientInvoke = InvokeFunction
-
-end
-
-function Server.BindFunction(Name, InvokeFunction)
-
-    assert(Functions:FindFirstChild(Name), "Could not find function '" .. Name .. "'")
-    local Function = Functions[Name]
-    Function.OnServerInvoke = InvokeFunction
-
-end
-
-function Server.InvokeAllClients(Name, ...)
-
-    assert(Functions:FindFirstChild(Name), "Could not find function '" .. Name .. "'")
-    local Function = Functions[Name]
-
-    for Key, Value in next, game:GetService("Players"):GetChildren() do
-
-        Function:InvokeClient(Value, ...)
-
-    end
-end
-
-function Server.FireAllClients(Name, ...)
-
-    assert(Events:FindFirstChild(Name), "Could not find event '" .. Name .. "'")
-    Events[Name]:FireAllClients(...)
-
-end
-
-function Server.AddBroadcastRule(Name, Func)
-
-    local Rule = BroadcastRules[Name] or {}
-    Rule[#Rule + 1] = Func
-    BroadcastRules = Rule
-
-end
-
-function Client.Broadcast(Name, ...)
-
-    Server.FireEvent("Broadcast", ...)
-
-end
-
-function Client.ConnectBroadcastFunction(Name, Func)
-    
-    BroadcastFunc[Name] = Func
-    
-end
-
-function Client.DisconnectBroadcastFunction(Name)
-    
-    BroadcastFunc[Name] = nil
-    
-end
-
---[[Server.BindEvent("Broadcast", function(Player, ...)
-    local Args = {...}
-    if Args[1] ~= nil then
-        if type(Args[1]) == "string" then
-            for Item = 1, #BroadcastRules do
-                if BroadcastRules[Item](...) == false then
-                    return
-                end
-            end
-            Server.FireAllClients(...)
         end
+
+    end)
+    
+    RemoteFunction.OnClientInvoke = function(Name, ...)
+
+        local Function = Binds.Functions[Name]
+
+        if type(Name) ~= "string" then
+
+            Log(0, "Warning, servers has sent an empty or non-string request name.")
+            return false
+
+        elseif Function == nil then
+
+            Log(0, "Warning, no function '" .. Name .. "' found in function collection.")
+
+        else
+
+            return Function(...)
+
+        end
+
     end
-end)]]
 
-Client.BindEventB = BindEventB
-Server.BindEventB = BindEventB
+    Client.BindRemoteFunction("Ready", function()
 
-Client.BindFunctionB = BindFunctionB
-Server.BindFunctionB = BindFunctionB
+        return true
+
+    end)
+
+end
+
+function Server.WaitForTransmissionReady(Player)
+
+    local Tries = 0
+
+    while Server.TransmissionReady[Player.Name] == nil do
+
+        wait(CONFIG.coPollInterval)
+
+        Tries = Tries + 1
+
+        if Tries == CONFIG.coMaxTries then
+
+            error("Max transmission attempts reached for player " .. Player.Name .. "!")
+            return
+
+        end
+
+    end
+
+end
+
+function Server.FireRemoteEvent(Name, Player, ...)
+
+    Server.RemoteEvent:FireClient(Player, Name, ...)
+
+end
+
+function Server.InvokeRemoteFunction(Name, Player, ...)
+ 
+    return Server.RemoteFunction:InvokeClient(Player, Name, ...)
+
+end
+
+function Server.Broadcast(...)
+
+    Server.RemoteEvent:FireAllClients(...)
+
+end
+
+function Server.__main()
+
+    local RemoteEvent = ReplicatedStorage:FindFirstChild("RemoteEvent") or
+                        Instance.new("RemoteEvent", ReplicatedStorage)
+    local RemoteFunction = ReplicatedStorage:FindFirstChild("RemoteFunction") or
+                        Instance.new("RemoteFunction", ReplicatedStorage)
+
+    Server.RemoteEvent = RemoteEvent
+    Server.RemoteFunction = RemoteFunction
+
+    RemoteEvent.OnServerEvent:Connect(function(Player, Name, ...)
+
+        if not Player then return end
+        local Event = Binds.Events[Name]
+          
+        if type(Name) ~= "string" then
+
+            Log(0, "Warning, client " .. Player.Name .. " has sent an empty or non-string request name.")
+        
+        elseif Event == nil then
+
+            Log(0, "Warning, no event '" .. Name .. "' found in event collection.")
+
+        else
+
+            Event(Player, ...)
+
+        end
+
+    end)
+    
+    RemoteFunction.OnServerInvoke = function(Player, Name, ...)
+
+        if not Player then return end
+        local Function = Binds.Functions[Name]
+
+        if type(Name) ~= "string" then
+
+            Log(0, "Warning, client " .. Player.Name .. " has sent an empty or non-string request name.")
+            return false
+
+        elseif Function == nil then
+
+            Log(0, "Warning, no function '" .. Name .. "' found in function collection.")
+
+        else
+
+            return Function(Player, ...)
+
+        end
+
+    end
+
+    Players.PlayerAdded:Connect(function(Player)
+
+        while Server.InvokeRemoteFunction("Ready", Player) == nil do
+
+            wait(CONFIG.coPollInterval)
+
+        end
+
+        Server.TransmissionReady[Player.Name] = true
+
+    end)
+
+end
+
+for Key, Value in next, Mutual do
+
+    Client[Key] = Value
+    Server[Key] = Value
+
+end
 
 Func({
     Client = Client;
