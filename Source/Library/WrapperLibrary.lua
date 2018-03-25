@@ -152,7 +152,7 @@ Wrapper.Metatable = {
 
                 else
 
-                    error(Res)
+                    error(tostring(Object) .. ": " .. Res)
 
                 end
 

@@ -1,4 +1,4 @@
-Func = require(game:GetService("ReplicatedStorage").Import)
+local Func = require(game:GetService("ReplicatedStorage").Import)
 setfenv(1, Func())
 
 --[[
@@ -30,7 +30,11 @@ Config = {
         OnServerEvent = true;
     };
     
+    pSaveInterval = 30;
     pVersion = "1.0.0";
+    pDataStoreName = "PlayerData";
+    pBackupSuffix = "_Backup";
+    pDataStoreGetRetryWait = 5;
     
 }
 

@@ -61,7 +61,7 @@ function Client.__main()
         end
 
     end)
-    
+
     RemoteFunction.OnClientInvoke = function(Name, ...)
 
         local Function = Binds.Functions[Name]

@@ -45,7 +45,7 @@ function GetNewIndexHandler(IsServer)
             if Value.Object == nil then
                 
                 WrapFunc(NewKeys, Value)
-                Send = StripReplicatedData(Value)
+                Send = Replication.StripReplicatedData(Value)
                 
             end
             
@@ -62,6 +62,7 @@ function GetNewIndexHandler(IsServer)
         Replication.CallBinds(unpack(NewKeys))
         
     end
+
 end
 
 function IndexHandler(Self, Key)
@@ -125,7 +126,7 @@ Replication.ClientMetatable     = {
 SWrapReplicatedData = GetWrapReplicatedData(Replication.ServerMetatable)
 CWrapReplicatedData = GetWrapReplicatedData(Replication.ClientMetatable)
 
-function StripReplicatedData(Data)
+function Replication.StripReplicatedData(Data)
     
     local Result = {}
     
@@ -135,7 +136,7 @@ function StripReplicatedData(Data)
             
             if Value.Object == nil then -- Don't iterate through wrapped instances
                 
-                Value = StripReplicatedData(Value)
+                Value = Replication.StripReplicatedData(Value)
                 
             end
             
@@ -144,7 +145,7 @@ function StripReplicatedData(Data)
         Result[Key] = Value
         
     end
-    
+
     return Result
     
 end
@@ -225,7 +226,7 @@ function s__main()
 
     BindRemoteEvent("GetReplicatedData", function(Player)
 
-        FireRemoteEvent("GetReplicatedData", Player, StripReplicatedData(ReplicatedData))
+        FireRemoteEvent("GetReplicatedData", Player, Replication.StripReplicatedData(ReplicatedData))
         
     end)
     
@@ -239,6 +240,7 @@ function Replication.Wait(Item)
     while Result == nil do
         
         wait()
+        Result = ReplicatedData[Item]
         
     end
     
@@ -249,9 +251,25 @@ end
 function c__main()
     
     CWrapReplicatedData({}, ReplicatedData)
-    
-    BindRemoteEvent("ReplicateData", function(Keys, Value)
+
+    -- Client downloads all data when they join
+    BindRemoteEvent("GetReplicatedData", function(Data)
         
+        for Key, Value in next, Data do
+            
+            ReplicatedData[Key] = Value
+            
+        end
+        
+    end)
+    
+    -- Client requests data download
+    FireRemoteEvent("GetReplicatedData")
+
+    BindRemoteEvent("ReplicateData", function(Keys, Value)
+
+        Replication.Wait()
+
         if type(Keys) == "table" then
             
             local FinalKey = Keys[#Keys]
@@ -272,20 +290,6 @@ function c__main()
         
     end)
 
-    -- Client downloads all data when they join
-    BindRemoteEvent("GetReplicatedData", function(Data)
-        
-        for Key, Value in next, Data do
-            
-            ReplicatedData[Key] = Value
-            
-        end
-        
-    end)
-    
-    -- Client requests data download
-    FireRemoteEvent("GetReplicatedData")
-    
 end
 
 function SharedData.Wait(Item)

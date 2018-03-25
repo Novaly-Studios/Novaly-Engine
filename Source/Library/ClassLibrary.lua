@@ -1,7 +1,27 @@
 local Func = require(game:GetService("ReplicatedStorage").Import)
 setfenv(1, Func())
 
-local Class = {}
+local Class = {
+    NewMethod = "new";
+}
+
+function Class.GetData(Object)
+
+    local Attributes = {}
+
+    for Key, Value in next, Object do
+
+        if type(Value) ~= "function" then
+
+            Attributes[Key] = Value
+
+        end
+
+    end
+
+    return Attributes
+    
+end
 
 function Class.InstanceIndex(Self, Key)
 
@@ -21,7 +41,34 @@ function Class.InstanceIndex(Self, Key)
 
 end
 
-function Class.new(StaticTable, InstanceTable)
+function Class.FromConstructors(PreConstructor, PostConstructor)
+
+    return Class[Class.NewMethod]({
+        PreConstructor = PreConstructor or function() end;
+        PostConstructor = PostConstructor or function() end;
+    })
+
+end
+
+function Class.FromPostConstructor(PostConstructor)
+
+    return Class[Class.NewMethod]({
+        PreConstructor = function() end;
+        PostConstructor = PostConstructor or function() end;
+    })
+
+end
+
+function Class.FromPreConstructor(PreConstructor)
+
+    return Class[Class.NewMethod]({
+        PreConstructor = PreConstructor or function() end;
+        PostConstructor = function() end;
+    })
+
+end
+
+Class[Class.NewMethod] = function(StaticTable, InstanceTable)
 
     --[[
         We need StaticTable to maintain the same
@@ -53,36 +100,9 @@ function Class.new(StaticTable, InstanceTable)
     end
 
     setmetatable(ResultClass, StaticTable)
-    ResultClass.new = Constructor
+    ResultClass[Class.NewMethod] = Constructor
 
     return ResultClass
-
-end
-
-function Class.FromConstructors(PreConstructor, PostConstructor)
-
-    return Class.new({
-        PreConstructor = PreConstructor or function() end;
-        PostConstructor = PostConstructor or function() end;
-    })
-
-end
-
-function Class.FromPostConstructor(PostConstructor)
-
-    return Class.new({
-        PreConstructor = function() end;
-        PostConstructor = PostConstructor or function() end;
-    })
-
-end
-
-function Class.FromPreConstructor(PreConstructor)
-
-    return Class.new({
-        PreConstructor = PreConstructor or function() end;
-        PostConstructor = function() end;
-    })
 
 end
 

@@ -18,6 +18,7 @@ return
     "GraphicsLibrary";
     "GUILibrary";
     "ReplicationLibrary";
-    "PlayerDataLibrary";
+    --"PlayerDataLibrary";
+    "PlayerLibrary";
     "WeldLibrary";
 }
