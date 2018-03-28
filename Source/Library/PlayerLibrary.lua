@@ -22,7 +22,7 @@ function Server.PlayerDataManagement.WaitForPlayerData(Player)
 
     Server.PlayerDataManagement.WaitForDataStore()
 
-    while ReplicatedData.PlayerData[tostring(Player.UserId)] == nil do
+    while Server.PlayerData[tostring(Player.UserId)] == nil do
 
         wait()
 
@@ -34,7 +34,7 @@ function Server.PlayerDataManagement.Save(Player)
 
     Server.PlayerDataManagement.WaitForPlayerData(Player)
     
-    local Stripped = Replication.StripReplicatedData(ReplicatedData.PlayerData[tostring(Player.UserId)])
+    local Stripped = Server.PlayerData[tostring(Player.UserId)]
     local UserId = tostring(Player.UserId)
 
     Server.PlayerDataStore:SetAsync(UserId, Stripped)
@@ -46,7 +46,7 @@ function Server.__main()
 
     -- Metamethods are necessary to convert player ID to string when ID < 0
 
-    ReplicatedData.PlayerData = Server.PlayerData
+    Server.PlayerData = Server.PlayerData
 
     Players.PlayerAdded:Connect(function(Player)
 
@@ -71,7 +71,7 @@ function Server.__main()
 
         end
 
-        ReplicatedData.PlayerData[tostring(Player.UserId)] = Data
+        Server.PlayerData[tostring(Player.UserId)] = Data
         Data.Check = Data.Check + 1
 
         while wait(CONFIG.pSaveInterval) do
