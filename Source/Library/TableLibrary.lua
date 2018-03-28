@@ -230,6 +230,26 @@ function Table.ProtectedForeachI(Arr, Func)
 
 end
 
+function Table.ApplyTemplate(Previous, Template)
+    
+    for Key, Value in next, Template do
+        
+        local Target = Previous[Key]
+        
+        if type(Target) == "table" and type(Value) == "table" then
+            
+            Table.ApplyTemplate(Target, Value)
+            
+        elseif Target == nil then
+            
+            Previous[Key] = Value
+            
+        end
+        
+    end
+    
+end
+
 Func({
     Client = {table = Table, Table = Table};
     Server = {table = Table, Table = Table};
