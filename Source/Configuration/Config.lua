@@ -8,6 +8,7 @@ setfenv(1, Func())
     w - Wrapper Library
     s - Sequence Library
     p - Player Data Library
+    r - Replication Library
     _ - Global
 --]]
 
@@ -31,10 +32,12 @@ Config = {
     };
     
     pSaveInterval = 30;
-    pVersion = "1.0.0";
+    pDataStoreVersion = "1.0.0.2";
     pDataStoreName = "PlayerData";
     pBackupSuffix = "_Backup";
     pDataStoreGetRetryWait = 5;
+
+    rKey = "Vars"; -- Todo
     
 }
 

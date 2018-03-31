@@ -28,3 +28,6 @@ Graphics.RegisterFlare(
 	},
 	0.2
 )
+
+--[[print("abc")
+print(">>", PlayerData[tostring(Player.UserId)])]]

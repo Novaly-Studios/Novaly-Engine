@@ -42,7 +42,7 @@ function Table.ShallowClone(Array)
 
     local Result = {}
 
-    for Key, Value in next, Array do
+    for Key, Value in pairs(Array) do
 
         Result[Key] = Value
 
@@ -85,7 +85,7 @@ function Table.Clone(Array)
 
     local Result = {}
 
-    for Key, Value in next, Array do
+    for Key, Value in pairs(Array) do
 
         if type(Value) == "table" then
 
@@ -137,7 +137,7 @@ end
 
 function Table.MergeKey(Arr1, Arr2)
 
-    for Key, Value in next, Arr2 do
+    for Key, Value in pairs(Arr2) do
 
         Arr1[Key] = Value
 
@@ -149,13 +149,13 @@ function Table.CopyAndMergeKey(Arr1, Arr2)
 
     local Result = {}
 
-    for Key, Value in next, Arr1 do
+    for Key, Value in pairs(Arr1) do
 
         Result[Key] = Value
 
     end
 
-    for Key, Value in next, Arr2 do
+    for Key, Value in pairs(Arr2) do
 
         Result[Key] = Value
 
@@ -200,7 +200,7 @@ end
 
 function Table.ProtectedForeach(Arr, Func)
 
-    for Key, Value in next, Arr do
+    for Key, Value in pairs(Arr) do
 
         local Success, Result = Sub(Func, Key, Value)
 
@@ -232,7 +232,7 @@ end
 
 function Table.ApplyTemplate(Previous, Template)
     
-    for Key, Value in next, Template do
+    for Key, Value in pairs(Template) do
         
         local Target = Previous[Key]
         

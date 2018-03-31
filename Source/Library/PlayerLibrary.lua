@@ -10,7 +10,7 @@ local Server                    = {
 
 function Server.PlayerDataManagement.WaitForDataStore()
 
-    while not Server.PlayerDataStore do
+    while Server.PlayerDataStore == nil do
 
         wait()
 
@@ -34,9 +34,9 @@ function Server.PlayerDataManagement.Save(Player)
 
     Server.PlayerDataManagement.WaitForPlayerData(Player)
     
-    local Stripped = Server.PlayerData[tostring(Player.UserId)]
     local UserId = tostring(Player.UserId)
-
+    local Stripped = Replication.StripReplicatedData(Server.PlayerData[UserId])
+    
     Server.PlayerDataStore:SetAsync(UserId, Stripped)
     Server.PlayerDataStore:SetAsync(UserId .. CONFIG.pBackupSuffix, Stripped)
 
@@ -46,7 +46,7 @@ function Server.__main()
 
     -- Metamethods are necessary to convert player ID to string when ID < 0
 
-    Server.PlayerData = Server.PlayerData
+    ReplicatedData.PlayerData = Server.PlayerData
 
     Players.PlayerAdded:Connect(function(Player)
 
@@ -90,7 +90,7 @@ function Server.__main()
 
         local function TryGet()
 
-            Server.PlayerDataStore = Svc("DataStoreService"):GetDataStore(CONFIG.pDataStoreName)
+            Server.PlayerDataStore = Svc("DataStoreService"):GetDataStore(CONFIG.pDataStoreName .. CONFIG.pDataStoreVersion)
 
         end
         
@@ -120,7 +120,14 @@ function Client.__main()
     
     repeat wait() until LocalPlayer.Character ~= nil
     Client.Character = LocalPlayer.Character
-    
+
+    Sub(function()
+
+        Replication.Wait("PlayerData")
+        Client.PlayerData = ReplicatedData.PlayerData
+
+    end)
+
 end
 
 Func({
