@@ -92,6 +92,7 @@ function Table.Clone(Array)
             Value = Table.Clone(Value)
 
         end
+        
         Result[Key] = Value
 
     end
