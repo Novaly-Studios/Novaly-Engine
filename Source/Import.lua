@@ -1,8 +1,8 @@
 local Svc                   = setmetatable({}, {__index = function(_, Key) return game:GetService(Key) end})
 
-local ReplicatedStorage     = Svc.ReplicatedStorage;
-local RunService            = Svc.RunService;
-local Server                = RunService:IsServer();
+local ReplicatedStorage     = Svc.ReplicatedStorage
+local RunService            = Svc.RunService
+local Server                = RunService:IsServer()
 local Library               = ReplicatedStorage["Library"]
 
 local Env                   = {}
@@ -47,6 +47,12 @@ local function AddPlugin(Plugin)
             
         else
             
+            if Env[Key] then
+
+                print("Warning: Library item '" .. Key .. "' being overwritten.")
+
+            end
+
             Env[Key] = Value
             
         end
