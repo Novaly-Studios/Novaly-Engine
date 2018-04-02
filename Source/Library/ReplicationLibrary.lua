@@ -87,14 +87,13 @@ function GetWrapReplicatedData(Metatable)
                     if Value.Object == nil then -- Check for wrapped instances
                         
                         --[[
-                            Append new key (from iteration) onto end of previous list
+                            Append new key (from iteration) onto end of previous list, but copy (important)
                             Call self for sub-tables
                         ]]
-                        
-                        SelfFunc(table.insert(KeyList, Key), Value)
+
+                        SelfFunc(table.CopyAndAppend(KeyList, Key), Value)
                         
                     end
-                    
                     
                 end
                 
@@ -227,7 +226,7 @@ function s__main()
     BindRemoteEvent("GetReplicatedData", function(Player)
 
         FireRemoteEvent("GetReplicatedData", Player, Replication.StripReplicatedData(ReplicatedData))
-        
+
     end)
     
 end
@@ -269,13 +268,17 @@ function c__main()
     BindRemoteEvent("ReplicateData", function(Keys, Value)
 
         Replication.Wait()
+        --[[print("----")
+        Table.PrintTable(ReplicatedData)
+        print("----")
+        print(Keys[#Keys], "=", Value)]]
 
         if type(Keys) == "table" then
             
             local FinalKey = Keys[#Keys]
             local PreviousTable = ReplicatedData
             Keys[#Keys] = nil
-            
+
             for Key = 1, #Keys do -- Index along until the table we want
                 PreviousTable = PreviousTable[Keys[Key]]
             end
