@@ -2,7 +2,11 @@ local Func = require(game:GetService("ReplicatedStorage").Import)
 setfenv(1, Func())
 
 local Version                   = CONFIG.pVersion
-local Client                    = {}
+local PlayerData                = {}
+local Client                    = {
+    PlayerDataManagement        = {};
+    PlayerData                  = {};
+}
 local Server                    = {
     PlayerDataManagement        = {};
     PlayerData                  = {};
@@ -22,7 +26,7 @@ function Server.PlayerDataManagement.WaitForPlayerData(Player)
 
     Server.PlayerDataManagement.WaitForDataStore()
 
-    while Server.PlayerData[tostring(Player.UserId)] == nil do
+    while PlayerData[tostring(Player.UserId)] == nil do
 
         wait()
 
@@ -35,7 +39,7 @@ function Server.PlayerDataManagement.Save(Player)
     Server.PlayerDataManagement.WaitForPlayerData(Player)
     
     local UserId = tostring(Player.UserId)
-    local Stripped = Replication.StripReplicatedData(Server.PlayerData[UserId])
+    local Stripped = Replication.StripReplicatedData(PlayerData[UserId])
     
     Server.PlayerDataStore:SetAsync(UserId, Stripped)
     Server.PlayerDataStore:SetAsync(UserId .. CONFIG.pBackupSuffix, Stripped)
@@ -46,7 +50,8 @@ function Server.__main()
 
     -- Metamethods are necessary to convert player ID to string when ID < 0
 
-    ReplicatedData.PlayerData = Server.PlayerData
+    ReplicatedData.PlayerData = PlayerData
+    Server.PlayerData = PlayerData
 
     Players.PlayerAdded:Connect(function(Player)
 
@@ -71,7 +76,8 @@ function Server.__main()
 
         end
 
-        Server.PlayerData[tostring(Player.UserId)] = Data
+        repeat wait() until TransmissionReady[Player.Name]
+        PlayerData[tostring(Player.UserId)] = Data
         Data.Check = Data.Check + 1
 
         while wait(CONFIG.pSaveInterval) do
@@ -107,6 +113,26 @@ function Server.__main()
 
 end
 
+function Client.PlayerDataManagement.WaitForPlayerData(Player)
+
+    while PlayerData[tostring(Player.UserId)] == nil do
+
+        wait()
+
+    end
+
+end
+
+function Client.PlayerDataManagement.WaitForMyData()
+
+    while Client.PlayerDataManagement.MyData == nil do
+
+        wait()
+
+    end
+
+end
+
 function Client.__main()
     
     while Players.LocalPlayer == nil do
@@ -124,11 +150,34 @@ function Client.__main()
     Sub(function()
 
         Replication.Wait("PlayerData")
-        Client.PlayerData = ReplicatedData.PlayerData
+        PlayerData = ReplicatedData.PlayerData
+        Client.PlayerDataManagement.PlayerData = PlayerData
+
+        Client.PlayerDataManagement.WaitForPlayerData(LocalPlayer)
+        Client.PlayerDataManagement.MyData = PlayerData[tostring(LocalPlayer.UserId)]
 
     end)
 
 end
+
+local function WaitForItem(Player, Key)
+
+    local UserId = tostring(Player.UserId)
+    local Result = PlayerData[UserId][Key]
+
+    while Result == nil do
+
+        wait()
+        Result = PlayerData[UserId][Key]
+
+    end
+
+    return Result
+
+end
+
+Client.PlayerDataManagement.WaitForItem = WaitForItem
+Server.PlayerDataManagement.WaitForItem = WaitForItem
 
 Func({
     Client = Client;
