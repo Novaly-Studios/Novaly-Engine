@@ -57,7 +57,22 @@ function Server.__main()
 
         Server.PlayerDataManagement.WaitForDataStore()
 
-        local Data = Server.PlayerDataStore:GetAsync(tostring(Player.UserId)) or {
+        local Data = Server.PlayerDataStore:GetAsync(tostring(Player.UserId))
+        local Success = false
+
+        while Success == false do
+
+            Success, Data = pcall(function()
+
+                return Server.PlayerDataStore:GetAsync(tostring(Player.UserId))
+            
+            end)
+            
+            wait(CONFIG.pPlayerDataRetry)
+
+        end
+
+        Data = Data or {
 
             Check = 0;
 
@@ -152,7 +167,6 @@ function Client.__main()
         Replication.Wait("PlayerData")
         PlayerData = ReplicatedData.PlayerData
         Client.PlayerDataManagement.PlayerData = PlayerData
-
         Client.PlayerDataManagement.WaitForPlayerData(LocalPlayer)
         Client.PlayerDataManagement.MyData = PlayerData[tostring(LocalPlayer.UserId)]
 
