@@ -39,13 +39,15 @@ local function AddPlugin(Plugin)
     
     local Object = (Server and Plugin.Server or Plugin.Client)
     
+    if Object["__main"] then
+
+        Object["__main"]
+
+    end
+
     for Key, Value in next, Object do
 
-        if Key == "__main" then
-            
-            Value()
-            
-        else
+        if Key ~= "__main" then
             
             if Env[Key] then
 
