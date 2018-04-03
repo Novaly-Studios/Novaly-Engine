@@ -41,7 +41,7 @@ local function AddPlugin(Plugin)
     
     if Object["__main"] then
 
-        Object["__main"]
+        Object["__main"]()
 
     end
 
