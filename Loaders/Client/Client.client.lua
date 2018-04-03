@@ -16,8 +16,7 @@ function UpdateSunPosition()
 
 end
 
-Lighting:GetPropertyChangedSignal("TimeOfDay"):Connect(UpdateSunPosition)
-UpdateSunPosition()
+RunService.Heartbeat:Connect(UpdateSunPosition)
 
 Graphics.RegisterFlare(
 	"SunFlare",
