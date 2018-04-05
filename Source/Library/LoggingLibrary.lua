@@ -1,4 +1,4 @@
-local Func = require(game:GetService("ReplicatedStorage").Import)
+local Func = require(game:GetService("ReplicatedStorage").Novarine)
 setfenv(1, Func())
 
 -- Todo: reporting to Novaly servers, error detection

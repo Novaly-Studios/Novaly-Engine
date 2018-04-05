@@ -7,7 +7,7 @@
     wrapped.
 ]]
 
-local Func = require(game:GetService("ReplicatedStorage").Import)
+local Func = require(game:GetService("ReplicatedStorage").Novarine)
 setfenv(1, Func())
 
 local Replication                   = {Binds = {}, Access = {}}

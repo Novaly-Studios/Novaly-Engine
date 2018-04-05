@@ -1,5 +1,4 @@
-local Func = require(game:GetService("ReplicatedStorage").Import)
-setfenv(1, Func())
+setfenv(1, require(game:GetService("ReplicatedStorage").Novarine)())
 
 local Quaternion = Class.FromPostConstructor(function(Self, W, X, Y, Z)
 

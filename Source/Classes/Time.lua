@@ -1,5 +1,4 @@
-local Func = require(game:GetService("ReplicatedStorage").Import)
-setfenv(1, Func())
+setfenv(1, require(game:GetService("ReplicatedStorage").Novarine)())
 
 local Time = Class.FromPostConstructor(function(Self, Hour, Minute, Second)
 

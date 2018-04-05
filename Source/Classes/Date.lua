@@ -1,5 +1,4 @@
-local Func = require(game:GetService("ReplicatedStorage").Import)
-setfenv(1, Func())
+setfenv(1, require(game:GetService("ReplicatedStorage").Novarine)())
 
 local Date = Class.FromPostConstructor(function(Self, Day, Month, Year, UseLeapYears)
 
@@ -238,11 +237,4 @@ function Date.MonthsToDays(Month, LeapYear)
 
 end
 
-Func({
-    Client = {Date = Date};
-    Server = {Date = Date};
-})
-
 return Date
-
---return {}

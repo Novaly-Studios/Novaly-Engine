@@ -1,4 +1,4 @@
-Func = require(game:GetService("ReplicatedStorage").Import)
+Func = require(game:GetService("ReplicatedStorage").Novarine)
 setfenv(1, Func())
 
 local Graphics                      = {}

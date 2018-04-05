@@ -1,13 +1,10 @@
-ReplicatedStorage = game:GetService("ReplicatedStorage")
-Config = ReplicatedStorage.Configuration
-LoadOrder = require(Config.LoadOrder)
-CSString = game:GetService("RunService"):IsServer() and "Server" or "Client"
-
-require(ReplicatedStorage.Import)
-print("Engine Handler Loaded...")
+local ReplicatedStorage     = game:GetService("ReplicatedStorage")
+local Config                = ReplicatedStorage.Configuration
+local LoadOrder             = require(Config.LoadOrder)
+local ImportFunction        = require(ReplicatedStorage.Novarine)
+local Indicator             = game:GetService("RunService"):IsServer() and "Server" or "Client"
 
 require(Config.Config)
-print("Configurations Loaded...")
 
 for Key, Value in next, LoadOrder do
     
@@ -17,11 +14,11 @@ for Key, Value in next, LoadOrder do
         
         local Now = tick()
         require(Library)
-        print("[Load Order " .. Key .. "] Library: " .. Library.Name .. " Loaded on " .. CSString ..
+        print("[Load Order " .. Key .. "] Library: " .. Library.Name .. " Loaded on " .. Indicator ..
             " (" .. ("%.2f"):format((tick() - Now) * 1000) .. "ms)")
         
     end
     
 end
 
-_G["Loaded"] = true
+ImportFunction("Complete")
