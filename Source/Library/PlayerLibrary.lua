@@ -26,11 +26,16 @@ function Server.PlayerDataManagement.WaitForPlayerData(Player)
 
     Server.PlayerDataManagement.WaitForDataStore()
 
-    while PlayerData[tostring(Player.UserId)] == nil do
+    local Result = PlayerData[tostring(Player.UserId)]
+
+    while Result == nil do
 
         wait()
+        Result = PlayerData[tostring(Player.UserId)]
 
     end
+
+    return Result
 
 end
 
@@ -130,11 +135,16 @@ end
 
 function Client.PlayerDataManagement.WaitForPlayerData(Player)
 
-    while PlayerData[tostring(Player.UserId)] == nil do
+    local Result = PlayerData[tostring(Player.UserId)]
+
+    while Result == nil do
 
         wait()
+        Result = PlayerData[tostring(Player.UserId)]
 
     end
+
+    return Result
 
 end
 
