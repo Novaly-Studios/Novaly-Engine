@@ -47,6 +47,12 @@ Tweeners["UDim2"] = function(...)
 
 end
 
+Tweeners["UDim"] = function(...)
+
+    return Tweeners["ObjectLerp"](math.LerpUDim, ...)
+
+end
+
 Tweeners["CFrame"] = function(AnimType, ...)
 
     if AnimType == Enum.AnimationType.HermiteSpline then
