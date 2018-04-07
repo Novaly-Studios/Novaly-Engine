@@ -1,11 +1,49 @@
 local Func = require(game:GetService("ReplicatedStorage").Novarine)
 setfenv(1, Func())
 
+local Original = OriginalEnv["math"]
+
 local Maths = setmetatable({}, {__index = function(Self, Key)
     
-    return rawget(Self, Key) or OriginalEnv["math"][Key]
+    return rawget(Self, Key) or Original[Key]
 
 end})
+
+local Mappings = {
+    log = "Log";
+    ldexp = "Ldexp";
+    rad = "Rad";
+    cosh = "CosH";
+    random = "Random";
+    frexp = "FrExp";
+    tanh = "TanH";
+    floor = "Floor";
+    max = "Max";
+    sqrt = "Sqrt";
+    modf = "ModF";
+    huge = "Huge";
+    pow = "Pow";
+    atan = "ATan";
+    tan = "Tan";
+    cos = "Cos";
+    sign = "Sign";
+    clamp = "Clamp";
+    log10 = "Log10";
+    noise = "Noise";
+    acos = "ACos";
+    abs = "Abs";
+    pi = "PI";
+    sinh = "SinH";
+    asin = "ASin";
+    min = "Min";
+    deg = "Deg";
+    fmod = "FMod";
+    randomseed = "RandomSeed";
+    atan2 = "ATan2";
+    ceil = "Ceil";
+    sin = "Sin";
+    exp = "Exp";
+}
 
 local Curve = {}
 
@@ -309,6 +347,10 @@ Maths["NaN"]            = 0/0
 Maths["Inf"]            = 1/0
 Maths["Radian"]         = math.pi / 180
 Maths["Tau"]            = 2 * math.pi
+
+-- Let's Apply CoolCamelCasing ;)
+
+Table.ApplyKeyMapping(Maths, Mappings)
 
 Final = {math = Maths, Math = Maths, Curve = Curve}
 
