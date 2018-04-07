@@ -84,7 +84,7 @@ function Maths.LerpUDim(P0, P1, m)
 
     return UDim.new(
         Lerp(P0.Scale, P1.Scale, m),
-        Lerp(P0.Offset, P1.Offset, m),
+        Lerp(P0.Offset, P1.Offset, m)
     )
 
 end
