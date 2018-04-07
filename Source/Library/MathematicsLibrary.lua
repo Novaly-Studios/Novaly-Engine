@@ -348,7 +348,7 @@ Maths["Inf"]            = 1/0
 Maths["Radian"]         = math.pi / 180
 Maths["Tau"]            = 2 * math.pi
 
--- Let's Apply CoolCamelCasing ;)
+-- Let's Apply CoolPascalCasing ;)
 
 Table.ApplyKeyMapping(Maths, Mappings)
 
