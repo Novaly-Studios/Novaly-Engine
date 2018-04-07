@@ -73,6 +73,23 @@ function Maths.LerpUDim2(P0, P1, m)
 end
 
 --[[
+    Maths.LerpUDim
+
+    Linearly interpolates a UDim object into another UDim object
+]]
+
+function Maths.LerpUDim(P0, P1, m)
+
+    local Lerp = Maths.Lerp
+
+    return UDim.new(
+        Lerp(P0.Scale, P1.Scale, m),
+        Lerp(P0.Offset, P1.Offset, m),
+    )
+
+end
+
+--[[
     Maths.LerpVector2
 
     Linearly interpolates a Vector2 object into another Vector2 object
