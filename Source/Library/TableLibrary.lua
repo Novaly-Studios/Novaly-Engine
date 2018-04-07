@@ -9,6 +9,16 @@ local Table = setmetatable({}, {__index = function(Self, Key)
 
 end})
 
+local Mappings = {
+    setn = "SetN";
+    insert = "Insert";
+    getn = "GetN";
+    foeachi = "ForeachI";
+    concat = "Concat";
+    sort = "Sort";
+    remove = "Remove";
+}
+
 function Table.Find(Array, Item)
 
     for x = 1, #Array do
@@ -250,6 +260,38 @@ function Table.ApplyTemplate(Previous, Template)
     end
     
 end
+
+function Table.Capitalise(Array)
+    
+    for Key, Value in pairs(Array) do
+        
+        Array[Key:sub(1, 1):upper() .. Key:sub(2)] = Value
+        
+    end
+    
+end
+
+function Table.ApplyKeyMapping(Array, Append)
+
+    for Key, Value in pairs(Append) do
+
+        Array[Value] = Array[Key]
+
+    end
+
+end
+
+function Table.ApplyValueMapping(Array, Append)
+
+    for Key, Value in pairs(Append) do
+
+        Array[Key] = Array[Value]
+
+    end
+
+end
+
+Table.ApplyKeyMapping(Table, Mappings)
 
 Func({
     Client = {table = Table, Table = Table};
