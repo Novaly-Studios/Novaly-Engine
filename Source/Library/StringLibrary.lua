@@ -9,6 +9,24 @@ local String = setmetatable({}, {__index = function(Self, Key)
 
 end})
 
+local Mappings = {
+    sub = "SetN";
+    upper = "Upper";
+    len = "Len";
+    gfind = "GFind";
+    rep = "Rep";
+    find = "Find";
+    match = "Match";
+    char = "Char";
+    dump = "Dump";
+    gmatch = "GMatch";
+    reverse = "Reverse";
+    byte = "Byte";
+    format = "Format";
+    gsub = "GSub";
+    lower = "Lower";
+}
+
 local Compression   = {}
 Compression.LZW     = {}
 
@@ -138,6 +156,8 @@ function String.NumberComma(Input)
     return Formatted
 
 end
+
+Table.ApplyKeyMapping(String, Mappings)
 
 Func({
     Client = {string = String, String = String};
