@@ -74,7 +74,7 @@ function Table.PrintTable(Arr, Layer)
 
     end
 
-    for Key, Value in next, Arr do
+    for Key, Value in pairs(Arr) do
 
         if type(Value) == "table" then
 
