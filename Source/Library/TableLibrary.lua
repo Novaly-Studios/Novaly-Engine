@@ -291,6 +291,21 @@ function Table.ApplyValueMapping(Array, Append)
 
 end
 
+function Table.WaitForItem(Array, Key)
+
+    local Result = Array[Key]
+
+    while Result == nil do
+
+        wait()
+        Result = Array[Key]
+
+    end
+
+    return Result
+
+end
+
 Table.ApplyKeyMapping(Table, Mappings)
 
 Func({
