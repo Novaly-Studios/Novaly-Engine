@@ -62,8 +62,11 @@ function Server.__main()
 
         Server.PlayerDataManagement.WaitForDataStore()
 
-        local Data = Server.PlayerDataStore:GetAsync(tostring(Player.UserId))
-        local Success = false
+        local Success, Data = pcall(function()
+
+            return Server.PlayerDataStore:GetAsync(tostring(Player.UserId))
+
+        end)
 
         while Success == false do
 
