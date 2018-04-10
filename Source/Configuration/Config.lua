@@ -27,8 +27,11 @@ Config = {
     
     wEnableObjectWrapping = true;
     wCheckSignals = {
-        OnClientEvent = true;
-        OnServerEvent = true;
+        OnClientEvent   = true;
+        OnServerEvent   = true;
+        ChildAdded      = true;
+        PlayerAdded     = true;
+        DescendantAdded = true;
     };
     
     pSaveInterval = 30;
