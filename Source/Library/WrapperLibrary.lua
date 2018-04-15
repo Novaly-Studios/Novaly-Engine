@@ -329,7 +329,7 @@ function Wrapper.Wrap(Object)
     }
     
     -- Copy properties, only point to methods for memory efficiency
-    local Wrapped = setmetatable({table.Clone(Items.Properties), Items.Methods, Object = Object}, Wrapper.Metatable)
+    local Wrapped = setmetatable({Table.Clone(Items.Properties), Items.Methods, Object = Object}, Wrapper.Metatable)
     
     -- Add to cache
     Cache[Object] = Wrapped

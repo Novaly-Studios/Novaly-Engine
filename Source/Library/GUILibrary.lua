@@ -73,15 +73,15 @@ end
 
 function GUI.RoundOffset(UDim2Value, Determinant)
 
-    local F = function(x) return math.floor(x + 0.5) end
+    local F = function(x) return Math.Floor(x + 0.5) end
 
     if Determinant == true then
 
-        F = math.floor
+        F = Math.Floor
 
     elseif Determinant == false then
 
-        F = math.ceil
+        F = Math.Ceil
 
     end
 

@@ -91,7 +91,7 @@ function GetWrapReplicatedData(Metatable)
                             Call self for sub-tables
                         ]]
 
-                        SelfFunc(table.CopyAndAppend(KeyList, Key), Value)
+                        SelfFunc(Table.CopyAndAppend(KeyList, Key), Value)
                         
                     end
                     

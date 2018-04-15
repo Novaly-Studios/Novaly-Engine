@@ -1,16 +1,14 @@
 setfenv(1, require(game:GetService("ReplicatedStorage").Novarine)())
 
-local LensFlare = Class.FromPostConstructor(function(Self, ImageID, Offset, Size, Raycast, Distance, Scale, Rotate)
-    
-    Self.IsFlare    = true
-    Self.ImageID    = "rbxassetid://" .. ImageID
-    Self.Offset     = Offset
-    Self.Size       = Size
-    Self.HalfSize   = Size / 2
-    Self.Raycast    = Raycast
-    Self.Distance   = Distance
-    Self.Scale      = Scale -- Todo, scale image size with distance
-    Self.Rotate     = Rotate -- Todo, rotate image around adornee
+local LensFlare = Class.FromPostConstructor(function(Self, ImageID, Offset, Size, TransparencyValues, Scale, Rotate)
+
+    Self.Offset     			= Offset;
+    Self.Size       			= Size;
+    Self.Centre     			= Size / 2;
+    Self.Scale      			= Scale; -- Todo, scale image size with distance
+    Self.Rotate     			= Rotate;
+    Self.ImageID    			= ImageID;
+    Self.TransparencyValues 	= TransparencyValues;
 
 end)
 

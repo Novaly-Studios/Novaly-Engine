@@ -453,7 +453,7 @@ function Sequence.UpdateAnimation(SubjectAnimation, SequenceTimeForward)
     -- Check if pre-rendered interpolations are available
     local Object = SubjectAnimation.Object
     if SubjectAnimation.RenderFrames == true then
-        local Found = SubjectAnimation.Frames[math.floor(Forward * SubjectAnimation.PreRenderFramerate)]
+        local Found = SubjectAnimation.Frames[Math.Floor(Forward * SubjectAnimation.PreRenderFramerate)]
         if Found then
             SubjectAnimation.Object[SubjectAnimation.Property] = Found
         end

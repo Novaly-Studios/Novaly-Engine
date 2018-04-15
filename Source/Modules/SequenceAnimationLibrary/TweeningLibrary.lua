@@ -25,31 +25,31 @@ end
 
 Tweeners["Vector3"] = function(...)
 
-    return Tweeners["ObjectLerp"](math.Lerp, ...)
+    return Tweeners["ObjectLerp"](Math.Lerp, ...)
 
 end
 
 Tweeners["Vector2"] = function(...)
 
-    return Tweeners["ObjectLerp"](math.LerpVector2, ...)
+    return Tweeners["ObjectLerp"](Math.LerpVector2, ...)
 
 end
 
 Tweeners["Color3"] = function(...)
 
-    return Tweeners["ObjectLerp"](math.LerpColor3, ...)
+    return Tweeners["ObjectLerp"](Math.LerpColor3, ...)
 
 end
 
 Tweeners["UDim2"] = function(...)
 
-    return Tweeners["ObjectLerp"](math.LerpUDim2, ...)
+    return Tweeners["ObjectLerp"](Math.LerpUDim2, ...)
 
 end
 
 Tweeners["UDim"] = function(...)
 
-    return Tweeners["ObjectLerp"](math.LerpUDim, ...)
+    return Tweeners["ObjectLerp"](Math.LerpUDim, ...)
 
 end
 
@@ -57,7 +57,7 @@ Tweeners["CFrame"] = function(AnimType, ...)
 
     if AnimType == Enum.AnimationType.HermiteSpline then
 
-        return Tweeners["ObjectLerp"](math.HermiteInterpolateCFrame, AnimType, ...)
+        return Tweeners["ObjectLerp"](Math.HermiteInterpolateCFrame, AnimType, ...)
 
     else
 
@@ -79,11 +79,11 @@ Tweeners["number"] = function(AnimType, Tweener, Forward, Points, Time, Extra)
         
     elseif AnimType == Enum.AnimationType.BezierCurve then
         
-        return Points:Interpolate(Tweener(Forward, 0, 1, Time), math.Lerp)
+        return Points:Interpolate(Tweener(Forward, 0, 1, Time), Math.Lerp)
         
     elseif AnimType == Enum.AnimationType.HermiteSpline then
         
-        return Points:InterpolatePiecewiseCubic(Tweener(Forward, 0, 1, Time), math.HermiteInterpolate, Extra[1], Extra[2])
+        return Points:InterpolatePiecewiseCubic(Tweener(Forward, 0, 1, Time), Math.HermiteInterpolate, Extra[1], Extra[2])
         
     end
     
