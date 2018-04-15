@@ -4,16 +4,14 @@ setfenv(1, Func())
 local Graphics                      = {}
 Graphics.ParticleEmitters           = {}
 Graphics.CullCollections            = {}
-Graphics.LensFlareItems             = {}
-Graphics.Variables                  = {}
-Graphics.HorizontalFoV              = 0
+Graphics.LensFlareItems             = {} --setmetatable({}, {__mode = "kv"})
 Graphics.HalfHorizontalFoV          = 0
 Graphics.AspectRatio                = 0
 
 function Graphics.NewRenderWait(Func, WaitFunc)
-    
+
     WaitFunc = WaitFunc or rswait
-    
+
     Sub(function()
 
         while true do
@@ -24,43 +22,41 @@ function Graphics.NewRenderWait(Func, WaitFunc)
         end
 
     end)
-    
+
 end
 
-function Graphics.UpdateAspectRatio()
-    
-    local Screen = Graphics.Camera.ViewportSize
-    Graphics.AspectRatio = Screen.X / Screen.Y
-    
-end
+function Graphics.UpdateScreenValues()
 
-function Graphics.UpdateFoV()
-    
-    --Graphics.HalfHorizontalFoV = math.rad(Graphics.Camera.FieldOfView * Graphics.AspectRatio) / 2
-    Graphics.HalfHorizontalFoV = math.atan(math.tan(math.rad(Graphics.Camera.FieldOfView / 2)) * Graphics.AspectRatio)
-    Graphics.HorizontalFoV = Graphics.HalfHorizontalFoV * 2
-    
+    -- Screen Values and Aspect Ratio
+    local ScreenSize        = Graphics.Camera.ViewportSize
+    Graphics.ScreenSize     = ScreenSize
+    Graphics.ScreenCentre   = ScreenSize / 2
+    Graphics.AspectRatio    = ScreenSize.X / ScreenSize.Y
+
+    -- Horizontal Field of View
+    Graphics.HalfHorizontalFoV = Math.ATan(Math.Tan(Math.Rad(Graphics.Camera.FieldOfView / 2)) * Graphics.AspectRatio)
+
 end
 
 function Graphics.AddParticleEmitter(Object)
-    
+
     if Object:IsA("ParticleEmitter") then
-        
+
         local Index = #Graphics.ParticleEmitters + 1
         Graphics.ParticleEmitters[ Index ] = {Object, Object.Rate}
-        
+
         Object.Parent.ChildRemoved:Connect(function(Child)
-            
+
             if Child == Object then
 
                 Graphics.ParticleEmitters[Index] = nil
 
             end
-            
+
         end)
-        
+
     end
-    
+
 end
 
 function Graphics.DetectPlayer()
@@ -103,7 +99,7 @@ function Graphics.StabiliseParticles()
 
             elseif Target:IsA("ParticleEmitter") then
 
-                Target.Rate = math.floor((CurrentFPS / CONFIG._TargetFramerate) * Graphics.ParticleEmitters[x][2])
+                Target.Rate = Math.Floor((CurrentFPS / CONFIG._TargetFramerate) * Graphics.ParticleEmitters[x][2])
 
             end
             
@@ -119,74 +115,52 @@ function Graphics.UpdateLensFlares()
     
     if CONFIG.gEnableLensFlare == true then
         
-        for _, Flare in next, Graphics.LensFlareItems do
+        for _, FlareCollection in next, Graphics.LensFlareItems do
             
-            -- Adornee, Object, FlareData.Offset, FlareData.Raycast, FlareData.Rotate, FlareData.Distance, false, FlareData.Size / 2
-            for Value = 1, #Flare do
-                
-                Value = Flare[Value]
-                
-                local CamCF = Graphics.Camera.CFrame
-                local Adornee = Value[1]
-                local ImageLabel = Value[2]
-                local Diff = Adornee.Position - CamCF.p
-                local Dist = Diff.magnitude
-                
-                if Dist <= Value[6] or Value[6] == 0 then
-                    
-                    if Graphics.IsVisible(CamCF, Adornee.Position, Graphics.HalfHorizontalFoV) then
-                        
-                        if Value[4] then
-                            
-                            local Temp = Adornee
+            local Adornee = FlareCollection.Adornee
+            local MaxDistance = FlareCollection.MaxDistance
 
-                            if Temp.Parent == nil then
+            if FlareCollection.Enabled then
 
-                                Temp = nil
+                local TargetPosition = Adornee.Position
+                local CheckRay = Ray.new(Graphics.Camera.CFrame.p, (TargetPosition - Graphics.Camera.CFrame.p).unit * MaxDistance)
+                local Hit = workspace:FindPartOnRayWithIgnoreList(CheckRay, {Graphics.PlayerIgnore})
+
+                if Hit == nil then
+
+                    local IsVisible, Vec3ScreenSpace = Graphics.AccurateIsVisible(TargetPosition)
+                    local Vec2ScreenSpace = Vector2.new(Vec3ScreenSpace.X, Vec3ScreenSpace.Y)
+
+                    if FlareCollection.Transparency < 1 then
+
+                        for _, Pairing in pairs(FlareCollection.LensFlares) do
+
+                            local FlareObject = Pairing[1]
+                            local ImageLabel = Pairing[2]
+                            local From = Vec2ScreenSpace - FlareObject.Centre
+                            local To = Graphics.ScreenCentre - FlareObject.Centre
+                            local NewPos = From:Lerp(To, FlareObject.Offset)
+                            ImageLabel.Position = GUI.V2U(nil, NewPos)
+                            -- Todo: rotate and scale
+
+                            if FlareObject.Rotate then
+
+                                ImageLabel.Rotation = Math.Deg(Math.ATan2(
+                                    Vec2ScreenSpace.Y - Graphics.ScreenCentre.Y,
+                                    Vec2ScreenSpace.X - Graphics.ScreenCentre.X
+                                ))
 
                             end
-
-                            Value[7] = workspace:FindPartOnRayWithIgnoreList(Ray.new(CamCF.p, Diff.unit * Dist), {Temp, Graphics.PlayerIgnore}) == nil
-                            
-                        else
-
-                            Value[7] = true
 
                         end
-                        
-                        if Value[7] then
-                            
-                            if Value[9] and Value[6] ~= 0 then
-
-                                local Scalar = 1 - Dist / Value[6]
-                                local ScaledSize = Value[10] * Scalar
-                                Value[2].Size = GUI.V2U(nil, ScaledSize)
-                                Value[8] = ScaledSize / 2
-
-                            end
-                            
-                            local ScreenPosVec3 = Graphics.Camera:WorldToScreenPoint(Adornee.Position)
-                            local ScreenPos = Vector2.new(ScreenPosVec3.X, ScreenPosVec3.Y)
-                            local CentrePos = Graphics.Camera.ViewportSize / 2
-                            Value[2].Position = GUI.V2U(nil, math.Lerp(ScreenPos, CentrePos, Value[3]) - Value[8])
-                            
-                            if Value[5] then
-
-                                local Diff = ScreenPos - CentrePos
-                                Value[2].Rotation = math.deg(math.atan2(Diff.y, Diff.x))
-
-                            end
-                            
-                        end
-                        
-                    else
-
-                        Value[7] = false
 
                     end
+
+                    FlareCollection.Show = IsVisible
+
                 else
 
-                    Value[7] = false
+                    FlareCollection.Show = false
 
                 end
 
@@ -208,8 +182,7 @@ function c__main()
     local LensFlareFrame = Instance.new("Frame", GraphicsGui)
     
     Graphics.Camera = workspace.CurrentCamera
-    Graphics.UpdateAspectRatio()
-    Graphics.UpdateFoV()
+    Graphics.UpdateScreenValues()
     
     workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
 
@@ -240,8 +213,7 @@ function c__main()
 
         if Property == "ViewportSize" or Property == "FieldOfView" then
 
-            Graphics.UpdateAspectRatio()
-            Graphics.UpdateFoV()
+            Graphics.UpdateScreenValues()
 
         end
 
@@ -254,87 +226,33 @@ end
 
 function Graphics.IsVisible(Subject, Target, Tolerance)
 
-    return math.acos(Subject.lookVector:Dot((Target - Subject.p).unit)) <= Tolerance
+    return Math.ACos(Subject.lookVector:Dot((Target - Subject.p).unit)) <= Tolerance
 
 end
 
-function Graphics.AccurateIsVisible(Target, Bounds)
+function Graphics.AccurateIsVisible(Target)
 
     local Camera = Graphics.Camera
-    local Position = Camera:WorldToScreenPoint(Subject)
+    local Position = Camera:WorldToScreenPoint(Target)
     local ScreenDimensions = Camera.ViewportSize
 
-    return (Position.X <= ScreenDimensions.X and Position.X > 0) and (Position.Y <= ScreenDimensions.Y and Position.Y > 0)
+    if Position.Z > 0 then
+        return (Position.X <= ScreenDimensions.X and Position.X >= 0) and (Position.Y <= ScreenDimensions.Y and Position.Y >= 0), Position
+    end
+
+    return false, Position
 
 end
 
---[[
-    Parameter [String] 'CollectionName' - Specifies the flare collection name
-    Parameter [Array{Instance, LensFlare}] 'Flares' - A collection of lens flare objects and adornee instances
-    Parameter [Number] 'FadeTime' - The time which the flares take to fade out when not visible
-]]
+function Graphics.RegisterFlare(Collection)
 
-function Graphics.RegisterFlare(CollectionName, Flares, FadeTime)
-    
-    local FlareObjects = {}
-    
-    for x = 1, #Flares do
+    for _, FlareObject in pairs(Collection.LensFlares) do
 
-        local Value = Flares[x]
-        local Adornee = Value[1]
-        local FlareData = Value[2]
-        local Object = Instance.new("ImageLabel")
-        Object.BackgroundTransparency = 1
-        Object.Size = GUI.V2U(nil, FlareData.Size)
-        Object.Image = FlareData.ImageID
-        Object.Parent = Graphics.GraphicsGui.LensFlareFrame
-        FlareObjects[x] = {Adornee, Object, FlareData.Offset, FlareData.Raycast, FlareData.Rotate, FlareData.Distance, false, FlareData.Size / 2, FlareData.Scale, FlareData.Size}
-        
-        local Ref = FlareObjects[x]
-        local Name = CollectionName .. x
-        Sequence.New(Name, FadeTime, Enum.SequenceType.Conditional, function() return Ref[7] end)
-        Sequence.NewAnim(Name, Enum.AnimationType.TwoPoint, Enum.AnimationControlPointState.Static, 0, Object, "ImageTransparency", {1, 0}, "linear", FadeTime)
-        Sequence.PreRender(Name, CONFIG._TargetFramerate)
-        Sequence.Start(Name)
+        FlareObject[2].Parent = Graphics.GraphicsGui.LensFlareFrame
 
     end
     
-    Graphics.LensFlareItems[CollectionName] = FlareObjects
-    
-end
-
---[[
-    Graphics.RemoveFlare
-    
-    Removes a registered flare
-
-    Parameter [String] 'CollectionName' - Specifies the flare collection name
-]]
-
-function Graphics.RemoveFlare(CollectionName)
-    
-    local Target = Graphics.LensFlareItems[CollectionName]
-    
-    for x = 1, #Target do
-
-        pcall(Sequence.Delete, CollectionName .. x)
-        Target[x][2]:Destroy()
-
-    end
-    
-    Graphics.LensFlareItems[CollectionName] = nil
-    
-end
-
-function Graphics.SetFlareColour(CollectionName, Colours)
-    
-    local Target = Graphics.LensFlareItems[CollectionName]
-    
-    for x = 1, #Colours do
-
-        Target[x][2].ImageColor3 = Colours[x]
-
-    end
+    Graphics.LensFlareItems[#Graphics.LensFlareItems + 1] = Collection
     
 end
 
