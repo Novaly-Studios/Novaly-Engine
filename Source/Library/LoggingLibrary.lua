@@ -12,8 +12,8 @@ function Log.Log(Level, Str)
 end
 
 Func({
-	Client = Log;
-	Server = Log;
+    Client = Log;
+    Server = Log;
 })
 
 return true

@@ -8,25 +8,25 @@ end)
 
 function TestClass:GetValue()
 
-	return self.Value
+    return self.Value
 
 end
 
 function TestClass:SetValue(Value)
 
-	self.Value = Value
+    self.Value = Value
 
 end
 
 function TestClass:__eq(Other)
 
-	return self:GetValue() == Other:GetValue()
+    return self:GetValue() == Other:GetValue()
 
 end
 
 function TestClass:GetAnother()
 
-	return TestClass.new(85)
+    return TestClass.new(85)
 
 end
 

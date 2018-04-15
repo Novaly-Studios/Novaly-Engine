@@ -318,7 +318,7 @@ function Wrapper.Wrap(Object)
 
     if Cached then
 
-    	return Cached
+        return Cached
 
     end
     
@@ -411,7 +411,7 @@ if CONFIG.wEnableObjectWrapping == true then
     setmetatable(Wrapper.WrapperCache, {__mode = "k"})
     game.DescendantRemoving:Connect(function(Object)
 
-    	Wrapper.WrapperCache[Object] = nil
+        Wrapper.WrapperCache[Object] = nil
 
     end)
 
