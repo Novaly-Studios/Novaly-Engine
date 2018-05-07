@@ -12,12 +12,11 @@ function Structures.ImportClass(Item, Name)
     if ModuleType == "table" or ModuleType == "userdata" then
 
         Structures[Name] = Module
-
-    else
-
-        error("Supplied module did not return a table or userdata.")
+        return
 
     end
+
+    error("Supplied module did not return a table or userdata.")
 
 end
 

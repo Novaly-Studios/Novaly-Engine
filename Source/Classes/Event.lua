@@ -1,6 +1,8 @@
 setfenv(1, require(game:GetService("ReplicatedStorage").Novarine)())
 
-local Event = Class.FromPostConstructor(
+local Event = Class.FromConstructor(
+    
+    script.Name,
 
     function(Self, Condition, DelayFunc)
 

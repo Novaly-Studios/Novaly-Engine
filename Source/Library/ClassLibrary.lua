@@ -3,6 +3,7 @@ setfenv(1, Func())
 
 local Class = {
     NewMethod = "new";
+    TypeName = "CLASS_TYPE";
 }
 
 function Class.GetData(Object)
@@ -26,49 +27,56 @@ end
 function Class.InstanceIndex(Self, Key)
 
     local ClassPointer = rawget(Self, "Class")
+    local Value = rawget(Self, Key)
 
     if ClassPointer then
 
         -- An instance is being indexed
-        return rawget(Self, Key) or ClassPointer[Key]
-
-    else
-
-        -- A class is being indexed
-        return rawget(Self, Key)
+        return Value or ClassPointer[Key]
 
     end
 
+    -- A class is being indexed
+    return Value
+
 end
 
-function Class.FromConstructors(PreConstructor, PostConstructor)
+function Class.FromConstructor(ClassType, Constructor)
 
-    return Class[Class.NewMethod]({
-        PreConstructor = PreConstructor or function() end;
-        PostConstructor = PostConstructor or function() end;
+    return Class[Class.NewMethod](ClassType, {
+        [ClassType] = Constructor or function() end;
     })
 
 end
 
-function Class.FromPostConstructor(PostConstructor)
+function Class.FromName(ClassType)
 
-    return Class[Class.NewMethod]({
-        PreConstructor = function() end;
-        PostConstructor = PostConstructor or function() end;
-    })
+    return Class[Class.NewMethod](ClassType)
 
 end
 
-function Class.FromPreConstructor(PreConstructor)
+function Class.InstanceOf(Subject, Other)
 
-    return Class[Class.NewMethod]({
-        PreConstructor = PreConstructor or function() end;
-        PostConstructor = function() end;
-    })
+    return (Subject[Class.TypeName] == Other[Class.TypeName])
 
 end
 
-Class[Class.NewMethod] = function(StaticTable, InstanceTable)
+function Class.CreateExtension(ClassType, Other)
+
+    local function IndexFunction(Self, Key)
+
+        return Class.InstanceIndex(Self, Key) or Other[Key]
+
+    end
+
+    local ClassMT = {__index = IndexFunction}
+    local ClassObject = Class[Class.NewMethod](ClassType, ClassMT, ClassMT)
+
+    return ClassObject
+
+end
+
+Class[Class.NewMethod] = function(ClassType, StaticTable, InstanceTable)
 
     --[[
         We need StaticTable to maintain the same
@@ -80,7 +88,8 @@ Class[Class.NewMethod] = function(StaticTable, InstanceTable)
     StaticTable = StaticTable or {}
     StaticTable.__index = StaticTable.__index or Class.InstanceIndex
     InstanceTable = InstanceTable or {}
-    
+    StaticTable[Class.TypeName] = ClassType
+
     local ResultClass = StaticTable
 
     local function Constructor(...)
@@ -88,13 +97,12 @@ Class[Class.NewMethod] = function(StaticTable, InstanceTable)
         -- ... are constructor arguments
         -- Clone instance table so each instance has a copy
 
-        local NewObject = table.ShallowClone(InstanceTable)
+        local NewObject = Table.ShallowClone(InstanceTable)
         NewObject.Class = ResultClass
 
-        -- Pre-constructor activates before metamethods, post-constructor after
-        NewObject = StaticTable.PreConstructor(NewObject, ...) or NewObject
         setmetatable(NewObject, StaticTable)
-        NewObject = StaticTable.PostConstructor(NewObject, ...) or NewObject
+        assert(StaticTable[ClassType], "Error: No constructor for class '" .. ClassType .."'!")
+        NewObject = StaticTable[ClassType](NewObject, ...) or NewObject
         return NewObject
 
     end

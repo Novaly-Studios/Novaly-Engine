@@ -1,6 +1,6 @@
 setfenv(1, require(game:GetService("ReplicatedStorage").Novarine)())
 
-local CircularBuffer = Class.FromPostConstructor(function(Self, MaxElements)
+local CircularBuffer = Class.FromConstructor(script.Name, function(Self, MaxElements)
 
     Self.MaxElements = MaxElements
     Self.CurrentElement = 0

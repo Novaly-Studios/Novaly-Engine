@@ -1,6 +1,6 @@
 setfenv(1, require(game:GetService("ReplicatedStorage").Novarine)())
 
-local Time = Class.FromPostConstructor(function(Self, Hour, Minute, Second)
+local Time = Class.FromConstructor(script.Name, function(Self, Hour, Minute, Second)
 
     if type(Hour) == "string" then
 

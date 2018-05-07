@@ -52,7 +52,7 @@ local function AddPlugin(Plugin)
             
             if Environment[Key] then
 
-                print("Warning: Library item '" .. Key .. "' being overwritten.")
+                print("\tWarning: Library item '" .. Key .. "' being overwritten.")
 
             end
 

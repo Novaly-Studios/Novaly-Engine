@@ -1,6 +1,6 @@
 setfenv(1, require(game:GetService("ReplicatedStorage").Novarine)())
 
-local Date = Class.FromPostConstructor(function(Self, Day, Month, Year, UseLeapYears)
+local Date = Class.FromConstructor(script.Name, function(Self, Day, Month, Year, UseLeapYears)
 
     if type(Day) == "string" then
 

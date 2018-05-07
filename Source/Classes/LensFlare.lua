@@ -1,6 +1,6 @@
 setfenv(1, require(game:GetService("ReplicatedStorage").Novarine)())
 
-local LensFlare = Class.FromPostConstructor(function(Self, ImageID, Offset, Size, TransparencyValues, Scale, Rotate)
+local LensFlare = Class.FromConstructor(script.Name, function(Self, ImageID, Offset, Size, TransparencyValues, Scale, Rotate)
 
     Self.Offset                 = Offset;
     Self.Size                   = Size;

@@ -1,6 +1,6 @@
 setfenv(1, require(game:GetService("ReplicatedStorage").Novarine)())
 
-local LinkedList = Class.FromPostConstructor(function(Self)
+local LinkedList = Class.FromConstructor(script.Name, function(Self)
     
     Self.FirstNode = nil
     Self.PreviousNode = nil
