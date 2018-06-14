@@ -39,12 +39,25 @@ end
 function Server.PlayerDataManagement.Save(Player)
 
     Server.PlayerDataManagement.WaitForPlayerData(Player)
-    
+
     local UserId = tostring(Player.UserId)
     local Stripped = Replication.StripReplicatedData(PlayerData[UserId])
-    
+
     Server.PlayerDataStore:SetAsync(UserId, Stripped)
-    Server.PlayerDataStore:SetAsync(UserId .. CONFIG.pBackupSuffix, Stripped)
+    --Server.PlayerDataStore:SetAsync(UserId .. CONFIG.pBackupSuffix, Stripped)
+
+end
+
+function Server.PlayerDataManagement.LeaveSave(Player)
+
+    local UserId = tostring(Player.UserId)
+    Server.PlayerDataManagement.WaitForPlayerData(Player)
+    local Stripped = Replication.StripReplicatedData(PlayerData[UserId])
+
+    wait(6.5)
+
+    Server.PlayerDataStore:SetAsync(UserId, Stripped)
+    --Server.PlayerDataStore:SetAsync(UserId .. CONFIG.pBackupSuffix, Stripped)
 
 end
 
@@ -87,13 +100,13 @@ function Server.__main()
         Data.Check = Data.Check + 1
 
         while wait(CONFIG.pSaveInterval) do
-            if not Player then break end
+            if not Player.Parent then break end
             Server.PlayerDataManagement.Save(Player)
         end
 
     end)
 
-    Players.PlayerRemoving:Connect(Server.PlayerDataManagement.Save)
+    Players.PlayerRemoving:Connect(Server.PlayerDataManagement.LeaveSave)
 
     Sub(function()
 
