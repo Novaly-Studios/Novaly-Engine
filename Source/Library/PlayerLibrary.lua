@@ -14,28 +14,25 @@ local Server                    = {
 
 function Server.PlayerDataManagement.WaitForDataStore()
 
-    while Server.PlayerDataStore == nil do
+    Table.WaitFor(wait, Server, "PlayerDataStore")
 
+    --[[while Server.PlayerDataStore == nil do
         wait()
-
-    end
+    end]]
 
 end
 
 function Server.PlayerDataManagement.WaitForPlayerData(Player)
 
     Server.PlayerDataManagement.WaitForDataStore()
+    return Table.WaitFor(wait, PlayerData, tostring(Player.UserId))
 
-    local Result = PlayerData[tostring(Player.UserId)]
-
+    --[[local Result = PlayerData[tostring(Player.UserId)]
     while Result == nil do
-
         wait()
         Result = PlayerData[tostring(Player.UserId)]
-
     end
-
-    return Result
+    return Result]]
 
 end
 
@@ -63,40 +60,26 @@ function Server.__main()
         Server.PlayerDataManagement.WaitForDataStore()
 
         local Success, Data = pcall(function()
-
             return Server.PlayerDataStore:GetAsync(tostring(Player.UserId))
-
         end)
 
         while Success == false do
-
             Success, Data = pcall(function()
-
                 return Server.PlayerDataStore:GetAsync(tostring(Player.UserId))
-            
             end)
-            
             wait(CONFIG.pPlayerDataRetry)
-
         end
 
         Data = Data or {
-
             Check = 0;
-
         }
 
         if Data.Check == 0 then
-
             local Backup = Server.PlayerDataStore:GetAsync(tostring(Player.UserId) .. CONFIG.pBackupSuffix)
-
             if Backup then
-
                 Log(0, "Abnormal data check found, restoring from backup.")
                 Data = Backup or Data
-
             end
-
         end
 
         repeat wait() until TransmissionReady[Player.Name]
@@ -104,11 +87,8 @@ function Server.__main()
         Data.Check = Data.Check + 1
 
         while wait(CONFIG.pSaveInterval) do
-
             if not Player then break end
-
             Server.PlayerDataManagement.Save(Player)
-
         end
 
     end)
@@ -118,18 +98,14 @@ function Server.__main()
     Sub(function()
 
         local function TryGet()
-
             Server.PlayerDataStore = Svc("DataStoreService"):GetDataStore(CONFIG.pDataStoreName .. CONFIG.pDataStoreVersion)
-
         end
         
         TryGet()
 
         while Server.PlayerDataStore == nil do
-
             TryGet()
             wait(CONFIG.pDataStoreGetRetryWait)
-
         end
 
     end)
@@ -138,35 +114,29 @@ end
 
 function Client.PlayerDataManagement.WaitForPlayerData(Player)
 
-    local Result = PlayerData[tostring(Player.UserId)]
-
+    return Table.WaitFor(wait, PlayerData, tostring(Player.UserId))
+    --[[local Result = PlayerData[tostring(Player.UserId)]
     while Result == nil do
-
         wait()
         Result = PlayerData[tostring(Player.UserId)]
-
     end
-
-    return Result
+    return Result]]
 
 end
 
 function Client.PlayerDataManagement.WaitForMyData()
 
-    while Client.PlayerDataManagement.MyData == nil do
-
+    return Table.WaitFor(wait, Client.PlayerDataManagement, "MyData")
+    --[[while Client.PlayerDataManagement.MyData == nil do
         wait()
-
-    end
+    end]]
 
 end
 
 function Client.__main()
     
     while Players.LocalPlayer == nil do
-
         wait()
-
     end
 
     local LocalPlayer = Players.LocalPlayer
