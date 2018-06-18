@@ -36,14 +36,47 @@ function Server.PlayerDataManagement.WaitForPlayerData(Player)
 
 end
 
+function Server.PlayerDataManagement.RecursiveSerialise(Data)
+
+    for Key, Value in next, Data do
+        if (DataStructures.GetType(Value) == "Color3") then
+            Data[Key] = {TYPE = "Color3", Red = Value.r, Green = Value.g, Blue = Value.b}
+        elseif type(Value) == "table" then
+            Server.PlayerDataManagement.RecursiveSerialise(Value)
+        end
+    end
+
+    return Data
+
+end
+
+function Server.PlayerDataManagement.RecursiveBuild(Data)
+
+    for Key, Value in next, Data do
+        if (type(Value) == "table") then
+            local DataType = Value.TYPE
+            if DataType then
+                if (DataType == "Color3") then
+                    Data[Key] = Color3.new(Value.Red, Value.Green, Value.Blue)
+                end
+            end
+            Server.PlayerDataManagement.RecursiveBuild(Value)
+        end
+    end
+
+    return Data
+
+end
+
 function Server.PlayerDataManagement.Save(Player)
 
     Server.PlayerDataManagement.WaitForPlayerData(Player)
 
     local UserId = tostring(Player.UserId)
     local Stripped = Replication.StripReplicatedData(PlayerData[UserId])
+    local Serial = Server.PlayerDataManagement.RecursiveSerialise(Stripped)
 
-    Server.PlayerDataStore:SetAsync(UserId, Stripped)
+    Server.PlayerDataStore:SetAsync(UserId, Serial)
     --Server.PlayerDataStore:SetAsync(UserId .. CONFIG.pBackupSuffix, Stripped)
 
 end
@@ -53,10 +86,11 @@ function Server.PlayerDataManagement.LeaveSave(Player)
     local UserId = tostring(Player.UserId)
     Server.PlayerDataManagement.WaitForPlayerData(Player)
     local Stripped = Replication.StripReplicatedData(PlayerData[UserId])
+    local Serial = Server.PlayerDataManagement.RecursiveSerialise(Stripped)
 
     wait(6.5)
 
-    Server.PlayerDataStore:SetAsync(UserId, Stripped)
+    Server.PlayerDataStore:SetAsync(UserId, Serial)
     --Server.PlayerDataStore:SetAsync(UserId .. CONFIG.pBackupSuffix, Stripped)
 
 end
@@ -90,10 +124,17 @@ function Server.__main()
         if Data.Check == 0 then
             local Backup = Server.PlayerDataStore:GetAsync(tostring(Player.UserId) .. CONFIG.pBackupSuffix)
             if Backup then
-                Log(0, "Abnormal data check found, restoring from backup.")
-                Data = Backup or Data
+                if (Backup.Check) then
+                    if (Backup.Check > Data.Check) then
+                        Log(0, "Abnormal data check found, restoring from backup.")
+                        Data = Backup or Data
+                    end
+                end
             end
         end
+
+        Server.PlayerDataManagement.RecursiveBuild(Data)
+        Table.PrintTable(Data)
 
         repeat wait() until TransmissionReady[Player.Name]
         PlayerData[tostring(Player.UserId)] = Data
@@ -116,7 +157,7 @@ function Server.__main()
         
         TryGet()
 
-        while Server.PlayerDataStore == nil do
+        while (Server.PlayerDataStore == nil) do
             TryGet()
             wait(CONFIG.pDataStoreGetRetryWait)
         end
