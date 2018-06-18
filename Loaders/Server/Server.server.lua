@@ -11,5 +11,6 @@ PlayerData[tostring(Player.UserId)] = {
     Ayy = {
         Value = "Str";
         Numeric = 353425.124;
+        Colour = Color3.new(1, 0, 0);
     };
 }
