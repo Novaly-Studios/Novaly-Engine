@@ -2,7 +2,6 @@ Func = require(game:GetService("ReplicatedStorage").Novarine)
 setfenv(1, Func())
 
 local Graphics                      = {}
-Graphics.ParticleEmitters           = {}
 Graphics.CullCollections            = {}
 Graphics.LensFlareItems             = {} --setmetatable({}, {__mode = "kv"})
 Graphics.HalfHorizontalFoV          = 0
@@ -13,14 +12,10 @@ function Graphics.NewRenderWait(Func, WaitFunc)
     WaitFunc = WaitFunc or rswait
 
     Sub(function()
-
         while true do
-
             Func()
             WaitFunc()
-
         end
-
     end)
 
 end
@@ -38,23 +33,33 @@ function Graphics.UpdateScreenValues()
 
 end
 
-function Graphics.AddParticleEmitter(Object)
+function Graphics.TweenLighting(Property, To, Time, Style, Wait)
 
-    if Object:IsA("ParticleEmitter") then
+    local SequenceName = "Lighting" .. Property
 
-        local Index = #Graphics.ParticleEmitters + 1
-        Graphics.ParticleEmitters[ Index ] = {Object, Object.Rate}
+    if (Sequence.Exists(SequenceName)) then
+        Sequence.Delete(SequenceName)
+    end
 
-        Object.Parent.ChildRemoved:Connect(function(Child)
+    Sequence.New(SequenceName, Time)
+    Sequence.NewAnim(
+        SequenceName,
+        Enum.AnimationType.TwoPoint,
+        Enum.AnimationControlPointState.Static,
+        0,
+        Lighting,
+        Property,
+        {
+            Lighting[Property];
+            To;
+        },
+        Style,
+        Time
+    )
+    Sequence.Start(SequenceName)
 
-            if Child == Object then
-
-                Graphics.ParticleEmitters[Index] = nil
-
-            end
-
-        end)
-
+    if Wait then
+        Sequence.Wait(SequenceName)
     end
 
 end
@@ -62,53 +67,16 @@ end
 function Graphics.DetectPlayer()
     
     if Players.LocalPlayer == nil then return end
-    
     local Char = Players.LocalPlayer.Character
-    
+
     if Char then
-        
         local Head = Char.Head
-
         if Head then
-
             if (Head.Position - Graphics.Camera.CFrame.p).magnitude < 0.8 then
-
                 Graphics.PlayerIgnore = Char
-
             end
-
         end
-        
     end
-
-end
-
-function Graphics.StabiliseParticles()
-    
-    if CONFIG.gEnableParticleStabilisation == true then
-        
-        local CurrentFPS = 1 / Latency.GetRenderLatency()
-
-        for x = 1, #Graphics.ParticleEmitters do
-
-            local Target = Graphics.ParticleEmitters[x][1]
-            
-            if Target.Parent == nil then
-
-                Graphics.ParticleEmitters[x] = nil
-
-            elseif Target:IsA("ParticleEmitter") then
-
-                Target.Rate = Math.Floor((CurrentFPS / CONFIG._TargetFramerate) * Graphics.ParticleEmitters[x][2])
-
-            end
-            
-            rswait()
-
-        end
-        
-    end
-    
 end
 
 function Graphics.UpdateLensFlares()
@@ -174,7 +142,9 @@ end
 
 function c__main()
     
-    if CONFIG.gEnableGraphics == false then return end
+    if (CONFIG.gEnableGraphics == false) then
+        return
+    end
     
     local Player = Players.LocalPlayer
     local PlayerGui = Player:WaitForChild("PlayerGui")
@@ -185,38 +155,22 @@ function c__main()
     Graphics.UpdateScreenValues()
     
     workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
-
         Graphics.Camera = workspace.CurrentCamera
-
     end)
     
-    if CONFIG.gEnableLensFlare == true then
-
+    if (CONFIG.gEnableLensFlare == true) then
         local FlareFrame = Instance.new("Frame", GraphicsGui)
         FlareFrame.Name = "LensFlare"
         Graphics.GraphicsGui = GraphicsGui
-
     end
-    
-    if CONFIG.gEnableParticleStabilisation == true then
 
-        --Recursive(workspace, Graphics.AddParticleEmitter)
-        workspace.DescendantAdded:Connect(Graphics.AddParticleEmitter)
-
-    end
-    
-    Graphics.NewRenderWait(Graphics.StabiliseParticles)
     Graphics.NewRenderWait(Graphics.UpdateLensFlares)
     Graphics.NewRenderWait(Graphics.DetectPlayer, wait)
     
     Graphics.Camera.Changed:Connect(function(Property)
-
-        if Property == "ViewportSize" or Property == "FieldOfView" then
-
+        if (Property == "ViewportSize" or Property == "FieldOfView") then
             Graphics.UpdateScreenValues()
-
         end
-
     end)
     
     GraphicsGui.Name = "GraphicsGui"
@@ -225,9 +179,7 @@ function c__main()
 end
 
 function Graphics.IsVisible(Subject, Target, Tolerance)
-
     return Math.ACos(Subject.lookVector:Dot((Target - Subject.p).unit)) <= Tolerance
-
 end
 
 function Graphics.AccurateIsVisible(Target)
@@ -247,11 +199,9 @@ end
 function Graphics.RegisterFlare(Collection)
 
     for _, FlareObject in pairs(Collection.LensFlares) do
-
         FlareObject[2].Parent = Graphics.GraphicsGui.LensFlareFrame
-
     end
-    
+
     Graphics.LensFlareItems[#Graphics.LensFlareItems + 1] = Collection
     
 end
