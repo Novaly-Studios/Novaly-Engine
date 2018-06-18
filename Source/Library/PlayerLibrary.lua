@@ -134,7 +134,6 @@ function Server.__main()
         end
 
         Server.PlayerDataManagement.RecursiveBuild(Data)
-        Table.PrintTable(Data)
 
         repeat wait() until TransmissionReady[Player.Name]
         PlayerData[tostring(Player.UserId)] = Data
