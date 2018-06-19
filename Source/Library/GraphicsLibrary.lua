@@ -132,11 +132,11 @@ function Graphics.UpdateLensFlares()
 end
 
 function c__main()
-    
+
     if (CONFIG.gEnableGraphics == false) then
         return
     end
-    
+
     local Player = Players.LocalPlayer
     local PlayerGui = Player:WaitForChild("PlayerGui")
     local GraphicsGui = Instance.new("ScreenGui", PlayerGui)
@@ -166,12 +166,13 @@ function c__main()
         ["Blur"]            = Blur;
         ["Tint"]            = Tint;
         ["SunRays"]         = SunRays;
+        ["Terrain"]         = workspace:WaitForChild("Terrain");
     }
-    
+
     workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
         Graphics.Camera = workspace.CurrentCamera
     end)
-    
+
     if (CONFIG.gEnableLensFlare == true) then
         local FlareFrame = Instance.new("Frame", GraphicsGui)
         FlareFrame.Name = "LensFlare"
@@ -180,13 +181,13 @@ function c__main()
 
     Graphics.NewRenderWait(Graphics.UpdateLensFlares)
     Graphics.NewRenderWait(Graphics.DetectPlayer, wait)
-    
+
     Graphics.Camera.Changed:Connect(function(Property)
         if (Property == "ViewportSize" or Property == "FieldOfView") then
             Graphics.UpdateScreenValues()
         end
     end)
-    
+
     GraphicsGui.Name = "GraphicsGui"
     LensFlareFrame.Name = "LensFlareFrame"
 
