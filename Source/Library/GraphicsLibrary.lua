@@ -2,10 +2,10 @@ Func = require(game:GetService("ReplicatedStorage").Novarine)
 setfenv(1, Func())
 
 local Graphics                      = {}
-Graphics.CullCollections            = {}
 Graphics.LensFlareItems             = {} --setmetatable({}, {__mode = "kv"})
 Graphics.HalfHorizontalFoV          = 0
 Graphics.AspectRatio                = 0
+Graphics.EffectsEnabled             = true
 
 function Graphics.NewRenderWait(Func, WaitFunc)
 
@@ -13,11 +13,12 @@ function Graphics.NewRenderWait(Func, WaitFunc)
 
     Sub(function()
         while true do
-            Func()
+            if (Graphics.EffectsEnabled) then
+                Func()
+            end
             WaitFunc()
         end
     end)
-
 end
 
 function Graphics.UpdateScreenValues()
@@ -33,9 +34,10 @@ function Graphics.UpdateScreenValues()
 
 end
 
-function Graphics.TweenLighting(Property, To, Time, Style, Wait)
+function Graphics.TweenEffect(Item, Property, To, Time, Style, Wait)
 
-    local SequenceName = "Lighting" .. Property
+    local SequenceName = Item .. Property
+    local Item = Graphics.AnimateItems[Item]
 
     if (Sequence.Exists(SequenceName)) then
         Sequence.Delete(SequenceName)
@@ -47,10 +49,10 @@ function Graphics.TweenLighting(Property, To, Time, Style, Wait)
         Enum.AnimationType.TwoPoint,
         Enum.AnimationControlPointState.Static,
         0,
-        Lighting,
+        Item,
         Property,
         {
-            Lighting[Property];
+            Item[Property];
             To;
         },
         Style,
@@ -61,7 +63,6 @@ function Graphics.TweenLighting(Property, To, Time, Style, Wait)
     if Wait then
         Sequence.Wait(SequenceName)
     end
-
 end
 
 function Graphics.DetectPlayer()
@@ -112,32 +113,22 @@ function Graphics.UpdateLensFlares()
                             -- Todo: rotate and scale
 
                             if FlareObject.Rotate then
-
                                 ImageLabel.Rotation = Math.Deg(Math.ATan2(
                                     Vec2ScreenSpace.Y - Graphics.ScreenCentre.Y,
                                     Vec2ScreenSpace.X - Graphics.ScreenCentre.X
                                 ))
-
                             end
-
                         end
-
                     end
 
                     FlareCollection.Show = IsVisible
 
                 else
-
                     FlareCollection.Show = false
-
                 end
-
             end
-
         end
-
     end
-
 end
 
 function c__main()
@@ -150,9 +141,32 @@ function c__main()
     local PlayerGui = Player:WaitForChild("PlayerGui")
     local GraphicsGui = Instance.new("ScreenGui", PlayerGui)
     local LensFlareFrame = Instance.new("Frame", GraphicsGui)
+
+    local Bloom = Instance.new("BloomEffect", Lighting)
+    local Blur = Instance.new("BlurEffect", Lighting)
+    local Tint = Instance.new("ColorCorrectionEffect", Lighting)
+    local SunRays = Instance.new("SunRaysEffect", Lighting)
+
+    Blur.Size           = 0
+    Bloom.Intensity     = 0
+    SunRays.Intensity   = 0.03
+    SunRays.Spread      = 0.1
+
+    Graphics.Bloom      = Bloom
+    Graphics.Blur       = Blur
+    Graphics.Tint       = Tint
+    Graphics.SunRays    = SunRays
     
     Graphics.Camera = workspace.CurrentCamera
     Graphics.UpdateScreenValues()
+
+    Graphics.AnimateItems   = {
+        ["Lighting"]        = Lighting;
+        ["Bloom"]           = Bloom;
+        ["Blur"]            = Blur;
+        ["Tint"]            = Tint;
+        ["SunRays"]         = SunRays;
+    }
     
     workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
         Graphics.Camera = workspace.CurrentCamera
@@ -188,7 +202,7 @@ function Graphics.AccurateIsVisible(Target)
     local Position = Camera:WorldToScreenPoint(Target)
     local ScreenDimensions = Camera.ViewportSize
 
-    if Position.Z > 0 then
+    if (Position.Z > 0) then
         return (Position.X <= ScreenDimensions.X and Position.X >= 0) and (Position.Y <= ScreenDimensions.Y and Position.Y >= 0), Position
     end
 

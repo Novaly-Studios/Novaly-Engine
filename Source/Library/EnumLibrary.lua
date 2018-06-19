@@ -18,6 +18,16 @@ function Enums.new(Name, Values)
     
 end
 
+function Enums.FromCollection(Name, Values)
+
+	for Index, Value in pairs(Values) do
+		Values[Value] = Index
+	end
+
+	Enums.new(Name, Values)
+
+end
+
 Func({
     Client = {Enum = Enums};
     Server = {Enum = Enums};
