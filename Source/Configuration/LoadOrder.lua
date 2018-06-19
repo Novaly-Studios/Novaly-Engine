@@ -7,6 +7,7 @@ return
     "ClassLibrary";
     "ImportClasses";
     "MathematicsLibrary";
+    "GeometryLibrary";
     "StringLibrary";
     "EnumLibrary";
     "WrapperLibrary";
