@@ -17,21 +17,29 @@ local SvcLoad           = {
 }
 
 local NameSubstitutes   = {
-    ["pairs"]            = "Pairs";
-    ["ipairs"]           = "IPairs";
-    ["wait"]             = "Wait";
-    ["assert"]           = "Assert";
-    ["pcall"]            = "ProtectedCall";
-    ["getfenv"]          = "GetFunctionEnvironment";
-    ["getmetatable"]     = "GetMetatable";
-    ["setmetatable"]     = "SetMetatable";
-    ["next"]             = "Next";
-    ["print"]            = "Print";
-    ["type"]             = "Type";
-    ["tonumber"]         = "ToNumber";
-    ["tostring"]         = "ToString";
-    ["unpack"]           = "Unpack";
-    ["error"]            = "Error";
+    ["assert"]          = "Assert";
+    ["collectgarbage"]  = "CollectGarbage";
+    ["error"]           = "Error";
+    ["getfenv"]         = "GetFunctionEnvironment";
+    ["getmetatable"]    = "GetMetatable";
+    ["ipairs"]          = "IPairs";
+    ["loadstring"]      = "LoadString";
+    ["next"]            = "Next";
+    ["pairs"]           = "Pairs";
+    ["pcall"]           = "ProtectedCall";
+    ["print"]           = "Print";
+    ["rawequal"]        = "RawEqual";
+    ["rawget"]          = "RawGet";
+    ["rawset"]          = "RawSet";
+    ["require"]         = "Require";
+    ["select"]          = "Select";
+    ["setfenv"]         = "SetFunctionEnvironment";
+    ["setmetatable"]    = "SetMetatable";
+    ["tonumber"]        = "ToNumber";
+    ["tostring"]        = "ToString";
+    ["type"]            = "Type";
+    ["unpack"]          = "Unpack";
+    ["wait"]            = "Wait";
 }
 
 local Core              = {}
@@ -89,7 +97,7 @@ for Index = 1, #SvcLoad do
     Core[Value] = game:GetService(Value)
 end
 
-for Key, Value in next, NameSubstitutes do
+for Key, Value in pairs(NameSubstitutes) do
     Core[Value] = Core[Key] or getfenv()[Key]
 end
 

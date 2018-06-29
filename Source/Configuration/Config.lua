@@ -32,6 +32,7 @@ Config = {
         ChildAdded      = true;
         PlayerAdded     = true;
         DescendantAdded = true;
+        Touched         = true;
     };
     
     pSaveInterval = 30;

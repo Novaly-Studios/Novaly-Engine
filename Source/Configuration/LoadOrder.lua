@@ -6,6 +6,7 @@ return
     "TableLibrary";
     "ClassLibrary";
     "ImportClasses";
+    "CoroutineLibrary";
     "MathematicsLibrary";
     "GeometryLibrary";
     "StringLibrary";

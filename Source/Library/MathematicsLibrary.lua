@@ -4,14 +4,12 @@ setfenv(1, Func())
 local Original = OriginalEnv["math"]
 
 local Maths = setmetatable({}, {__index = function(Self, Key)
-    
     return rawget(Self, Key) or Original[Key]
-
 end})
 
 local Mappings = {
     log = "Log";
-    ldexp = "Ldexp";
+    ldexp = "LdExp";
     rad = "Rad";
     cosh = "CosH";
     random = "Random";
