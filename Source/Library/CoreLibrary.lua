@@ -43,6 +43,7 @@ local NameSubstitutes   = {
     ["wait"]            = "Wait";
     -- Services and objects
     ["Workspace"]       = "workspace";
+    ["game"]            = "Game";
 }
 
 local Core              = {}
