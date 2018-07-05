@@ -1,13 +1,12 @@
 setfenv(1, require(game:GetService("ReplicatedStorage").Novarine)("Wait"))
 
---[[local Player = Players.LocalPlayer
-local PlrData = PlayerDataManagement.WaitForMyData()
-print'a'
-print(Table.WaitFor(wait, PlrData, "Ayy", "Value"))
-print'b']]
-
 wait(4)
--- Item, Property, To, Time, Style, Wait
-Graphics.TweenEffect("Tint", "Saturation", 3, 5, "inOutSine")
-Print(SetMetatable)
-Print(Coroutine.Wrap)
+Sequence.New("Test", 10)
+Sequence.NewAnim("Test", Enum.AnimationType.HermiteSpline, Enum.AnimationControlPointState.Static, 0, workspace.Test, "CFrame", Curve.New({
+	CFrame.new(90, 0, 0);
+	CFrame.new(90, 0, 0);
+	CFrame.new(90, 10, 0) * CFrame.Angles(0, math.pi / 2, 0);
+	CFrame.new(90, 10, 30);
+	CFrame.new(90, 10, 30);
+}), "linear", 10, 0.5, 0)
+Sequence.Start("Test")

@@ -1,12 +1,14 @@
 setfenv(1, require(game:GetService("ReplicatedStorage").Novarine)())
 
-local CircularBuffer = Class.FromConstructor(script.Name, function(Self, MaxElements)
+local CircularBuffer = Class:FromName(script.Name)
 
-    Self.MaxElements = MaxElements
-    Self.CurrentElement = 0
-    Self.Array = {}
-
-end)
+function CircularBuffer:CircularBuffer(MaxElements)
+    return {
+        MaxElements     = MaxElements;
+        Array           = {};
+        CurrentElement  = 0;
+    }
+end
 
 function CircularBuffer:GetCircularIndex(Index)
 
@@ -15,7 +17,7 @@ function CircularBuffer:GetCircularIndex(Index)
 end
 
 function CircularBuffer:Set(Index, Value)
-    
+
     self.Array[self:GetCircularIndex(Index)] = Value
 
 end

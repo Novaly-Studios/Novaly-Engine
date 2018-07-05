@@ -1,18 +1,18 @@
 setfenv(1, require(game:GetService("ReplicatedStorage").Novarine)())
 
-local Time = Class.FromConstructor(script.Name, function(Self, Hour, Minute, Second)
+local Time = Class:FromName(script.Name)
 
+function Time:Time(Hour, Minute, Second)
+
+    print(Hour, Minute, Second)
     if type(Hour) == "string" then
-
         return Time.GetData(Hour)
-
     end
 
-    Self.Hour = Hour or 0
-    Self.Minute = Minute or 0
-    Self.Second = Second or 0
-
-end)
+    self.Hour = Hour or 0
+    self.Minute = Minute or 0
+    self.Second = Second or 0
+end
 
 Time.DefaultDelimiter = ":"
 Time.SecondsInMinute = 60
@@ -64,7 +64,7 @@ function Time:GetSeconds()
 
     return  (self.Hour * Time.SecondsInHour) +
             (self.Minute * Time.SecondsInMinute) +
-            (self.Seconds)
+            (self.Second)
 
 end
 

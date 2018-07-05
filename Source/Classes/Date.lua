@@ -1,19 +1,20 @@
 setfenv(1, require(game:GetService("ReplicatedStorage").Novarine)())
 
-local Date = Class.FromConstructor(script.Name, function(Self, Day, Month, Year, UseLeapYears)
+local Date = Class:FromName(script.Name)
 
-    if type(Day) == "string" then
+function Date:Date(Day, Month, Year, UseLeapYears)
 
+    if (type(Day) == "string") then
         return Date.GetData(Day)
-
     end
 
-    Self.Day = Day or 0
-    Self.Month = Month or 0
-    Self.Year = Year or 0
-    Self.UseLeapYears = UseLeapYears or true
-
-end)
+    return {
+        Day             = Day or 0;
+        Month           = Month or 0;
+        Year            = Year or 0;
+        UseLeapYears    = UseLeapYears or true;
+    }
+end
 
 Date.MonthConstants                 = {
     {Name = "January",      Days = 31};

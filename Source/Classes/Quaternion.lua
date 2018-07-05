@@ -1,13 +1,15 @@
 setfenv(1, require(game:GetService("ReplicatedStorage").Novarine)())
 
-local Quaternion = Class.FromConstructor(script.Name, function(Self, W, X, Y, Z)
+local Quaternion = Class:FromName(script.Name)
 
-    Self.W = W
-    Self.X = X
-    Self.Y = Y
-    Self.Z = Z
-
-end)
+function Quaternion:Quaternion(W, X, Y, Z)
+    return {
+        W = W;
+        X = X;
+        Y = Y;
+        Z = Z;
+    }
+end
 
 function Quaternion.Neg(Subject)
 

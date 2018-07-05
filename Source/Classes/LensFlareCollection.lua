@@ -1,21 +1,22 @@
 setfenv(1, require(game:GetService("ReplicatedStorage").Novarine)())
 
-local LensFlareCollection = Class.FromConstructor(script.Name, function(Self, Name, FadeTime, Adornee, MaxDistance)
+local LensFlareCollection = Class:FromName(script.Name)
 
-    Self.Show           = true
-    Self.Enabled        = true
-    Self.Adornee        = Adornee
-    Self.Name           = Name
-    Self.MaxDistance    = MaxDistance
-    Self.FadeTime       = FadeTime
-    Self.Transparency   = 0
-    Self.LensFlares     = {}
+function LensFlareCollection:LensFlareCollection(Name, FadeTime, Adornee, MaxDistance)
+
+    self.Adornee        = Adornee
+    self.Name           = Name
+    self.MaxDistance    = MaxDistance
+    self.FadeTime       = FadeTime
+    self.Show           = true
+    self.Enabled        = true
+    self.Transparency   = 0
+    self.LensFlares     = {}
 
     Sequence.New(Name, FadeTime, Enum.SequenceType.Conditional, function()
-        return Self.Show and Self.Enabled
+        return self.Show and self.Enabled
     end)
-
-end)
+end
 
 function LensFlareCollection:AddLensFlares(...)
 

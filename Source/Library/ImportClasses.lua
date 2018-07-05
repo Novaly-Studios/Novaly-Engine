@@ -10,10 +10,8 @@ function Structures.ImportClass(Item, Name)
     local ModuleType = type(Module)
 
     if ModuleType == "table" or ModuleType == "userdata" then
-
         Structures[Name] = Module
         return
-
     end
 
     error("Supplied module did not return a table or userdata.")
