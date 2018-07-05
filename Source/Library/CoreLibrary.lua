@@ -17,6 +17,7 @@ local SvcLoad           = {
 }
 
 local NameSubstitutes   = {
+    -- Built-in functions
     ["assert"]          = "Assert";
     ["collectgarbage"]  = "CollectGarbage";
     ["error"]           = "Error";
@@ -40,6 +41,8 @@ local NameSubstitutes   = {
     ["type"]            = "Type";
     ["unpack"]          = "Unpack";
     ["wait"]            = "Wait";
+    -- Services and objects
+    ["Workspace"]       = "workspace";
 }
 
 local Core              = {}
@@ -70,12 +73,6 @@ function Core.passert(Condition, Warning)
     end
 end
 
-function Core.Attribute(Object, Attributes)
-    for Key, Value in next, Attributes do
-        Object[Key] = Value
-    end
-end
-
 function Core.pairs(Array)
     return Core.OldPairs(Array.Vars == nil and Array or Array.Vars)
 end
@@ -97,12 +94,9 @@ for Index = 1, #SvcLoad do
     Core[Value] = game:GetService(Value)
 end
 
-for Key, Value in pairs(NameSubstitutes) do
+for Key, Value in Pairs(NameSubstitutes) do
     Core[Value] = Core[Key] or getfenv()[Key]
 end
-
-Core.Pairs = Core.pairs
-Core.IPairs = Core.ipairs
 
 Func({
     Client = Core;
