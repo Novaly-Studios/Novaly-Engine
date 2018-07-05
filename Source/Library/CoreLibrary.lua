@@ -95,7 +95,7 @@ for Index = 1, #SvcLoad do
     Core[Value] = game:GetService(Value)
 end
 
-for Key, Value in Pairs(NameSubstitutes) do
+for Key, Value in pairs(NameSubstitutes) do
     Core[Value] = Core[Key] or getfenv()[Key]
 end
 
