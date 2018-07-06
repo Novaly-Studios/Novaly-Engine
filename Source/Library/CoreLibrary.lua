@@ -74,17 +74,25 @@ function Core.passert(Condition, Warning)
     end
 end
 
-function Core.pairs(Array)
-    return Core.OldPairs(Array.Vars == nil and Array or Array.Vars)
+function Core.pairs(Object)
+    if (type(Object) == "table") then
+        return Core.OldPairs(Object.Vars == nil and Object or Object.Vars)
+    else
+        return Core.OldPairs(Object)
+    end
 end
 
 function Core.ipairs(Array)
-    return Core.OldIPairs(Array.Vars == nil and Array or Array.Vars)
+    if (type(Object) == "table") then
+        return Core.OldIPairs(Object.Vars == nil and Object or Object.Vars)
+    else
+        return Core.OldIPairs(Object)
+    end
 end
 
 function Core.Count(Array)
     local Count = 0
-    for Key, Value in next, Array do
+    for Key, Value in pairs(Array) do
         Count = Count + 1
     end
     return Count
