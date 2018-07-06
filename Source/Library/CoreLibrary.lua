@@ -99,6 +99,15 @@ for Key, Value in pairs(NameSubstitutes) do
     Core[Value] = Core[Key] or getfenv()[Key]
 end
 
+Core.Svc = setmetatable({}, {
+    __index = function(Self, Key)
+        return game:GetService(Key)
+    end;
+    __call = function(Self, Key)
+        return Self[Key]
+    end;
+})
+
 Func({
     Client = Core;
     Server = Core;

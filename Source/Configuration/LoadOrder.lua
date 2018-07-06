@@ -11,7 +11,6 @@ return
     "GeometryLibrary";
     "StringLibrary";
     "EnumLibrary";
-    "WrapperLibrary";
     "CoreLibrary";
     "DataStructureLibrary";
     "CommunicationLibrary";
@@ -20,7 +19,6 @@ return
     "GraphicsLibrary";
     "GUILibrary";
     "ReplicationLibrary";
-    --"PlayerDataLibrary";
     "PlayerLibrary";
     "WeldLibrary";
 }
