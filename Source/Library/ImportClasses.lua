@@ -6,25 +6,22 @@ local ClassItems = Classes:GetChildren()
 
 function Structures.ImportClass(Item, Name)
 
-    local Module = require(Item)
-    local ModuleType = type(Module)
+    local Module = Require(Item)
+    local ModuleType = Type(Module)
 
-    if ModuleType == "table" or ModuleType == "userdata" then
+    if (ModuleType == "table" or ModuleType == "userdata") then
         Structures[Name] = Module
         return
     end
 
-    error("Supplied module did not return a table or userdata.")
-
+    Error("Supplied module did not return a table or userdata.")
 end
 
 for Item = 1, #ClassItems do
-
     local Item = ClassItems[Item]
     local Name = Item.Name
     Log(1, "Importing Class '" .. Name .. "'")
     Structures.ImportClass(Item, Name)
-
 end
 
 Func({

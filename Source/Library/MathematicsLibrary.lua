@@ -1,54 +1,48 @@
 local Func = require(game:GetService("ReplicatedStorage").Novarine)
 setfenv(1, Func())
 
-local Original = OriginalEnv["math"]
-
-local Maths = setmetatable({}, {__index = function(Self, Key)
-    return rawget(Self, Key) or Original[Key]
-end})
+local Maths = setmetatable({}, {__index = OriginalEnv["math"]})
 
 local Mappings = {
-    log = "Log";
-    ldexp = "LdExp";
-    rad = "Rad";
-    cosh = "CosH";
-    random = "Random";
-    frexp = "FrExp";
-    tanh = "TanH";
-    floor = "Floor";
-    max = "Max";
-    sqrt = "Sqrt";
-    modf = "ModF";
-    huge = "Huge";
-    pow = "Pow";
-    atan = "ATan";
-    tan = "Tan";
-    cos = "Cos";
-    sign = "Sign";
-    clamp = "Clamp";
-    log10 = "Log10";
-    noise = "Noise";
-    acos = "ACos";
-    abs = "Abs";
-    pi = "PI";
-    sinh = "SinH";
-    asin = "ASin";
-    min = "Min";
-    deg = "Deg";
-    fmod = "FMod";
-    randomseed = "RandomSeed";
-    atan2 = "ATan2";
-    ceil = "Ceil";
-    sin = "Sin";
-    exp = "Exp";
+    log         = "Log";
+    ldexp       = "LdExp";
+    rad         = "Rad";
+    cosh        = "CosH";
+    random      = "Random";
+    frexp       = "FrExp";
+    tanh        = "TanH";
+    floor       = "Floor";
+    max         = "Max";
+    sqrt        = "Sqrt";
+    modf        = "ModF";
+    huge        = "Huge";
+    pow         = "Pow";
+    atan        = "ATan";
+    tan         = "Tan";
+    cos         = "Cos";
+    sign        = "Sign";
+    clamp       = "Clamp";
+    log10       = "Log10";
+    noise       = "Noise";
+    acos        = "ACos";
+    abs         = "Abs";
+    pi          = "PI";
+    sinh        = "SinH";
+    asin        = "ASin";
+    min         = "Min";
+    deg         = "Deg";
+    fmod        = "FMod";
+    randomseed  = "RandomSeed";
+    atan2       = "ATan2";
+    ceil        = "Ceil";
+    sin         = "Sin";
+    exp         = "Exp";
 }
 
 local Curve = {}
 
 function Maths.Lerp(P0, P1, Mul)
-
     return P0 + (P1 - P0) * Mul
-
 end
 
 --[[
@@ -67,7 +61,6 @@ function Maths.LerpUDim2(P0, P1, m)
         Lerp(P0.Y.Scale, P1.Y.Scale, m),
         Lerp(P0.Y.Offset, P1.Y.Offset, m)
     )
-
 end
 
 --[[
@@ -84,7 +77,6 @@ function Maths.LerpUDim(P0, P1, m)
         Lerp(P0.Scale, P1.Scale, m),
         Lerp(P0.Offset, P1.Offset, m)
     )
-
 end
 
 --[[
@@ -101,7 +93,6 @@ function Maths.LerpVector2(P0, P1, m)
         Lerp(P0.X, P1.X, m),
         Lerp(P0.Y, P1.Y, m)
     )
-
 end
 
 --[[
@@ -111,11 +102,8 @@ end
 ]]
 
 function Maths.LerpColor3(P0, P1, Mul)
-
     local Result = Vector3.new(P0.r, P0.g, P0.b):lerp(Vector3.new(P1.r, P1.g, P1.b), Mul)
-    
     return Color3.new(Result.X, Result.Y, Result.Z)
-
 end
 
 --[[
@@ -125,11 +113,8 @@ end
 ]]
 
 function Maths.NumberToLength(Num, Len)
-
     local Order = 10 ^ (Len - 1)
-
-    return math.floor(Num * Order) / Order
-
+    return Maths.Floor(Num * Order) / Order
 end
 
 --[[
@@ -139,11 +124,8 @@ end
 ]]
 
 function Maths.CountDigits(Num)
-
     local Str = tostring(Num)
-
     return #Str - #Str:gsub("%d", "")
-
 end
 
 --[[
@@ -238,7 +220,6 @@ function Maths.CubicInterpolate(P0, P1, P2, P3, Mul)
     local C3 = P1
 
     return C0 * Mul * Mul2 + C1 * Mul2 + C2 * Mul + C3
-
 end
 
 --[[
@@ -252,9 +233,7 @@ end
 ]]
 
 function Maths.Clamp(Num, Min, Max)
-
     return (Num < Min and Min or Num > Max and Max or Num)
-
 end
 
 --[[
@@ -272,9 +251,7 @@ function Curve:InterpolatePiecewiseCubic(Mul, InterpolationFunc, ...)
     local Forward = Mul * (#self - 3)
 
     if Forward == #self - 3 then
-
         Forward = Forward - 0.00000001
-
     end
 
     local PointIndex = 2 + math.floor(Forward)
@@ -288,9 +265,7 @@ function Curve:InterpolatePiecewiseCubic(Mul, InterpolationFunc, ...)
         Mul = Forward - (PointIndex - 2)
 
         return InterpolationFunc(P0, P1, P2, P3, Mul, ...)
-
     end
-
 end
 
 --[[
@@ -307,31 +282,22 @@ function Curve:InterpolateBezier(Mul, LerpFunc)
     local Super = {}
 
     for Point = 1, #self do
-
         Super[Point] = self[Point]
-
     end
 
     LerpFunc = LerpFunc or Maths.Lerp
 
-    while #Super > 1 do
-
+    while (#Super > 1) do
         local New = {}
-
         for Point = 2, #Super do
-
             local P0 = Super[Point - 1]
             local P1 = Super[Point]
             New[ #New + 1 ] = LerpFunc(P0, P1, Mul)
-
         end
-
         Super = New
-
     end
 
     return Super[1]
-
 end
 
 --[[
@@ -343,29 +309,23 @@ end
 --]]
 
 function Curve.New(Points)
-
-    return setmetatable(Points, {
-
+    return SetMetatable(Points, {
         __index = function(Self, Key)
-
-            return rawget(Self, Key) or Curve[Key]
-
+            return RawGet(Self, Key) or Curve[Key]
         end;
-
     })
-
 end
+
+-- Let's Apply CoolPascalCasing ;)
+
+Table.ApplyKeyMapping(Maths, Mappings)
 
 -- Mathematical Constants
 
 Maths["NaN"]            = 0/0
 Maths["Inf"]            = 1/0
-Maths["Radian"]         = math.pi / 180
-Maths["Tau"]            = 2 * math.pi
-
--- Let's Apply CoolPascalCasing ;)
-
-Table.ApplyKeyMapping(Maths, Mappings)
+Maths["Radian"]         = Maths.PI / 180
+Maths["Tau"]            = 2 * Maths.PI
 
 Final = {math = Maths, Math = Maths, Curve = Curve}
 

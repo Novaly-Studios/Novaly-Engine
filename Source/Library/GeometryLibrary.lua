@@ -25,11 +25,11 @@ function Geometry:StripAxis(Point, ClassRef, ...)
     local Args = {...}
     local Count = #Args
 
-    for Key, Index in pairs(Args) do
+    for Key, Index in Pairs(Args) do
         Args[Key] = Point[Index]
     end
 
-    return ClassRef.new(unpack(Args))
+    return ClassRef.new(Unpack(Args))
 end
 
 Func({

@@ -8,19 +8,19 @@ Sequence.Tweeners                       = require(Modules[script.Name].TweeningL
 Sequence.CurrentAnimation               = 0
 
 local SequenceTypeEnum                  = {
-    Normal = 1; -- Will simply run, progress and stop as a normal animation would
-    Conditional = 2; -- Will go forward or backward depending on a function which returns a boolean
+    Normal          = 1; -- Will simply run, progress and stop as a normal animation would
+    Conditional     = 2; -- Will go forward or backward depending on a function which returns a boolean
 }
 
 local AnimationControlPointStateEnum    = {
-    Static = 1; -- Unmoving points
-    Dynamic = 2; -- Moving points
+    Static          = 1; -- Unmoving points
+    Dynamic         = 2; -- Moving points
 }
 
 local AnimationTypeEnum                 = {
-    TwoPoint = 1; -- Interpolation between two points
-    BezierCurve = 2; -- Many-point bezier curve interpolation
-    HermiteSpline = 3; -- Piecewise hermite spline interpolation
+    TwoPoint        = 1; -- Interpolation between two points
+    BezierCurve     = 2; -- Many-point bezier curve interpolation
+    HermiteSpline   = 3; -- Piecewise hermite spline interpolation
 }
 
 --[[
@@ -29,11 +29,14 @@ local AnimationTypeEnum                 = {
     Obtains a unique name for a sequence.
 ]]
 
-function Sequence.GetUniqueName()
-    while Sequence.Sequences[Sequence.CurrentAnimation] ~= nil do
+function Sequence:GetUniqueName()
+
+    while (Sequence.Sequences[Sequence.CurrentAnimation] ~= nil) do
         Sequence.CurrentAnimation = Sequence.CurrentAnimation + 1
     end
+
     Sequence.Sequences[Sequence.CurrentAnimation] = true
+
     return Sequence.CurrentAnimation
 end
 
@@ -45,7 +48,7 @@ end
     Unlimited string parameters.
 ]]
 
-function Sequence.Delete(...)
+function Sequence:Delete(...)
     for Key, Value in next, {...} do
         local TargetSequence = Sequence.Sequences[Value]
         assert(TargetSequence, "Sequence '" .. Value .. "' does not exist!")
@@ -64,7 +67,7 @@ end
     Parameter [Anything] 'Value' - The value to set.
 ]]
 
-function Sequence.Set(SequenceName, Property, Value)
+function Sequence:Set(SequenceName, Property, Value)
     local TargetSequence = Sequence.Sequences[SequenceName]
     
     assert(SequenceName,    "Argument missing: #1 Sequence (sequence name)")
@@ -84,7 +87,7 @@ end
     Parameter [String] 'SequenceName'
 --]]
 
-function Sequence.Exists(SequenceName)
+function Sequence:Exists(SequenceName)
     return Sequence.Sequences[SequenceName] ~= nil
 end
 
@@ -96,7 +99,7 @@ end
     Parameter [String] 'SequenceName' - The name of the sequence to get.
 ]]
 
-function Sequence.Get(SequenceName)
+function Sequence:Get(SequenceName)
     local TargetSequence = Sequence.Sequences[SequenceName]
     assert(TargetSequence, "Sequence '" .. SequenceName .. "' does not exist!")
     return TargetSequence
@@ -114,7 +117,7 @@ end
     Parameter [Function] Check - Used in conditional sequences.
 ]]
 
-function Sequence.New(Name, Time, Type, Check)
+function Sequence:New(Name, Time, Type, Check)
     
     Type = Type or Enum.SequenceType.Normal
     
@@ -147,7 +150,7 @@ function Sequence.New(Name, Time, Type, Check)
     
     Sequence.Sequences[Name] = NewSequence
     
-    return Sequence.Get(Name)
+    return Sequence:Get(Name)
 end
 
 --[[
@@ -166,7 +169,7 @@ end
     Parameter [Number] 'Time' - The time the animation will play for.
 ]]
 
-function Sequence.NewAnim(SequenceName, AnimType, AnimState, TimeOnScale, Object, Property, Points, Style, Time, ...)
+function Sequence:NewAnim(SequenceName, AnimType, AnimState, TimeOnScale, Object, Property, Points, Style, Time, ...)
     -- Check and formulate data
     local TargetSequence = Sequence.Sequences[SequenceName]
     
@@ -202,10 +205,10 @@ function Sequence.NewAnim(SequenceName, AnimType, AnimState, TimeOnScale, Object
         AnimTable.GotPoints = false
         AnimTable.PointFunction = Points
         AnimTable.Points = nil
-        AnimTable.Type = DataStructures.GetType(Points()[1])
+        AnimTable.Type = DataStructures:GetType(Points()[1])
     else
         AnimTable.ControlPointState = Enum.AnimationControlPointState.Static
-        AnimTable.Type = DataStructures.GetType(Points[1])
+        AnimTable.Type = DataStructures:GetType(Points[1])
     end
 end
 
@@ -222,12 +225,15 @@ end
 --]]
 
 
-function Sequence.PreRender(SequenceName, Framerate, WaitAfterIterations, WaitTime)
+function Sequence:PreRender(SequenceName, Framerate, WaitAfterIterations, WaitTime)
+
     local TargetSequence = Sequence.Sequences[SequenceName]
     assert(TargetSequence, "Sequence '" .. SequenceName .. "' does not exist!")
     
     for AnimTable = 1, #TargetSequence.Animations do
+
         AnimTable = TargetSequence.Animations[AnimTable]
+
         local Frames = {}
         local Tweener = AnimTable.Tweener
         local Type = AnimTable.Type
@@ -235,7 +241,9 @@ function Sequence.PreRender(SequenceName, Framerate, WaitAfterIterations, WaitTi
         local AnimType = AnimTable.AnimType
         local Time = AnimTable.Time
         local Points = (AnimTable.Points == nil and AnimTable.PointFunction() or AnimTable.Points)
+
         Sub(function()
+
             for FrameTime = 0, AnimTable.Time * Framerate do
                 Frames[FrameTime] = Sequence.Tweeners[Type](AnimType, AnimTable.Tweener, FrameTime / Framerate, Points, Time, Extra)
                 if WaitAfterIterations and WaitTime then
@@ -244,6 +252,7 @@ function Sequence.PreRender(SequenceName, Framerate, WaitAfterIterations, WaitTi
                     end
                 end
             end
+
             AnimTable.RenderFrames = true
             AnimTable.Frames = Frames
             AnimTable.PreRenderFramerate = Framerate
@@ -259,7 +268,7 @@ end
     Unlimited string parameters.
 ]]
 
-function Sequence.Start(...)
+function Sequence:Start(...)
     for Key, Value in next, {...} do
         
         local TargetSequence = Sequence.Sequences[Value]
@@ -298,7 +307,7 @@ end
     Unlimited string parameters.
 ]]
 
-function Sequence.Stop(...)
+function Sequence:Stop(...)
     for Key, Value in next, {...} do
         local TargetSequence = Sequence.Sequences[Value]
         assert(TargetSequence, "Sequence '" .. Value .. "' does not exist!")
@@ -323,7 +332,7 @@ end
     Unlimited string parameters.
 ]]
 
-function Sequence.Pause(...)
+function Sequence:Pause(...)
     for Key, Value in next, {...} do
         local TargetSequence = Sequence.Sequences[Value]
         assert(TargetSequence, "Sequence '" .. Value .. "' does not exist!")
@@ -340,7 +349,7 @@ end
     Unlimited string parameters.
 ]]
 
-function Sequence.Wait(...)
+function Sequence:Wait(...)
     for Key, Value in next, {...} do
         local TargetSequence = Sequence.Sequences[Value]
         assert(TargetSequence, "Sequence '" .. Value .. "' does not exist!")
@@ -359,7 +368,7 @@ end
     Parameter [Boolean] 'CheckFor' - True will wait until it hits the end, false will wait until it hits the start.
 ]]
 
-function Sequence.WaitConditional(SequenceName, CheckFor)
+function Sequence:WaitConditional(SequenceName, CheckFor)
     local TargetSequence = Sequence.Sequences[SequenceName]
     assert(TargetSequence, "Sequence '" .. SequenceName .. "' does not exist!")
     local Point = (CheckFor == true and TargetSequence.Time or 0)
@@ -376,7 +385,7 @@ end
     Parameter [String] 'SequenceName' - The sequence to operate on.
 ]]
 
-function Sequence.WaitForPreRender(SequenceName)
+function Sequence:WaitForPreRender(SequenceName)
     local TargetSequence = Sequence.Sequences[SequenceName]
     assert(TargetSequence, "Sequence '" .. SequenceName .. "' does not exist!")
     repeat
@@ -392,7 +401,7 @@ end
     Parameter [String] 'SequenceName' - The sequence to check.
 ]]
 
-function Sequence.IsRunning(SequenceName)
+function Sequence:IsRunning(SequenceName)
     local TargetSequence = Sequence.Sequences[SequenceName]
     assert(TargetSequence, "Sequence '" .. SequenceName .. "' does not exist!")
     return TargetSequence.Running
@@ -407,7 +416,7 @@ end
     Parameter [Number] 'Scalar' - The new scale of the sequence.
 ]]
 
-function Sequence.Scale(SequenceName, Scalar)
+function Sequence:Scale(SequenceName, Scalar)
     local TargetSequence = Sequence.Sequences[SequenceName]
     assert(TargetSequence, "Sequence '" .. SequenceName .. "' does not exist!")
     assert(not TargetSequence.Running, "Cannot scale animation while running!")
@@ -423,7 +432,7 @@ end
     Parameter [Number] 'SequenceTimeForward' - The current time the sequence which the animation resides in is at.
 ]]
 
-function Sequence.UpdateAnimation(SubjectAnimation, SequenceTimeForward)
+function Sequence:UpdateAnimation(SubjectAnimation, SequenceTimeForward)
     
     -- Collect data
     local Forward = SequenceTimeForward - SubjectAnimation.TimeOnScale
@@ -471,7 +480,7 @@ end
     Parameter [Number] 'Step' - The amount of time forward the sequence is.
 ]]
 
-function Sequence.Step(SequenceName, Step)
+function Sequence:Step(SequenceName, Step)
     
     -- Find which animations in a sequence to update and change
     local SubjectSequence = Sequence.Sequences[SequenceName]
@@ -491,7 +500,7 @@ function Sequence.Step(SequenceName, Step)
             local TotalTime = Value.TimeOnScale + Value.Time
             if SequenceTimeForward >= Value.TimeOnScale and SequenceTimeForward <= TotalTime then
                 -- If sequence time is in between animation starting and ending time, update animation
-                Sequence.UpdateAnimation(Value, SequenceTimeForward)
+                Sequence:UpdateAnimation(Value, SequenceTimeForward)
             end
         end
         if SubjectSequence.Type == SequenceTypeEnum.Normal then
@@ -504,7 +513,7 @@ function Sequence.Step(SequenceName, Step)
                         Value.Done = true
                     end
                 end
-                Sequence.Stop(SequenceName)
+                Sequence:Stop(SequenceName)
             end
         elseif SubjectSequence.Type == SequenceTypeEnum.Conditional then
             for Value = 1, #AnimationTable do
@@ -522,7 +531,7 @@ function Sequence.Step(SequenceName, Step)
     end
 end
 
-function c__main()
+function ClientInit()
     
     -- Declare Enums
     Enum.new("SequenceType", SequenceTypeEnum)
@@ -542,7 +551,7 @@ function c__main()
                     
                     -- Tick would avoid decimal precision issues as opposed to stepping by Step variable
                     SubjectSequence.CurrentTime = tick() - SubjectSequence.StartingTick
-                    Sequence.Step(Name)
+                    Sequence:Step(Name)
                     
                 elseif SubjectSequence.Type == Enum.SequenceType.Conditional then
                     
@@ -565,7 +574,7 @@ function c__main()
                         SubjectSequence.CurrentTime = NewTime
                     end
                     
-                    Sequence.Step(Name)
+                    Sequence:Step(Name)
                     
                 end
             end
@@ -574,7 +583,7 @@ function c__main()
 end
 
 Func({
-    Client = {Sequence = Sequence, __main = c__main};
+    Client = {Sequence = Sequence, Init = ClientInit};
     Server = {};
 })
 

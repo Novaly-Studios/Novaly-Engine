@@ -2,56 +2,94 @@ local Func = require(game:GetService("ReplicatedStorage").Novarine)
 setfenv(1, Func())
 
 local Class = {
-    ConstructorNames = {"new", "New"};
+    NameKey             = "ClassName";
+    ClassRefKey         = "Class";
+    SuperclassRefKey    = "Super";
+    ConstructorNames    = {"new", "New"};
+    ClassMetatable      = {
+        __call = function(Self, Static)
+            Assert(Type(Static) == "table", "Static vars must be a table.")
+            for Key, Value in Pairs(Static) do
+                RawSet(Self, Key, Value)
+            end
+            return Self
+        end;
+    };
 }
 
 function Class:New(Name, ClassTable)
 
     local function Constructor(...)
 
-        local Result = setmetatable({Class = ClassTable}, ClassTable)
+        local Result = SetMetatable({Class = ClassTable}, ClassTable)
         local Func = ClassTable[Name]
-        getfenv(Func).Self = Result
+        GetFunctionEnv(Func).Self = Result
 
         local Object = Func(Result, ...)
-        local Final = Object or Result
-        Final["Class"] = ClassTable
-        setmetatable(Final, ClassTable)
 
-        for Key, Value in pairs(Final) do
-            if (type(Value) == "function") then
-                getfenv(Value).Self = Final
+        if Object then
+            Table.MergeKey(Result, Object)
+        end
+
+        Result[self.ClassRefKey] = ClassTable
+        SetMetatable(Result, ClassTable)
+
+        for Key, Value in Pairs(Result) do
+            if (Type(Value) == "function") then
+                GetFunctionEnv(Value).Self = Result
             end
         end
 
-        return Final
+        return Result
     end
 
-    for _, Value in pairs(self.ConstructorNames) do
+    for _, Value in Pairs(self.ConstructorNames) do
         ClassTable[Value] = Constructor
     end
 
-    ClassTable["Name"] = Name
+    ClassTable[self.NameKey] = Name
     ClassTable["__index"] = ClassTable
+
+    SetMetatable(ClassTable, self.ClassMetatable)
 
     return ClassTable
 end
 
+-- Create class from name
 function Class:FromName(Name)
     return self:New(Name, {})
 end
 
+-- Create class as an extension of another
 function Class:FromExtension(Name, Other)
 
     local Result = self:FromName(Name)
 
     Result["__index"] = function(Self, Key)
-        return (rawget(Self, Key) or rawget(Self, "Class")[Key] or Other[Key])
+        return (RawGet(Self, Key) or RawGet(Self, "Class")[Key] or Other[Key])
     end
-    Result.Super = Other
+    Result[self.SuperclassRefKey] = Other
 
     return Result
 end
+
+-- Check if two classes are of equal type
+function Class:IsEquivalentType(Subject, CheckSuperclass)
+
+    local SuperKey = self.SuperclassRefKey
+    local NameKey = self.NameKey
+
+    while (Subject[SuperKey]) do
+        local NextSuper = Subject[SuperKey]
+        if (NextSuper[NameKey] == CheckSuperclass[NameKey]) then
+            return true
+        end
+        Subject = NextSuper
+    end
+
+    return false
+end
+
 
 Func({
     Client = {Class = Class};

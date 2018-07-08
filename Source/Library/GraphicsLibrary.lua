@@ -1,13 +1,14 @@
 Func = require(game:GetService("ReplicatedStorage").Novarine)
 setfenv(1, Func())
 
-local Graphics                      = {}
-Graphics.LensFlareItems             = {} --setmetatable({}, {__mode = "kv"})
-Graphics.HalfHorizontalFoV          = 0
-Graphics.AspectRatio                = 0
-Graphics.EffectsEnabled             = true
+local Graphics                  = {
+    LensFlareItems              = {}; --setmetatable({}, {__mode = "kv"})
+    HalfHorizontalFoV           = 0;
+    AspectRatio                 = 0;
+    EffectsEnabled              = true;
+}
 
-function Graphics.NewRenderWait(Func, WaitFunc)
+function Graphics:NewRenderWait(Func, WaitFunc)
 
     WaitFunc = WaitFunc or rswait
 
@@ -21,7 +22,7 @@ function Graphics.NewRenderWait(Func, WaitFunc)
     end)
 end
 
-function Graphics.UpdateScreenValues()
+function Graphics:UpdateScreenValues()
 
     -- Screen Values and Aspect Ratio
     local ScreenSize        = Graphics.Camera.ViewportSize
@@ -34,17 +35,17 @@ function Graphics.UpdateScreenValues()
 
 end
 
-function Graphics.TweenEffect(Item, Property, To, Time, Style, Wait)
+function Graphics:TweenEffect(Item, Property, To, Time, Style, Wait)
 
     local SequenceName = Item .. Property
     local Item = Graphics.AnimateItems[Item]
 
-    if (Sequence.Exists(SequenceName)) then
-        Sequence.Delete(SequenceName)
+    if (Sequence:Exists(SequenceName)) then
+        Sequence:Delete(SequenceName)
     end
 
-    Sequence.New(SequenceName, Time)
-    Sequence.NewAnim(
+    Sequence:New(SequenceName, Time)
+    Sequence:NewAnim(
         SequenceName,
         Enum.AnimationType.TwoPoint,
         Enum.AnimationControlPointState.Static,
@@ -58,14 +59,14 @@ function Graphics.TweenEffect(Item, Property, To, Time, Style, Wait)
         Style,
         Time
     )
-    Sequence.Start(SequenceName)
+    Sequence:Start(SequenceName)
 
     if Wait then
-        Sequence.Wait(SequenceName)
+        Sequence:Wait(SequenceName)
     end
 end
 
-function Graphics.DetectPlayer()
+function Graphics:DetectPlayer()
     
     if Players.LocalPlayer == nil then return end
     local Char = Players.LocalPlayer.Character
@@ -73,36 +74,36 @@ function Graphics.DetectPlayer()
     if Char then
         local Head = Char.Head
         if Head then
-            if (Head.Position - Graphics.Camera.CFrame.p).magnitude < 0.8 then
+            if ((Head.Position - Graphics.Camera.CFrame.p).magnitude < 0.8) then
                 Graphics.PlayerIgnore = Char
             end
         end
     end
 end
 
-function Graphics.UpdateLensFlares()
+function Graphics:UpdateLensFlares()
     
-    if CONFIG.gEnableLensFlare == true then
+    if (CONFIG.gEnableLensFlare == true) then
         
-        for _, FlareCollection in next, Graphics.LensFlareItems do
+        for _, FlareCollection in Pairs(Graphics.LensFlareItems) do
             
             local Adornee = FlareCollection.Adornee
             local MaxDistance = FlareCollection.MaxDistance
 
-            if FlareCollection.Enabled then
+            if (FlareCollection.Enabled) then
 
                 local TargetPosition = Adornee.Position
                 local CheckRay = Ray.new(Graphics.Camera.CFrame.p, (TargetPosition - Graphics.Camera.CFrame.p).unit * MaxDistance)
                 local Hit = workspace:FindPartOnRayWithIgnoreList(CheckRay, {Graphics.PlayerIgnore})
 
-                if Hit == nil then
+                if (Hit == nil) then
 
-                    local IsVisible, Vec3ScreenSpace = Graphics.AccurateIsVisible(TargetPosition)
+                    local IsVisible, Vec3ScreenSpace = Graphics:AccurateIsVisible(TargetPosition)
                     local Vec2ScreenSpace = Vector2.new(Vec3ScreenSpace.X, Vec3ScreenSpace.Y)
 
-                    if FlareCollection.Transparency < 1 then
+                    if (FlareCollection.Transparency < 1) then
 
-                        for _, Pairing in pairs(FlareCollection.LensFlares) do
+                        for _, Pairing in Pairs(FlareCollection.LensFlares) do
 
                             local FlareObject = Pairing[1]
                             local ImageLabel = Pairing[2]
@@ -112,7 +113,7 @@ function Graphics.UpdateLensFlares()
                             ImageLabel.Position = GUI.V2U(nil, NewPos)
                             -- Todo: rotate and scale
 
-                            if FlareObject.Rotate then
+                            if (FlareObject.Rotate) then
                                 ImageLabel.Rotation = Math.Deg(Math.ATan2(
                                     Vec2ScreenSpace.Y - Graphics.ScreenCentre.Y,
                                     Vec2ScreenSpace.X - Graphics.ScreenCentre.X
@@ -120,9 +121,7 @@ function Graphics.UpdateLensFlares()
                             end
                         end
                     end
-
                     FlareCollection.Show = IsVisible
-
                 else
                     FlareCollection.Show = false
                 end
@@ -131,7 +130,7 @@ function Graphics.UpdateLensFlares()
     end
 end
 
-function c__main()
+function ClientInit()
 
     if (CONFIG.gEnableGraphics == false) then
         return
@@ -166,11 +165,11 @@ function c__main()
         ["Blur"]            = Blur;
         ["Tint"]            = Tint;
         ["SunRays"]         = SunRays;
-        ["Terrain"]         = workspace:WaitForChild("Terrain");
+        ["Terrain"]         = Workspace:WaitForChild("Terrain");
     }
 
-    workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
-        Graphics.Camera = workspace.CurrentCamera
+    Workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
+        Graphics.Camera = Workspace.CurrentCamera
     end)
 
     if (CONFIG.gEnableLensFlare == true) then
@@ -179,25 +178,24 @@ function c__main()
         Graphics.GraphicsGui = GraphicsGui
     end
 
-    Graphics.NewRenderWait(Graphics.UpdateLensFlares)
-    Graphics.NewRenderWait(Graphics.DetectPlayer, wait)
+    Graphics:NewRenderWait(Graphics.UpdateLensFlares)
+    Graphics:NewRenderWait(Graphics.DetectPlayer, wait)
 
     Graphics.Camera.Changed:Connect(function(Property)
         if (Property == "ViewportSize" or Property == "FieldOfView") then
-            Graphics.UpdateScreenValues()
+            Graphics:UpdateScreenValues()
         end
     end)
 
     GraphicsGui.Name = "GraphicsGui"
     LensFlareFrame.Name = "LensFlareFrame"
-
 end
 
-function Graphics.IsVisible(Subject, Target, Tolerance)
-    return Math.ACos(Subject.lookVector:Dot((Target - Subject.p).unit)) <= Tolerance
+function Graphics:IsVisible(Subject, Target, Tolerance)
+    return (Math.ACos(Subject.lookVector:Dot((Target - Subject.p).unit)) <= Tolerance)
 end
 
-function Graphics.AccurateIsVisible(Target)
+function Graphics:AccurateIsVisible(Target)
 
     local Camera = Graphics.Camera
     local Position = Camera:WorldToScreenPoint(Target)
@@ -208,21 +206,19 @@ function Graphics.AccurateIsVisible(Target)
     end
 
     return false, Position
-
 end
 
-function Graphics.RegisterFlare(Collection)
+function Graphics:RegisterFlare(Collection)
 
-    for _, FlareObject in pairs(Collection.LensFlares) do
+    for _, FlareObject in Pairs(Collection.LensFlares) do
         FlareObject[2].Parent = Graphics.GraphicsGui.LensFlareFrame
     end
 
     Graphics.LensFlareItems[#Graphics.LensFlareItems + 1] = Collection
-    
 end
 
 Func({
-    Client = {Graphics = Graphics, __main = c__main};
+    Client = {Graphics = Graphics, Init = ClientInit};
     Server = {};
 })
 

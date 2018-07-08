@@ -2,6 +2,7 @@
 
 return
 {
+    "CoreLibrary";
     "LoggingLibrary";
     "TableLibrary";
     "ClassLibrary";
@@ -11,10 +12,8 @@ return
     "GeometryLibrary";
     "StringLibrary";
     "EnumLibrary";
-    "CoreLibrary";
     "DataStructureLibrary";
     "CommunicationLibrary";
-    --"LatencyLibrary";
     "SequenceAnimationLibrary";
     "GraphicsLibrary";
     "GUILibrary";

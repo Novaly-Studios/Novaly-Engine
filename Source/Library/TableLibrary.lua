@@ -1,22 +1,16 @@
 local Func = require(game:GetService("ReplicatedStorage").Novarine)
 setfenv(1, Func())
 
-local Original = OriginalEnv["table"]
-
-local Table = setmetatable({}, {__index = function(Self, Key)
-
-    return rawget(Self, Key) or Original[Key]
-
-end})
+local Table = setmetatable({}, {__index = OriginalEnv["table"]})
 
 local Mappings = {
-    setn = "SetN";
-    insert = "Insert";
-    getn = "GetN";
+    setn    = "SetN";
+    insert  = "Insert";
+    getn    = "GetN";
     foeachi = "ForeachI";
-    concat = "Concat";
-    sort = "Sort";
-    remove = "Remove";
+    concat  = "Concat";
+    sort    = "Sort";
+    remove  = "Remove";
 }
 
 function Table.Find(Array, Item)

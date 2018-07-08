@@ -4,7 +4,6 @@ local Time = Class:FromName(script.Name)
 
 function Time:Time(Hour, Minute, Second)
 
-    print(Hour, Minute, Second)
     if type(Hour) == "string" then
         return Time.GetData(Hour)
     end
