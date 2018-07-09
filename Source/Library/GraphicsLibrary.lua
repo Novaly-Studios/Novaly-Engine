@@ -110,7 +110,7 @@ function Graphics:UpdateLensFlares()
                             local From = Vec2ScreenSpace - FlareObject.Centre
                             local To = Graphics.ScreenCentre - FlareObject.Centre
                             local NewPos = From:Lerp(To, FlareObject.Offset)
-                            ImageLabel.Position = GUI.V2U(nil, NewPos)
+                            ImageLabel.Position = GUI:V2U(nil, NewPos)
                             -- Todo: rotate and scale
 
                             if (FlareObject.Rotate) then

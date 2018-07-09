@@ -13,19 +13,19 @@ local Server                    = {
 }
 
 function Server.PlayerDataManagement.WaitForDataStore()
-    Table.WaitFor(wait, Server, "PlayerDataStore")
+    Table.WaitFor(Wait, Server, "PlayerDataStore")
 end
 
 function Server.PlayerDataManagement.WaitForPlayerData(Player)
     Server.PlayerDataManagement.WaitForDataStore()
-    return Table.WaitFor(wait, PlayerData, tostring(Player.UserId))
+    return Table.WaitFor(Wait, PlayerData, ToString(Player.UserId))
 end
 
 function Server.PlayerDataManagement.RecursiveSerialise(Data)
 
     for Key, Value in Pairs(Data) do
-        if (DataStructures.GetType(Value) == "Color3") then
-            Data[Key] = {TYPE = "Color3", Red = Value.r, Green = Value.g, Blue = Value.b}
+        if (DataStructures:CanSerialise(DataStructures:GetType(Value)) and Type(Value) == "userdata") then
+            Data[Key] = DataStructures:Serialise(Value)
         elseif (Type(Value) == "table") then
             Server.PlayerDataManagement.RecursiveSerialise(Value)
         end
@@ -40,8 +40,8 @@ function Server.PlayerDataManagement.RecursiveBuild(Data)
         if (Type(Value) == "table") then
             local DataType = Value.TYPE
             if DataType then
-                if (DataType == "Color3") then
-                    Data[Key] = Color3.new(Value.Red, Value.Green, Value.Blue)
+                if (DataStructures:CanBuild(DataType)) then
+                    Data[Key] = DataStructures:Build(Value)
                 end
             end
             Server.PlayerDataManagement.RecursiveBuild(Value)
@@ -55,17 +55,16 @@ function Server.PlayerDataManagement.Save(Player)
 
     Server.PlayerDataManagement.WaitForPlayerData(Player)
 
-    local UserId = tostring(Player.UserId)
+    local UserId = ToString(Player.UserId)
     local Stripped = Replication.StripReplicatedData(PlayerData[UserId])
     local Serial = Server.PlayerDataManagement.RecursiveSerialise(Stripped)
 
     Server.PlayerDataStore:SetAsync(UserId, Serial)
-    --Server.PlayerDataStore:SetAsync(UserId .. CONFIG.pBackupSuffix, Stripped)
 end
 
 function Server.PlayerDataManagement.LeaveSave(Player)
 
-    local UserId = tostring(Player.UserId)
+    local UserId = ToString(Player.UserId)
     Server.PlayerDataManagement.WaitForPlayerData(Player)
     local Stripped = Replication.StripReplicatedData(PlayerData[UserId])
     local Serial = Server.PlayerDataManagement.RecursiveSerialise(Stripped)
@@ -73,7 +72,6 @@ function Server.PlayerDataManagement.LeaveSave(Player)
     Wait(6.5)
 
     Server.PlayerDataStore:SetAsync(UserId, Serial)
-    --Server.PlayerDataStore:SetAsync(UserId .. CONFIG.pBackupSuffix, Stripped)
 end
 
 function Server.Init()
@@ -88,37 +86,24 @@ function Server.Init()
         Server.PlayerDataManagement.WaitForDataStore()
 
         local Success, Data = ProtectedCall(function()
-            return Server.PlayerDataStore:GetAsync(tostring(Player.UserId))
+            return Server.PlayerDataStore:GetAsync(ToString(Player.UserId))
         end)
 
         while (Success == false) do
             Success, Data = ProtectedCall(function()
-                return Server.PlayerDataStore:GetAsync(tostring(Player.UserId))
+                return Server.PlayerDataStore:GetAsync(ToString(Player.UserId))
             end)
             Wait(CONFIG.pPlayerDataRetry)
         end
 
-        Data = Data or {
-            Check = 0;
-        }
-
-        if (Data.Check == 0) then
-            local Backup = Server.PlayerDataStore:GetAsync(tostring(Player.UserId) .. CONFIG.pBackupSuffix)
-            if Backup then
-                if (Backup.Check) then
-                    if (Backup.Check > Data.Check) then
-                        Log(0, "Abnormal data check found, restoring from backup.")
-                        Data = Backup or Data
-                    end
-                end
-            end
-        end
+        Data = Data or {}
 
         Server.PlayerDataManagement.RecursiveBuild(Data)
 
         repeat Wait() until TransmissionReady[Player.Name]
         PlayerData[ToString(Player.UserId)] = Data
-        Data.Check = Data.Check + 1
+
+        Table.PrintTable(PlayerData)
 
         while Wait(CONFIG.pSaveInterval) do
             if not Player.Parent then break end
@@ -144,11 +129,11 @@ function Server.Init()
 end
 
 function Client.PlayerDataManagement.WaitForPlayerData(Player)
-    return Table.WaitFor(wait, PlayerData, ToString(Player.UserId))
+    return Table.WaitFor(Wait, PlayerData, ToString(Player.UserId))
 end
 
 function Client.PlayerDataManagement.WaitForMyData()
-    return Table.WaitFor(wait, Client.PlayerDataManagement, "MyData")
+    return Table.WaitFor(Wait, Client.PlayerDataManagement, "MyData")
 end
 
 function Client.Init()
@@ -168,7 +153,7 @@ function Client.Init()
         PlayerData = ReplicatedData.PlayerData
         Client.PlayerDataManagement.PlayerData = PlayerData
         Client.PlayerDataManagement.WaitForPlayerData(LocalPlayer)
-        Client.PlayerDataManagement.MyData = PlayerData[tostring(LocalPlayer.UserId)]
+        Client.PlayerDataManagement.MyData = PlayerData[ToString(LocalPlayer.UserId)]
     end)
 end
 
@@ -177,7 +162,7 @@ local function WaitForItem(Player, Key)
     local UserId = ToString(Player.UserId)
     local Result = PlayerData[UserId][Key]
 
-    while Result == nil do
+    while (Result == nil) do
         Wait()
         Result = PlayerData[UserId][Key]
     end

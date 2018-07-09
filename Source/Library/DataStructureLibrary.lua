@@ -1,7 +1,9 @@
 local Func = require(game:GetService("ReplicatedStorage").Novarine)
 setfenv(1, Func())
 
-local DataStructures    = {}
+local DataStructures    = {
+    TypeVar             = "TYPE";
+}
 
 DataStructures.Built    = {
     Vector2 = {
@@ -41,6 +43,52 @@ DataStructures.Built    = {
     };
 }
 
+DataStructures.SerialiseFunctions = {
+    Color3 = function(Object)
+        return {
+            r = Object.r;
+            g = Object.g;
+            b = Object.b;
+        }
+    end;
+    Vector3 = function(Object)
+        return {
+            x = Object.X;
+            y = Object.Y;
+            z = Object.Z;
+        }
+    end;
+    Vector2 = function(Object)
+        return {
+            x = Object.X;
+            y = Object.Y;
+        }
+    end;
+}
+
+DataStructures.BuildFunctions = {
+    Color3 = function(Object)
+        return {
+            Object.r;
+            Object.g;
+            Object.b;
+        }
+    end;
+    Vector3 = function(Object)
+        return {
+            Object.X;
+            Object.Y;
+            Object.Z;
+        }
+    end;
+    Vector2 = function(Object)
+        return {
+            Object.X;
+            Object.Y;
+        }
+    end;
+}
+
 function Test(Var, Property)
     local Result, Value = ProtectedCall(function()
         return Var[Property]
@@ -59,7 +107,7 @@ function DataStructures:GetType(Var)
         local Prev = 0
         local Found = nil
 
-        for Key, Value in Pairs(DataStructures.Built) do
+        for Key, Value in Pairs(self.Built) do
 
             local Count = 0
 
@@ -75,6 +123,39 @@ function DataStructures:GetType(Var)
 
         return (Found ~= "userdata" and Found or "unknown"), Prev
     end
+end
+
+function DataStructures:Serialise(Item)
+
+    local ItemType = self:GetType(Item)
+    local Handler = self.SerialiseFunctions[ItemType]
+    Assert(Handler, String.Format("No serialisation function exists for %s!", ItemType))
+
+    local Result = Handler(Item)
+    Result[self.TypeVar] = ItemType
+    return Result
+end
+
+function DataStructures:Build(Serialised)
+
+    local ItemType = Serialised[self.TypeVar]
+    Assert(ItemType, "Data passed to this function must be serialised!")
+
+    local Class = GetFunctionEnv()[ItemType]
+    Assert(Class, String.Format("No class exists under the name %s!", ItemType))
+
+    local BuildFunction = self.BuildFunctions[ItemType]
+    Assert(BuildFunction, String.Format("No build function exists for %s!", ItemType))
+
+    return Class.new(Unpack(BuildFunction(Serialised)))
+end
+
+function DataStructures:CanSerialise(TypeName)
+    return (self.SerialiseFunctions[TypeName] == nil and false or true)
+end
+
+function DataStructures:CanBuild(TypeName)
+    return (self.BuildFunction[TypeName] == nil and false or true)
 end
 
 Func({
