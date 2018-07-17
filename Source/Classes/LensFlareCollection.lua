@@ -27,7 +27,7 @@ function LensFlareCollection:AddLensFlares(...)
         local ImageLabel = Instance.new("ImageLabel")
         ImageLabel.Image = "rbxassetid://" .. Value.ImageID
         ImageLabel.BackgroundTransparency = 1
-        ImageLabel.Size = GUI.V2U(nil, Value.Size)
+        ImageLabel.Size = GUI:V2U(nil, Value.Size)
 
         Table.Insert(self.LensFlares, {Value, ImageLabel})
 

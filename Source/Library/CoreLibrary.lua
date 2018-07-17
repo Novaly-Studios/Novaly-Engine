@@ -40,6 +40,7 @@ local NameSubstitutes   = {
     ["tostring"]        = "ToString";
     ["type"]            = "Type";
     ["unpack"]          = "Unpack";
+    ["warn"]            = "Warn";
     ["wait"]            = "Wait";
     -- Services and objects
     ["Workspace"]       = "workspace";
@@ -54,24 +55,12 @@ function Core.Sub(F, ...)
     return coroutine.resume(coroutine.create(F), ...)
 end
 
-function Core.rswait()
-    RunService.RenderStepped:wait()
+function Core.RunServiceWait()
+    RunService.RenderStepped:Wait()
 end
 
-function Core.nassert(Condition, Error)
-    return assert(not Condition, Error)
-end
-
-function Core.wassert(Condition, Warning)
-    if not Condition then
-        warn(Warning)
-    end
-end
-
-function Core.passert(Condition, Warning)
-    if not Condition then
-        print(Warning)
-    end
+function Core.HeartbeatWait()
+    RunService.Heartbeat:Wait()
 end
 
 function Core.pairs(Object)

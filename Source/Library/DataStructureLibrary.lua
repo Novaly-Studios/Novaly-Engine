@@ -155,7 +155,7 @@ function DataStructures:CanSerialise(TypeName)
 end
 
 function DataStructures:CanBuild(TypeName)
-    return (self.BuildFunction[TypeName] == nil and false or true)
+    return (self.BuildFunctions[TypeName] == nil and false or true)
 end
 
 Func({

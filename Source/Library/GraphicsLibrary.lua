@@ -2,7 +2,8 @@ Func = require(game:GetService("ReplicatedStorage").Novarine)
 setfenv(1, Func())
 
 local Graphics                  = {
-    LensFlareItems              = {}; --setmetatable({}, {__mode = "kv"})
+    LensFlareItems              = {};
+    SurfaceBillboards           = {};
     HalfHorizontalFoV           = 0;
     AspectRatio                 = 0;
     EffectsEnabled              = true;
@@ -10,16 +11,16 @@ local Graphics                  = {
 
 function Graphics:NewRenderWait(Func, WaitFunc)
 
-    WaitFunc = WaitFunc or rswait
+    WaitFunc = WaitFunc or HeartbeatWait
 
-    Sub(function()
+    Coroutine.Wrap(function()
         while true do
             if (Graphics.EffectsEnabled) then
                 Func()
             end
             WaitFunc()
         end
-    end)
+    end)()
 end
 
 function Graphics:UpdateScreenValues()
@@ -72,7 +73,7 @@ function Graphics:DetectPlayer()
     local Char = Players.LocalPlayer.Character
 
     if Char then
-        local Head = Char.Head
+        local Head = Char:FindFirstChild("Head")
         if Head then
             if ((Head.Position - Graphics.Camera.CFrame.p).magnitude < 0.8) then
                 Graphics.PlayerIgnore = Char
@@ -130,6 +131,24 @@ function Graphics:UpdateLensFlares()
     end
 end
 
+function Graphics:UpdateBillboards()
+
+    local SurfaceBillboards = Graphics.SurfaceBillboards
+
+    for Key, Value in Pairs(SurfaceBillboards) do
+        if (Value.Part.Parent) then
+            Value:Update()
+        else
+            Value:Destroy()
+            SurfaceBillboards[Key] = nil
+        end
+    end
+end
+
+function Graphics:RegisterSurfaceBillboard(Item)
+    Table.Insert(self.SurfaceBillboards, Item)
+end
+
 function ClientInit()
 
     if (CONFIG.gEnableGraphics == false) then
@@ -179,7 +198,8 @@ function ClientInit()
     end
 
     Graphics:NewRenderWait(Graphics.UpdateLensFlares)
-    Graphics:NewRenderWait(Graphics.DetectPlayer, wait)
+    Graphics:NewRenderWait(Graphics.UpdateBillboards)
+    Graphics:NewRenderWait(Graphics.DetectPlayer, Wait)
 
     Graphics.Camera.Changed:Connect(function(Property)
         if (Property == "ViewportSize" or Property == "FieldOfView") then

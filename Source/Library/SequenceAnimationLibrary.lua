@@ -229,9 +229,12 @@ function Sequence:PreRender(SequenceName, Framerate, WaitAfterIterations, WaitTi
 
     local TargetSequence = Sequence.Sequences[SequenceName]
     assert(TargetSequence, "Sequence '" .. SequenceName .. "' does not exist!")
+
+    Framerate = Framerate or CONFIG._TargetFramerate
     
     for AnimTable = 1, #TargetSequence.Animations do
 
+        local Index = AnimTable
         AnimTable = TargetSequence.Animations[AnimTable]
 
         local Frames = {}
@@ -244,11 +247,13 @@ function Sequence:PreRender(SequenceName, Framerate, WaitAfterIterations, WaitTi
 
         Sub(function()
 
+            local StartTick = tick()
+
             for FrameTime = 0, AnimTable.Time * Framerate do
                 Frames[FrameTime] = Sequence.Tweeners[Type](AnimType, AnimTable.Tweener, FrameTime / Framerate, Points, Time, Extra)
                 if WaitAfterIterations and WaitTime then
                     if FrameTime % WaitAfterIterations == 0 then
-                        wait(WaitTime)
+                        Wait(WaitTime)
                     end
                 end
             end
@@ -256,6 +261,8 @@ function Sequence:PreRender(SequenceName, Framerate, WaitAfterIterations, WaitTi
             AnimTable.RenderFrames = true
             AnimTable.Frames = Frames
             AnimTable.PreRenderFramerate = Framerate
+
+            --Log(1, String.Format("[%s] Pre-rendered %s/%d+ in %.2f ms", script.Name, SequenceName, Index, Math.Floor((tick() - StartTick) * 1000)))
         end)
     end
 end

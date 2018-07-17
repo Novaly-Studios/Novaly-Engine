@@ -5,7 +5,7 @@ local Class = {
     NameKey             = "ClassName";
     ClassRefKey         = "Class";
     SuperclassRefKey    = "Super";
-    ConstructorNames    = {"new", "New"};
+    ConstructorNames    = {"new", "New", "Create"};
     ClassMetatable      = {
         __call = function(Self, Static)
             Assert(Type(Static) == "table", "Static vars must be a table.")

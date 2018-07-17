@@ -83,6 +83,25 @@ function GUI:RippleEffect(Parent, Position, RippleImage, StartRadius, EndRadius,
     RippleImage:Destroy()
 end
 
+function GUI:GetMouseOverIndicator(Button, MouseEnterFunc, MouseLeaveFunc)
+
+    local Over = false
+
+    local Connection1 = Button.MouseEnter:Connect(function()
+        if MouseEnterFunc then MouseEnterFunc() end
+        Over = true
+    end)
+
+    local Connection2 = Button.MouseLeave:Connect(function()
+        if MouseLeaveFunc then MouseLeaveFunc() end
+        Over = false
+    end)
+
+    return function()
+        return Over
+    end
+end
+
 Func({
     Client = {GUI = GUI};
     Server = {};
