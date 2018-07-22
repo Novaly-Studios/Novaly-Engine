@@ -1,5 +1,6 @@
 setfenv(1, require(game:GetService("ReplicatedStorage").Novarine)())
 
+local CHECK_ANIMATION_TYPE = "Animation"
 local Sequence = Class:FromName(script.Name)
 
 function Sequence:Sequence(Properties)
@@ -26,6 +27,8 @@ end
 
 -- Adds an animation object to the current sequence
 function Sequence:AddAnimation(AnimationObject)
+    Assert(AnimationObject[Class.NameKey] == CHECK_ANIMATION_TYPE, 
+        String.Format("Animation object is an incorrect type (%s)", CHECK_ANIMATION_TYPE))
     self.Animations[AnimationObject] = AnimationObject
     return self
 end
@@ -67,6 +70,10 @@ function Sequence:BindOnFinish(Func)
     self.FinishBind = Func
 end
 
+function Sequence:BindOnUpdate(Func)
+    self.StepBind = Func
+end
+
 function Sequence:Wait()
     while (self.Play) do
         RunService.Stepped:Wait()
@@ -88,22 +95,25 @@ end
 
 function Sequence:Step(TimeDelta)
 
-    local PreviousTime = self.CurrentTime
-    local CurrentTime = PreviousTime + TimeDelta * self.Increment
-
     if (not self.Play) then
         return
     end
 
+    local PreviousTime = self.CurrentTime
+    local FinishBind = self.FinishBind
+    local StepBind = self.StepBind
+    local CurrentTime = PreviousTime + TimeDelta * self.Increment
+
     if (CurrentTime < 0 or CurrentTime > self.Duration) then
-        -- Maybe update final anim to final position?
         self.Play = false
-
-        if (self.FinishBind) then
-            self:FinishBind()
+        if FinishBind then
+            FinishBind(self)
         end
-
         return
+    end
+
+    if StepBind then
+        StepBind(self)
     end
 
     local PreviousAnimations = self:GetActiveAnimationsAtTime(PreviousTime)

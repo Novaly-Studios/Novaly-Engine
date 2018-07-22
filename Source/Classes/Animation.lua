@@ -30,7 +30,7 @@ function Animation:Update()
     for Property, Transition in Pairs(self.Transitions) do
         self.Target[Property] = Transition:GetValueAt(self.CurrentTime, self.Duration)
     end
-    return Animation
+    return self
 end
 
 function Animation:Destroy()

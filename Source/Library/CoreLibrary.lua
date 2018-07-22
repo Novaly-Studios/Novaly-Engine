@@ -36,6 +36,7 @@ local NameSubstitutes   = {
     ["select"]          = "Select";
     ["setfenv"]         = "SetFunctionEnv";
     ["setmetatable"]    = "SetMetatable";
+    ["tick"]            = "Tick";
     ["tonumber"]        = "ToNumber";
     ["tostring"]        = "ToString";
     ["type"]            = "Type";

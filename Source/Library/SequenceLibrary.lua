@@ -2,8 +2,29 @@ local Func = require(game:GetService("ReplicatedStorage").Novarine)
 setfenv(1, Func())
 
 local Sequencer = {
-    Sequences = {}; --SetMetatable({}, {__mode = "k"});
-}
+    Sequences       = {};
+    Tweens          = Require(Modules.Sequence.TweeningStyles);
+    PresetEasing    = {
+        ["LowElastic"] = {
+            Target      = 1.0;
+            Damping     = 0.05;
+            Compression = 60.0;
+            Velocity    = 0.1;
+        };
+        ["MidElastic"] = {
+            Target      = 1.0;
+            Damping     = 0.05;
+            Compression = 60.0;
+            Velocity    = 0.3;
+        };
+        ["HighElastic"] = {
+            Target      = 1.0;
+            Damping     = 0.05;
+            Compression = 60.0;
+            Velocity    = 0.6;
+        };
+    };
+};
 
 function Sequencer:Register(Target)
     self.Sequences[Target] = true
@@ -14,7 +35,13 @@ function Sequencer:Deregister(Target)
 end
 
 function Sequencer:PreRender(Target)
-    
+   -- Todo 
+end
+
+function Sequencer:AddEasingStyle(Name, Spring)
+    self.Tweens[Name] = function(CurrentTime)
+        return Spring:UpdateAt(CurrentTime).Current
+    end
 end
 
 function ClientInit()
@@ -25,9 +52,12 @@ function ClientInit()
             if (Subject.Play) then
                 Subject:Step(Step)
             end
-            Print(Subject)
         end
     end)
+
+    for Name, Properties in Pairs(Sequencer.PresetEasing) do
+        Sequencer:AddEasingStyle(Name, TimeSpring.New(Properties))
+    end
 end
 
 Func({
