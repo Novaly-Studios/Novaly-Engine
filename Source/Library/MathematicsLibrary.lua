@@ -176,7 +176,6 @@ function Maths.HermiteInterpolate(P0, P1, P2, P3, Mul, Tension, Bias)
     local C3 = -2 * Mul3 + 3 * Mul2
 
     return C0 * P1 + C1 * Mul0 + C2 * Mul1 + C3 * P2
-
 end
 
 --[[
@@ -196,7 +195,6 @@ function Maths.HermiteInterpolateCFrame(P0, P1, P2, P3, Mul, Tension, Bias)
     local Position = Maths.HermiteInterpolate(P0P, P1P, P2P, P3P, Mul, Tension, Bias)
 
     return CFrame.new(Position.X, Position.Y, Position.Z, M00, M01, M02, M10, M11, M12, M20, M21, M22)
-
 end
 
 --[[
@@ -266,6 +264,34 @@ function Curve:InterpolatePiecewiseCubic(Mul, InterpolationFunc, ...)
 
         return InterpolationFunc(P0, P1, P2, P3, Mul, ...)
     end
+end
+
+--[[
+    Maths.InterpolatePiecewise
+]]
+
+function Maths.PiecewiseInterpolate(Points, InterpolateFunction, DefaultArgs, CurrentTime, Duration, Offset, PullRange)
+
+    local Lines = #Points - 1
+    local Ratio = CurrentTime / Duration
+    local CorrectedRatio = (Ratio * Lines) % 1
+    local Segment = Maths.Floor(Lines / Duration * CurrentTime) + 1 + Offset
+    local Result = {}
+
+    local Iter = 1
+
+    for Index = PullRange.Min, PullRange.Max do
+        Result[Iter] = Points[Maths.Clamp(Segment + Index, 1, Lines + 1)]
+        Iter = Iter + 1
+    end
+
+    Table.Insert(Result, CorrectedRatio)
+
+    for _, Arg in Pairs(DefaultArgs) do
+        Table.Insert(Result, Arg)
+    end
+
+    return InterpolateFunction(Unpack(Result))
 end
 
 --[[

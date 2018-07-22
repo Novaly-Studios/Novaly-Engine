@@ -14,7 +14,8 @@ return
     "EnumLibrary";
     "DataStructureLibrary";
     "CommunicationLibrary";
-    "SequenceAnimationLibrary";
+    "SequenceLibrary";
+    --"SequenceAnimationLibrary";
     "GraphicsLibrary";
     "GUILibrary";
     "ReplicationLibrary";

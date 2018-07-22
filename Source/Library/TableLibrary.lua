@@ -186,6 +186,13 @@ function Table.WaitForItem(Array, Key)
     return Table.WaitFor(wait, Array, Key)
 end
 
+function Table.ProtectedGet(Array, Key)
+    local Success, Result = ProtectedCall(function()
+        return Array[Key]
+    end)
+    return Success, Result
+end
+
 Table.ApplyKeyMapping(Table, Mappings)
 
 Func({
