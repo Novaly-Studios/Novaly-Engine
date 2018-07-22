@@ -64,6 +64,10 @@ function Core.HeartbeatWait()
     RunService.Heartbeat:Wait()
 end
 
+function Core.SteppedWait()
+    RunService.Stepped:Wait()
+end
+
 function Core.pairs(Object)
     if (type(Object) == "table") then
         return Core.OldPairs(Object.Vars == nil and Object or Object.Vars)

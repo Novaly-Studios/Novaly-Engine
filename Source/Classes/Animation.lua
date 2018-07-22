@@ -15,7 +15,6 @@ function Animation:Animation(Properties, Transitions)
         local ValueType = Type(Value)
         local DefaultValue = Object[Key]
         Assert(DefaultValue ~= nil, String.Format("Invalid animation property '%s'", Key))
-        Assert(ValueType == Type(DefaultValue), String.Format("Invalid type for property '%s'", Key))
         Object[Key] = Value
     end
 

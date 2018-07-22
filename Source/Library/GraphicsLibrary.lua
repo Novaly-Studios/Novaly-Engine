@@ -11,7 +11,7 @@ local Graphics                  = {
 
 function Graphics:NewRenderWait(Func, WaitFunc)
 
-    WaitFunc = WaitFunc or HeartbeatWait
+    WaitFunc = WaitFunc or SteppedWait
 
     Coroutine.Wrap(function()
         while true do

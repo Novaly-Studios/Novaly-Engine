@@ -13,9 +13,15 @@ function LensFlareCollection:LensFlareCollection(Name, FadeTime, Adornee, MaxDis
     self.Transparency   = 0
     self.LensFlares     = {}
 
-    Sequence:New(Name, FadeTime, Enum.SequenceType.Conditional, function()
-        return (self.Show and self.Enabled)
+    local FlareSequence = Sequence.New({
+        Duration = FadeTime;
+        AutoStop = false;
+    })
+    FlareSequence:BindOnUpdate(function()
+        FlareSequence.Increment = (self.Show and self.Enabled) and 1 or -1
     end)
+    FlareSequence:Initialise():Resume()
+    self.FlareSequence = FlareSequence
 end
 
 function LensFlareCollection:AddLensFlares(...)
@@ -31,45 +37,36 @@ function LensFlareCollection:AddLensFlares(...)
 
         Table.Insert(self.LensFlares, {Value, ImageLabel})
 
-        Sequence:NewAnim(
-            self.Name,
-            Enum.AnimationType.TwoPoint,
-            Enum.AnimationControlPointState.Static,
-            0,
-            ImageLabel,
-            "ImageTransparency",
-            Value.TransparencyValues,
-            "linear",
-            self.FadeTime
-        )
+        local FlareTransparency = TweenValue.New("PiecewiseTransition", "Linear", CONFIG._TargetFramerate, {}, Value.TransparencyValues)
+        self.FlareSequence:AddAnimation(Animation.New({
+            Target              = ImageLabel;
+            Duration            = self.FadeTime;
+            StartTime           = 0;
+        }, {
+            ImageTransparency   = FlareTransparency;
+        }))
     end
 
-    Sequence:NewAnim(
-        self.Name,
-        Enum.AnimationType.TwoPoint,
-        Enum.AnimationControlPointState.Static,
-        0,
-        self,
-        "Transparency",
-        {
-            1;
-            0;
-        },
-        "linear",
-        self.FadeTime
-    )
+    local Transparency = TweenValue.New("PiecewiseTransition", "Linear", CONFIG._TargetFramerate, {}, {0, 1})
+    self.FlareSequence:AddAnimation(Animation.New({
+        Target              = self;
+        Duration            = self.FadeTime;
+        StartTime           = 0;
+    }, {
+        ImageTransparency   = Transparency;
+    }))
 end
 
 function LensFlareCollection:Start()
-    Sequence:Start(self.Name)
+    Sequence:Resume()
 end
 
 function LensFlareCollection:Pause()
-    Sequence:Pause(self.Name)
+    Sequence:Pause()
 end
 
 function LensFlareCollection:Remove()
-    Sequence:Delete(self.Name)
+    Sequence:Destroy()
 end
 
 return LensFlareCollection

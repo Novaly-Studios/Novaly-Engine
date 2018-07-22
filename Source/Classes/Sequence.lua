@@ -11,6 +11,7 @@ function Sequence:Sequence(Properties)
         ["CurrentTime"]         = 0.0;  -- Current time of the sequence
         ["TimePercentile"]      = 0.0;  -- A number between 0 and 1 denoting whole sequence progress
         ["Animations"]          = SetMetatable({}, {__mode = "k"}); -- A table of animation objects
+        ["AutoStop"]            = true;  -- Automatically stops the sequence when done
         ["Play"]                = false; -- When true, allows the sequence to step
     }
 
@@ -104,12 +105,16 @@ function Sequence:Step(TimeDelta)
     local StepBind = self.StepBind
     local CurrentTime = PreviousTime + TimeDelta * self.Increment
 
-    if (CurrentTime < 0 or CurrentTime > self.Duration) then
-        self.Play = false
-        if FinishBind then
-            FinishBind(self)
+    if (self.AutoStop) then
+        if (CurrentTime < 0 or CurrentTime > self.Duration) then
+            self.Play = false
+            if FinishBind then
+                FinishBind(self)
+            end
+            return
         end
-        return
+    else
+        CurrentTime = Math.Clamp(CurrentTime, 0, self.Duration)
     end
 
     if StepBind then

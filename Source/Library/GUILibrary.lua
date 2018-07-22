@@ -52,7 +52,7 @@ function GUI:RotatedClip(Element, Parent)
     end)
 end
 
-function GUI:RippleEffect(Parent, Position, RippleImage, StartRadius, EndRadius, StartTransparency, EndTransparency, StartColour, EndColour, Time, Style)
+function GUI:RippleEffect(Parent, Position, StartRadius, EndRadius, StartTransparency, EndTransparency, StartColour, EndColour, Time, Style)
 
     StartRadius = StartRadius or 1
     EndRadius = EndRadius or 50
@@ -62,8 +62,7 @@ function GUI:RippleEffect(Parent, Position, RippleImage, StartRadius, EndRadius,
     EndColour = EndColour or Color3.new(1, 1, 1)
     Time = Time or 0.35
     Style = Style or "linear"
-    
-    local Name = Sequence:GetUniqueName()
+
     local RippleImage = Instance.new("ImageLabel")
     RippleImage.Size = UDim2.new(0, StartRadius * 2, 0, StartRadius * 2)
     RippleImage.Position = Position - UDim2.new(0, StartRadius, 0, StartRadius)
@@ -72,14 +71,44 @@ function GUI:RippleEffect(Parent, Position, RippleImage, StartRadius, EndRadius,
     RippleImage.Image = "rbxassetid://426424851"
     RippleImage.BackgroundTransparency = 1
     RippleImage.Parent = Parent
-    Sequence:New(Name, Time)
-    Sequence:NewAnim(Name, Enum.AnimationType.TwoPoint, Enum.AnimationControlPointState.Static, 0, RippleImage, "Position", {RippleImage.Position, UDim2.new(0, Position.X.Offset - EndRadius, 0, Position.Y.Offset - EndRadius)}, Style, Time)
-    Sequence:NewAnim(Name, Enum.AnimationType.TwoPoint, Enum.AnimationControlPointState.Static, 0, RippleImage, "Size", {RippleImage.Size, UDim2.new(0, EndRadius * 2, 0, EndRadius * 2)}, Style, Time)
-    Sequence:NewAnim(Name, Enum.AnimationType.TwoPoint, Enum.AnimationControlPointState.Static, 0, RippleImage, "ImageTransparency", {StartTransparency, EndTransparency}, Style, Time)
-    Sequence:NewAnim(Name, Enum.AnimationType.TwoPoint, Enum.AnimationControlPointState.Static, 0, RippleImage, "ImageColor3", {StartColour, EndColour}, Style, Time)
-    Sequence:Start(Name)
-    Sequence:Wait(Name)
-    Sequence:Delete(Name)
+
+    local RippleSequence = Sequence.New({Duration = Time})
+    local RipplePosition = TweenValue.New("SingleTransition", "Linear", CONFIG["_TargetFramerate"], {
+        ["EasingStyle"] = Style;
+    }, {
+        RippleImage.Position;
+        UDim2.new(0, Position.X.Offset - EndRadius, 0, Position.Y.Offset - EndRadius);
+    })
+    local RippleSize = TweenValue.New("SingleTransition", "Linear", CONFIG["_TargetFramerate"], {
+        ["EasingStyle"] = Style;
+    }, {
+        RippleImage.Size;
+        UDim2.new(0, EndRadius * 2, 0, EndRadius * 2);
+    })
+    local RippleTransparency = TweenValue.New("SingleTransition", "Linear", CONFIG["_TargetFramerate"], {
+        ["EasingStyle"] = Style;
+    }, {
+        StartTransparency;
+        EndTransparency;
+    })
+    local RippleColour = TweenValue.New("SingleTransition", "Linear", CONFIG["_TargetFramerate"], {
+        ["EasingStyle"] = Style;
+    }, {
+        StartColour;
+        EndColour;
+    })
+    local RippleAnim = Animation.New({
+        Target              = RippleImage;
+        Duration            = Time;
+        StartTime           = 0;
+    }, {
+        Position            = RipplePosition;
+        Size                = RippleSize;
+        ImageTransparency   = RippleTransparency;
+        ImageColor3         = RippleColour;
+    })
+
+    RippleSequence:AddAnimation(RippleAnim):Initialise():Resume():Wait():Destroy()
     RippleImage:Destroy()
 end
 

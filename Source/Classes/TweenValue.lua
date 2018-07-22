@@ -49,8 +49,20 @@ function TweenValue.SingleTransition:Linear(Points, CurrentTime, Duration)
 
     elseif (DataType == "UDim2") then
 
-        From = WrappedUDim2.new(From)
-        To = WrappedUDim2.new(To)
+        return UDim2.new(
+            Math.Lerp(From.X.Scale, To.X.Scale, TimeRatio),
+            Math.Lerp(From.X.Offset, To.X.Offset, TimeRatio),
+            Math.Lerp(From.Y.Scale, To.Y.Scale, TimeRatio),
+            Math.Lerp(From.Y.Offset, To.Y.Offset, TimeRatio)
+        )
+
+    elseif (DataType == "Color3") then
+
+        return Color3.new(
+            Math.Lerp(From.r, To.r, TimeRatio),
+            Math.Lerp(From.g, To.g, TimeRatio),
+            Math.Lerp(From.b, To.b, TimeRatio)
+        )
     end
 
     return Math.Lerp(From, To, TimeRatio)
