@@ -3,7 +3,7 @@ setfenv(1, Func())
 
 local Sequencer = {
     Sequences       = {};
-    Tweens          = Require(Modules.Sequence.TweeningStyles);
+    EasingStyles    = Require(Modules.Sequence.TweeningStyles);
     PresetEasing    = {
         ["LowElastic"] = {
             Target      = 1.0;
@@ -39,7 +39,7 @@ function Sequencer:PreRender(Target)
 end
 
 function Sequencer:AddEasingStyle(Name, Spring)
-    self.Tweens[Name] = function(CurrentTime)
+    self.EasingStyles[Name] = function(CurrentTime)
         return Spring:UpdateAt(CurrentTime).Current
     end
 end
