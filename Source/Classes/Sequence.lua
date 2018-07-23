@@ -69,10 +69,12 @@ end
 
 function Sequence:BindOnFinish(Func)
     self.FinishBind = Func
+    return self
 end
 
 function Sequence:BindOnUpdate(Func)
     self.StepBind = Func
+    return self
 end
 
 function Sequence:Wait()
