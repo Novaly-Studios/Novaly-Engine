@@ -2,6 +2,7 @@ Func = require(game:GetService("ReplicatedStorage").Novarine)
 setfenv(1, Func())
 
 local Graphics                  = {
+    EffectSequences             = {};
     LensFlareItems              = {};
     SurfaceBillboards           = {};
     HalfHorizontalFoV           = 0;
@@ -33,15 +34,41 @@ function Graphics:UpdateScreenValues()
 
     -- Horizontal Field of View
     Graphics.HalfHorizontalFoV = Math.ATan(Math.Tan(Math.Rad(Graphics.Camera.FieldOfView / 2)) * Graphics.AspectRatio)
-
 end
 
 function Graphics:TweenEffect(Item, Property, To, Time, Style, Wait)
 
     local SequenceName = Item .. Property
-    local Item = Graphics.AnimateItems[Item]
+    local Item = self.AnimateItems[Item]
+    local TweenSequence = self.EffectSequences[SequenceName]
 
-    if (Sequence:Exists(SequenceName)) then
+    if TweenSequence then
+        TweenSequence:Destroy()
+    end
+
+    local TweenSequence = Sequence.New({
+        Duration = Time;
+    })
+    local PropertyTransition = TweenValue.New("SingleTransition", "Linear", CONFIG["_TargetFramerate"], {
+        ["EasingStyle"] = Style;
+    }, {
+        Item[Property];
+        To;
+    })
+    local PropertyAnimation = Animation.New({
+        Target      = Item;
+        Duration    = Time;
+        StartTime   = 0;
+    }, {
+        [Property]  = PropertyTransition;
+    })
+    TweenSequence:AddAnimation(PropertyAnimation):Initialise():Resume()
+
+    if Wait then
+        TweenSequence:Wait()
+    end
+
+    --[[if (Sequence:Exists(SequenceName)) then
         Sequence:Delete(SequenceName)
     end
 
@@ -64,7 +91,9 @@ function Graphics:TweenEffect(Item, Property, To, Time, Style, Wait)
 
     if Wait then
         Sequence:Wait(SequenceName)
-    end
+    end]]
+
+
 end
 
 function Graphics:DetectPlayer()
