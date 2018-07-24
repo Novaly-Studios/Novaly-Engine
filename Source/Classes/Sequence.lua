@@ -48,7 +48,7 @@ function Sequence:GetActiveAnimationsAtTime(CurrentTime)
         if (CurrentTime >= Animation.StartTime) then
             if (CurrentTime <= Animation.EndTime) then
                 Active[Animation] = true
-            elseif (CurrentTime > Animation.EndTime) then
+            else
                 Active[Animation] = false
             end
         end

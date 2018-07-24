@@ -4,26 +4,23 @@ setfenv(1, require(game:GetService("ReplicatedStorage").Novarine)("Wait"))
 
 Wait(2)
 
-local Up1 = TweenValue.New("SingleTransition", "Linear", CONFIG["_TargetFramerate"], {
+local Up1 = TweenValue.New("PiecewiseTransition", "Linear", CONFIG["_TargetFramerate"], {
     ["EasingStyle"] = "LowElastic";
-    --["SuperEasingStyle"] = "SlowElastic";
+    ["SuperEasingStyle"] = "inOutExpo";
 }, {
     CFrame.new(0, 0, 0);
     CFrame.new(0, 10, 0) * CFrame.Angles(0, Math.PI / 2, 0);
+    CFrame.new(0, 10, 10);
 })
 
-local Up2 = TweenValue.New("SingleTransition", "Linear", CONFIG["_TargetFramerate"], {
-    ["EasingStyle"] = "MidElastic";
-    --["SuperEasingStyle"] = "SlowElastic";
-}, {
+local Up2 = TweenValue.New("PiecewiseTransition", "HermiteSpline", CONFIG["_TargetFramerate"], {}, {
     CFrame.new(0, 0, 0);
     CFrame.new(0, 20, 0) * CFrame.Angles(0, Math.PI / 2, 0);
+    CFrame.new(0, 10, 10);
+    CFrame.new(10, 10, 10);
 })
 
-local Up3 = TweenValue.New("SingleTransition", "Linear", CONFIG["_TargetFramerate"], {
-    ["EasingStyle"] = "HighElastic";
-    --["SuperEasingStyle"] = "SlowElastic";
-}, {
+local Up3 = TweenValue.New("SingleTransition", "Linear", CONFIG["_TargetFramerate"], {}, {
     CFrame.new(0, 0, 0);
     CFrame.new(0, 30, 0) * CFrame.Angles(0, Math.PI / 2, 0);
 })
@@ -66,7 +63,10 @@ local Sequence1 = Sequence.New({
     Duration = 20;
 })
 
-Sequence1:AddAnimation(Anim1):AddAnimation(Anim2):AddAnimation(Anim3):Initialise():Resume()
+Sequence1:AddAnimation(Anim1):AddAnimation(Anim2):AddAnimation(Anim3):Initialise():Resume():BindOnFinish(function()
+    Sequence1.Increment = -Sequence1.Increment
+    Sequence1:Resume()
+end)
 
 local SpringAnim1 = SpringAnimation.New({
     Target = Workspace.D;
