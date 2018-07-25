@@ -14,7 +14,7 @@ function Enums:NewCollection(Name, Values)
     for Index, Value in Pairs(Values) do
         Values[Value] = Index
     end
-    Enums.new(Name, Values)
+    Enums:New(Name, Values)
     return Enums
 end
 
