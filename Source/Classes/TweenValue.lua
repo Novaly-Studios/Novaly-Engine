@@ -179,6 +179,7 @@ function TweenValue:TweenValue(TransitionClassificationName, TransitionerName, T
         Transitioner            = Transitioner;
         TargetFramerate         = TargetFramerate;
         TransitionerData        = TransitionerData;
+        TargetFramerateTime     = 1 / TargetFramerate;
         ControlPointsDynamic    = ControlPointsDynamic;
     }
 end
@@ -191,6 +192,8 @@ function TweenValue:GetValueAt(CurrentTime, Duration)
     -- Dynamic control points disallow framely caching of interpolated values as they cannot be predicted from here
     if (self.ControlPointsDynamic) then
         return self:Transitioner(self.Points, CurrentTime, Duration, self.TransitionerData)
+    elseif (CurrentTime < self.TargetFramerateTime) then -- Low inaccurate times (0.0004 etc) can cause first frame to be cached, so this solves that issue
+        return self.Points[1]
     else
         ComputedPoints[Frame] = ComputedPoints[Frame] or self:Transitioner(self.Points, CurrentTime, Duration, self.TransitionerData)
         return ComputedPoints[Frame]

@@ -106,6 +106,58 @@ function Sequence:Step(TimeDelta)
     local FinishBind = self.FinishBind
     local StepBind = self.StepBind
     local CurrentTime = PreviousTime + TimeDelta * self.Increment
+    local ClampedTime = Math.Clamp(CurrentTime, 0, self.Duration)
+    local CurrentAnimations = self:GetActiveAnimationsAtTime(ClampedTime)
+
+    if (self.AutoStop) then
+        if (CurrentTime < 0 or CurrentTime > self.Duration) then
+            self.Play = false
+            for Animation in Pairs(CurrentAnimations) do
+                Animation.CurrentTime = ClampedTime
+                Animation:Update()
+            end
+            if FinishBind then
+                FinishBind(self)
+            end
+            return
+        end
+    else
+        CurrentTime = ClampedTime
+    end
+
+    if StepBind then
+        StepBind(self)
+    end
+
+    local PreviousAnimations = self:GetActiveAnimationsAtTime(PreviousTime)
+
+    for Animation, Active in Pairs(CurrentAnimations) do
+        if Active then
+            Animation.CurrentTime = CurrentTime - Animation.StartTime
+            Animation:Update()
+        else
+            -- If the animation has just finished, update at end for numerical accuracy
+            if (PreviousAnimations[Animation] == true) then
+                Animation.CurrentTime = Animation.Duration
+                Animation:Update()
+            end
+        end
+    end
+
+    self.CurrentTime = CurrentTime
+    return self
+end
+
+--[[function Sequence:Step(TimeDelta)
+
+    if (not self.Play) then
+        return
+    end
+
+    local PreviousTime = self.CurrentTime
+    local FinishBind = self.FinishBind
+    local StepBind = self.StepBind
+    local CurrentTime = PreviousTime + TimeDelta * self.Increment
 
     if (self.AutoStop) then
         if (CurrentTime < 0 or CurrentTime > self.Duration) then
@@ -141,6 +193,6 @@ function Sequence:Step(TimeDelta)
 
     self.CurrentTime = CurrentTime
     return self
-end
+end--]]
 
 return Sequence
