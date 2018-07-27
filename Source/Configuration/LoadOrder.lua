@@ -21,4 +21,5 @@ return
     "ReplicationLibrary";
     "PlayerLibrary";
     "WeldLibrary";
-}
+    "CollectionHelperLibrary";
+};
