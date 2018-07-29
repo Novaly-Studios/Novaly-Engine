@@ -103,8 +103,6 @@ function Server.Init()
         repeat Wait() until TransmissionReady[Player.Name]
         PlayerData[ToString(Player.UserId)] = Data
 
-        Table.PrintTable(PlayerData)
-
         while Wait(CONFIG.pSaveInterval) do
             if not Player.Parent then break end
             Server.PlayerDataManagement.Save(Player)

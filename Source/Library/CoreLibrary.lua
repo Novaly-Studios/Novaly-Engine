@@ -14,6 +14,7 @@ local SvcLoad           = {
     "ReplicatedStorage";
     "CollectionService";
     "LocalizationService";
+    "ContextActionService";
 }
 
 local NameSubstitutes   = {
