@@ -36,6 +36,14 @@ function Graphics:UpdateScreenValues()
     Graphics.HalfHorizontalFoV = Math.ATan(Math.Tan(Math.Rad(Graphics.Camera.FieldOfView / 2)) * Graphics.AspectRatio)
 end
 
+function Graphics:SetEffect(Item, Property, To)
+    self.AnimateItems[Item][Property] = To
+end
+
+function Graphics:GetEffect(Item)
+    return self.AnimateItems[Item]
+end
+
 function Graphics:TweenEffect(Item, Property, To, Time, Style, Wait)
 
     local SequenceName = Item .. Property

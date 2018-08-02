@@ -16,6 +16,8 @@ function CollectionHelper:GetDescendantsWithTag(Root, Tag)
     return Result
 end
 
+-- GetAncestorWithTag
+
 -- More efficient, as this will stop when it finds one
 function CollectionHelper:FindFirstDescendantWithTag(Root, Tag)
     for _, Object in Pairs(Root:GetDescendants()) do

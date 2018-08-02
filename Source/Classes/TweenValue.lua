@@ -186,7 +186,7 @@ end
 
 function TweenValue:GetValueAt(CurrentTime, Duration)
 
-    local Frame = Math.Floor(CurrentTime * self.TargetFramerate) -- Access the current frame we are on (e.g. 0.5 seconds through = 30 frames)
+    local Frame = Math.Floor(CurrentTime * self.TargetFramerate + 0.5) -- Access the current frame we are on (e.g. 0.5 seconds through = 30 frames)
     local ComputedPoints = self.ComputedPoints
 
     -- Dynamic control points disallow framely caching of interpolated values as they cannot be predicted from here

@@ -66,7 +66,7 @@ function GetWrapReplicatedData(Metatable)
         Data.Vars = {}
         Data.KeyList = KeyList
 
-        for Key, Value in Pairs(Data) do -- Iterate through each data item, wrap if table
+        for Key, Value in next, Data do -- Iterate through each data item, wrap if table
             if (Key ~= "Vars" and Key ~= "KeyList") then
                 if (Type(Value) == "table") then
                     if (Value.Object == nil) then -- Check for wrapped instances
@@ -104,7 +104,7 @@ function Replication.StripReplicatedData(Data)
 
     local Result = {}
 
-    for Key, Value in Pairs(Data.Vars) do
+    for Key, Value in next, Data.Vars do
         if (Type(Value) == "table") then
             if (Value.Object == nil) then -- Don't iterate through wrapped instances
                 Value = Replication.StripReplicatedData(Value)
@@ -200,7 +200,7 @@ function ClientInit()
 
     -- Client downloads all data when they join
     BindRemoteEvent("GetReplicatedData", function(Data)
-        for Key, Value in Pairs(Data) do
+        for Key, Value in next, Data do
             ReplicatedData[Key] = Value
         end
     end)
@@ -242,7 +242,7 @@ end
 
 function SharedData.Append(Elements)
     if Type(Elements) == "table" then
-        for Key, Value in Pairs(Elements) do
+        for Key, Value in next, Elements do
             SharedData[Key] = Value
         end
     end

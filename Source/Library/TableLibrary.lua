@@ -38,7 +38,6 @@ function Table.ShallowClone(Array)
     return Result
 end
 
-
 function Table.PrintTable(Arr, Layer)
     local Layer = Layer or 1
     local Tab = ("    "):rep(Layer)
@@ -147,6 +146,11 @@ function Table.ApplyTemplate(Previous, Template)
         if type(Target) == "table" and type(Value) == "table" then
             Table.ApplyTemplate(Target, Value)
         elseif Target == nil then
+            --[[if (Key == "Inventory") then
+                Print("-------")
+                Table.PrintTable(Value)
+                Print("-------")
+            end]]
             Previous[Key] = Value
         end
     end
@@ -171,10 +175,15 @@ function Table.ApplyValueMapping(Array, Append)
 end
 
 function Table.WaitFor(YieldFunction, Array, ...)
+    local Iter = 1
     for Key, Value in pairs({...}) do
         local Next = Array[Value]
         while (not Next) do
             YieldFunction()
+            Iter = Iter + 1
+            if (Iter == 150) then
+                Warn(String.Format("[%s] Possible endless wait on '%s' for property '%s'.", GetFunctionEnv(0).script:GetFullName(), (Array.Name or ToString(Array)), ToString(Value)))
+            end
             Next = Array[Value]
         end
         Array = Next
