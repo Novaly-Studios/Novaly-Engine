@@ -1,7 +1,9 @@
 local Func = require(game:GetService("ReplicatedStorage").Novarine)
 setfenv(1, Func())
 
-local GUI = {}
+local GUI = {
+    OverStatusObjects = {};
+};
 
 function GUI:V2U(VecScale, VecOffset)
     VecScale = VecScale or Vector2.new()
@@ -112,22 +114,44 @@ function GUI:RippleEffect(Parent, Position, StartRadius, EndRadius, StartTranspa
     RippleImage:Destroy()
 end
 
+function GUI:CorrectMouseOver()
+    local OverStatusObjects = self.OverStatusObjects
+    for _, Object in Pairs(OverStatusObjects) do
+        Object.Status = false
+        if (Object.MouseLeaveFunc) then
+            Object.MouseLeaveFunc()
+        end
+    end
+end
+
 function GUI:GetMouseOverIndicator(Button, MouseEnterFunc, MouseLeaveFunc)
 
-    local Over = false
+    local OverObject = {
+        Status = false;
+        MouseEnterFunc = MouseEnterFunc;
+        MouseLeaveFunc = MouseLeaveFunc;
+    }
+    local OverStatusObjects = self.OverStatusObjects
 
     local Connection1 = Button.MouseEnter:Connect(function()
-        if MouseEnterFunc then MouseEnterFunc() end
-        Over = true
+        self:CorrectMouseOver()
+        OverObject.Status = true
+        if MouseEnterFunc then
+            MouseEnterFunc()
+        end
     end)
 
     local Connection2 = Button.MouseLeave:Connect(function()
-        if MouseLeaveFunc then MouseLeaveFunc() end
-        Over = false
+        self:CorrectMouseOver()
+        if MouseLeaveFunc then
+            MouseLeaveFunc()
+        end
     end)
 
+    Table.Insert(OverStatusObjects, OverObject)
+
     return function()
-        return Over
+        return OverObject.Status
     end
 end
 

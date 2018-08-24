@@ -59,6 +59,10 @@ function Server.PlayerDataManagement.Save(Player)
     local Stripped = Replication.StripReplicatedData(PlayerData[UserId])
     local Serial = Server.PlayerDataManagement.RecursiveSerialise(Stripped)
 
+    --[[Server.PlayerDataStore:UpdateAsync(UserId, function()
+        Table.PrintTable(Serial)
+        return Serial
+    end)]]
     Server.PlayerDataStore:SetAsync(UserId, Serial)
 end
 
@@ -71,6 +75,9 @@ function Server.PlayerDataManagement.LeaveSave(Player)
 
     Wait(6.5)
 
+    --[[Server.PlayerDataStore:UpdateAsync(UserId, function()
+        return Serial
+    end)]]
     Server.PlayerDataStore:SetAsync(UserId, Serial)
 end
 

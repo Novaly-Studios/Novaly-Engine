@@ -93,6 +93,54 @@ function Core.Count(Array)
     return Count
 end
 
+--[[
+    'SimpleUnyieldSequence' Usage:
+    SimpleUnyieldSequence(function()
+        return Workspace:WaitForChild("Abc"), "TestString"
+    end)(function(Result, Str)
+        Print("Yay", Result, Str)
+        Result:Destroy()
+    end)()
+]]
+
+function Core.SimpleUnyieldSequence(InitialFunc)
+    return setmetatable({InitialFunc}, {
+        __call = function(Self, Func)
+            if Func then
+                table.insert(Self, Func)
+                return Self
+            else
+                coroutine.wrap(function()
+                    local Last = {Self[1]()}
+                    for Index = 2, #Self do
+                        Last = Self[Index](unpack(Last))
+                    end
+                end)()
+            end
+        end;
+    })
+end
+
+--[[
+    'With' Usage:
+    local x, y, z = {}, {}, {}
+    With(x, y, z)
+    {
+        Test = 80;
+    }
+]]
+
+function Core.With(...)
+    local Items = {...}
+    return setmetatable({}, {__call = function(Self, Append)
+        for _, Item in pairs(Items) do
+            for Key, Value in pairs(Append) do
+                Item[Key] = Value
+            end
+        end
+    end})
+end
+
 for Index = 1, #SvcLoad do
     local Value = SvcLoad[Index]
     Core[Value] = game:GetService(Value)

@@ -146,11 +146,6 @@ function Table.ApplyTemplate(Previous, Template)
         if type(Target) == "table" and type(Value) == "table" then
             Table.ApplyTemplate(Target, Value)
         elseif Target == nil then
-            --[[if (Key == "Inventory") then
-                Print("-------")
-                Table.PrintTable(Value)
-                Print("-------")
-            end]]
             Previous[Key] = Value
         end
     end
@@ -182,7 +177,8 @@ function Table.WaitFor(YieldFunction, Array, ...)
             YieldFunction()
             Iter = Iter + 1
             if (Iter == 150) then
-                Warn(String.Format("[%s] Possible endless wait on '%s' for property '%s'.", GetFunctionEnv(0).script:GetFullName(), (Array.Name or ToString(Array)), ToString(Value)))
+                Warn(String.Format("Possible endless wait on '%s' for property '%s'.", (Array.Name or ToString(Array)), ToString(Value)))
+                Warn(debug.traceback())
             end
             Next = Array[Value]
         end

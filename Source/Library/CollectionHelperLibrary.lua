@@ -3,12 +3,21 @@ setfenv(1, Func())
 
 local CollectionHelper = {}
 
-function CollectionHelper:GetDescendantsWithTag(Root, Tag)
+function CollectionHelper:HasTags(Root, ...)
+    for _, Tag in Pairs({...}) do
+        if (not CollectionService:HasTag(Root, Tag)) then
+            return false
+        end
+    end
+    return true
+end
+
+function CollectionHelper:GetDescendantsWithTag(Root, ...)
 
     local Result = {}
 
     for _, Object in Pairs(Root:GetDescendants()) do
-        if (CollectionService:HasTag(Object, Tag)) then
+        if (self:HasTags(Object, ...)) then
             Table.Insert(Result, Object)
         end
     end
@@ -16,12 +25,33 @@ function CollectionHelper:GetDescendantsWithTag(Root, Tag)
     return Result
 end
 
--- GetAncestorWithTag
+function CollectionHelper:GetChildrenWithTag(Root, ...)
+
+    local Result = {}
+
+    for _, Object in Pairs(Root:GetChildren()) do
+        if (self:HasTags(Object, ...)) then
+            Table.Insert(Result, Object)
+        end
+    end
+
+    return Result
+end
+
+-- Todo: GetAncestorWithTag
 
 -- More efficient, as this will stop when it finds one
-function CollectionHelper:FindFirstDescendantWithTag(Root, Tag)
+function CollectionHelper:FindFirstDescendantWithTag(Root, ...)
     for _, Object in Pairs(Root:GetDescendants()) do
-        if (CollectionService:HasTag(Object, Tag)) then
+        if (self:HasTags(Object, ...)) then
+            return Object
+        end
+    end
+end
+
+function CollectionHelper:FindFirstChildWithTag(Root, ...)
+    for _, Object in Pairs(Root:GetChildren()) do
+        if (self:HasTags(Object, ...)) then
             return Object
         end
     end
@@ -46,6 +76,10 @@ function CollectionHelper:RemoveTags(Object)
             CollectionService:RemoveTag(Object, Tag)
         end
     end
+end
+
+function CollectionHelper:GetFirstTagged(Tag)
+    return CollectionService:GetTagged(Tag)[1]
 end
 
 Func({

@@ -148,6 +148,10 @@ function TweenValue.PiecewiseTransition:HermiteSpline(Points, CurrentTime, Durat
     return Math.PiecewiseInterpolate(Points, Wrapper, {}, CurrentTime, Duration, 1, NumberRange.new(-2, 1))
 end
 
+function TweenValue:Change(Properties)
+    -- Todo: return new copied TweenValue with user-specified changes
+end
+
 function TweenValue:TweenValue(TransitionClassificationName, TransitionerName, TargetFramerate, TransitionerData, Points)
 
     local TransitionClass = TweenValue[TransitionClassificationName]
@@ -188,12 +192,24 @@ function TweenValue:GetValueAt(CurrentTime, Duration)
 
     local Frame = Math.Floor(CurrentTime * self.TargetFramerate + 0.5) -- Access the current frame we are on (e.g. 0.5 seconds through = 30 frames)
     local ComputedPoints = self.ComputedPoints
+    local UniquePoints = ComputedPoints[Duration]
+
+    -- Durations differ, so too will framely caching
+    if UniquePoints then
+        ComputedPoints = UniquePoints
+    else
+        local Points = {}
+        ComputedPoints[Duration] = Points
+        ComputedPoints = Points
+    end
 
     -- Dynamic control points disallow framely caching of interpolated values as they cannot be predicted from here
     if (self.ControlPointsDynamic) then
         return self:Transitioner(self.Points, CurrentTime, Duration, self.TransitionerData)
     elseif (CurrentTime < self.TargetFramerateTime) then -- Low inaccurate times (0.0004 etc) can cause first frame to be cached, so this solves that issue
         return self.Points[1]
+    elseif (CurrentTime == Duration) then
+        return self.Points[2]
     else
         ComputedPoints[Frame] = ComputedPoints[Frame] or self:Transitioner(self.Points, CurrentTime, Duration, self.TransitionerData)
         return ComputedPoints[Frame]

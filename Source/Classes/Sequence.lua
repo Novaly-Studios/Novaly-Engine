@@ -112,9 +112,11 @@ function Sequence:Step(TimeDelta)
     if (self.AutoStop) then
         if (CurrentTime < 0 or CurrentTime > self.Duration) then
             self.Play = false
-            for Animation in Pairs(CurrentAnimations) do
-                Animation.CurrentTime = ClampedTime
-                Animation:Update()
+            for Animation, Update in Pairs(CurrentAnimations) do
+                if Update then
+                    Animation.CurrentTime = (self.Increment > 0 and Animation.Duration or 0)
+                    Animation:Update()
+                end
             end
             if FinishBind then
                 FinishBind(self)

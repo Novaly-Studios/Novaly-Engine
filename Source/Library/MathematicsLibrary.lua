@@ -235,6 +235,22 @@ function Maths.Clamp(Num, Min, Max)
 end
 
 --[[
+    Maths.IsNaN
+]]
+
+function Maths.IsNaN(Number)
+    return Number ~= Number
+end
+
+--[[
+    Maths.IsInf
+]]
+
+function Maths.IsInf(Number)
+    return (Number == Math.Huge or Number == -Math.Huge)
+end
+
+--[[
     Curve.InterpolatePiecewiseCubic
     
     Used for 'joining' cubic spline interpolations together.
