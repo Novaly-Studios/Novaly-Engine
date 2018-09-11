@@ -22,11 +22,9 @@ function Weld.Part(Class, Part0, Part1, C0, C1)
     end
 
     return Weld
-
 end
 
 function Weld.Model(Class, Model, Base, WeldC1)
-
     for Key, Value in Pairs(Model:GetChildren()) do
         if (Value ~= Base and Value:IsA("BasePart")) then
             Weld.WeldPart(Class, Base, Value, Base.CFrame:toObjectSpace(Value.CFrame))

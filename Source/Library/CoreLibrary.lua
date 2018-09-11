@@ -93,32 +93,16 @@ function Core.Count(Array)
     return Count
 end
 
---[[
-    'SimpleUnyieldSequence' Usage:
-    SimpleUnyieldSequence(function()
-        return Workspace:WaitForChild("Abc"), "TestString"
-    end)(function(Result, Str)
-        Print("Yay", Result, Str)
-        Result:Destroy()
-    end)()
-]]
-
-function Core.SimpleUnyieldSequence(InitialFunc)
-    return setmetatable({InitialFunc}, {
-        __call = function(Self, Func)
-            if Func then
-                table.insert(Self, Func)
-                return Self
-            else
-                coroutine.wrap(function()
-                    local Last = {Self[1]()}
-                    for Index = 2, #Self do
-                        Last = Self[Index](unpack(Last))
-                    end
-                end)()
-            end
-        end;
-    })
+-- Should probably update this
+function Core.TypeChain(...)
+    local Result = ""
+    for _, Arg in pairs({...}) do
+        local ArgType = type(Arg)
+        if (not Result:find(ArgType)) then
+            Result = Result .. ArgType
+        end
+    end
+    return Result
 end
 
 --[[
@@ -140,6 +124,77 @@ function Core.With(...)
         end
     end})
 end
+
+--[[
+    'Map' Usage:
+    local New = Map({1, 2, 3}, function(x)
+        return x * 2
+    end)
+]]
+
+function Core.Map(Items, Operator)
+    local Result = {}
+    for _, Item in pairs(Items) do
+        table.insert(Result, Operator(Item))
+    end
+    return Result
+end
+
+--[[
+    'Filter' Usage:
+    local New = Filter({1, 2, 3, 4, 5}, function(x)
+        return x < 4
+    end)
+]]
+
+function Core.Filter(Items, Assess)
+    local Result = {}
+    for Key, Item in pairs(Items) do
+        if (Assess(Item, Key)) then
+            table.insert(Result, Item)
+        end
+    end
+    return Result
+end
+
+--[[
+    'Range' Usage:
+    local Test = Range(-3, 3)
+]]
+
+function Core.Range(Start, End)
+    local Result = {}
+    for Index = Start, End do
+        Result[Index] = Index
+    end
+    return Result
+end
+
+--[[
+    'Reduce' Usage:
+    local Sample = {1, 2, 3}
+    local Average = Reduce(Sample, function(Total, New, Index, Count, Final)
+        return (Final and (Total + New) / Count or Total + New)
+    end)
+    local Sum = Reduce(Sample, function(Total, New)
+        return Total + New
+    end)
+    print(Sum, Average)
+]]
+
+function Core.Reduce(Item, Operator)
+    local Result = Item[1] - Item[1]
+    local Count = #Item
+    for Index = 1, Count do
+        Result = Operator(Result, Item[Index], Index, Count, Index == Count)
+    end
+    return Result
+end
+
+--[[
+    'Cart' Usage:
+    (todo)
+]]
 
 for Index = 1, #SvcLoad do
     local Value = SvcLoad[Index]

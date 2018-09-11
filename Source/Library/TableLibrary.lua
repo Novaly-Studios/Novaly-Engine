@@ -38,19 +38,36 @@ function Table.ShallowClone(Array)
     return Result
 end
 
-function Table.PrintTable(Arr, Layer)
-    local Layer = Layer or 1
-    local Tab = ("    "):rep(Layer)
-    if Layer == 1 then
-        print("Base Table = " .. tostring(Arr))
-    end
-    for Key, Value in pairs(Arr) do
-        if type(Value) == "table" then
-            print(Tab .. Key .. " (Table) = " .. tostring(Value))
-            Table.PrintTable(Value, Layer + 1)
+function Table.PrintTable(Item, Tabs)
+
+    local Tabs = Tabs or (function()
+        print("BaseTable = {")
+        return "\t"
+    end)()
+
+    for Key, Value in pairs(Item) do
+
+        local ValueType = type(Value)
+        local KeyType = type(Key)
+
+        if (KeyType == "number") then
+            Key = ""
         else
-            print(Tab .. Key .. " = " .. tostring(Value))
+            Key = Key .. " = "
         end
+
+        if (ValueType == "table") then
+            print(Tabs .. Key .. "{")
+            Table.PrintTable(Value, Tabs .. "\t")
+            print(Tabs .. "};")
+        else
+            local Encapsulation = (ValueType == "string" and string.format("\"%s\"", Value) or tostring(Value))
+            print(Tabs .. Key .. Encapsulation .. ";")
+        end
+    end
+
+    if (Tabs == "\t") then
+        print("};")
     end
 end
 
@@ -154,18 +171,6 @@ end
 function Table.Capitalise(Array)
     for Key, Value in pairs(Array) do
         Array[Key:sub(1, 1):upper() .. Key:sub(2)] = Value
-    end
-end
-
-function Table.ApplyKeyMapping(Array, Append)
-    for Key, Value in pairs(Append) do
-        Array[Value] = Array[Key]
-    end
-end
-
-function Table.ApplyValueMapping(Array, Append)
-    for Key, Value in pairs(Append) do
-        Array[Key] = Array[Value]
     end
 end
 
