@@ -1,9 +1,7 @@
-local Func = require(game:GetService("ReplicatedStorage").Novarine)
-setfenv(1, Func())
+shared()
+Core = {}
 
-local 
-
-Func({
+shared({
     Client = Core;
     Server = Core;
 })

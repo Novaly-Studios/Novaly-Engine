@@ -7,8 +7,7 @@
     wrapped.
 ]]
 
-local Func = require(game:GetService("ReplicatedStorage").Novarine)
-setfenv(1, Func())
+shared()
 
 local Replication                   = {Binds = {}, Access = {}}
 local ReplicatedData                = {} -- Data replicated between client and server
@@ -248,7 +247,7 @@ function SharedData.Append(Elements)
     end
 end
 
-Func({
+shared({
     Client = {ReplicatedData = ReplicatedData, SharedData = SharedData, Replication = Replication, Init = ClientInit};
     Server = {ReplicatedData = ReplicatedData, SharedData = SharedData, Replication = Replication, Init = ServerInit};
 })

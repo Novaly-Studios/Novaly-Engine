@@ -1,5 +1,4 @@
-local Func = require(game:GetService("ReplicatedStorage").Novarine)
-setfenv(1, Func())
+shared()
 
 -- Todo: reporting to Novaly servers, error detection
 
@@ -9,7 +8,7 @@ function Log.Log(Level, Str)
     Print(("\t"):rep(Level) .. Str)
 end
 
-Func({
+shared({
     Client = Log;
     Server = Log;
 })

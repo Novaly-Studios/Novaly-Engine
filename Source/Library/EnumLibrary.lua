@@ -1,5 +1,4 @@
-local Func = require(game:GetService("ReplicatedStorage").Novarine)
-setfenv(1, Func())
+shared()
 
 local Enums = SetMetatable({}, {__index = OriginalEnv["Enum"]})
 
@@ -18,7 +17,7 @@ function Enums:NewCollection(Name, Values)
     return Enums
 end
 
-Func({
+shared({
     Client = {Enum = Enums};
     Server = {Enum = Enums};
 })

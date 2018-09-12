@@ -1,5 +1,4 @@
-local Func = require(game:GetService("ReplicatedStorage").Novarine)
-setfenv(1, Func())
+shared()
 
 local Sequencer = {
     Sequences       = {};
@@ -60,7 +59,7 @@ function ClientInit()
     end
 end
 
-Func({
+shared({
     Client = {Sequencer = Sequencer, Init = ClientInit};
     Server = {};
 })

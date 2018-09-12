@@ -1,4 +1,4 @@
-setfenv(1, require(game:GetService("ReplicatedStorage").Novarine)())
+shared()
 
 local LensFlare = Class:FromName(script.Name)
 

@@ -1,8 +1,8 @@
-setfenv(1, require(game:GetService("ReplicatedStorage").Novarine)())
+shared()
 
 local UnyieldSequence = Class:FromName(script.Name)
 
-function UnyieldSequence.New(StatusFunction)
+function UnyieldSequence:UnyieldSequence(StatusFunction)
     return {
         Actions = {StatusFunction};
         Fail    = nil;

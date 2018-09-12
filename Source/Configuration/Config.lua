@@ -1,5 +1,4 @@
-local Func = require(game:GetService("ReplicatedStorage").Novarine)
-setfenv(1, Func())
+shared()
 
 --[[
     Prefixes:
@@ -11,7 +10,7 @@ setfenv(1, Func())
     _ - Global
 --]]
 
-Config = {
+local Config = {
 
     _TargetFramerate = 60;
 
@@ -32,9 +31,4 @@ Config = {
     rKey = "Vars"; -- Todo
 }
 
-Func({
-    Client = {CONFIG = Config};
-    Server = {CONFIG = Config};
-})
-
-return true
+return Config

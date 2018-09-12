@@ -1,5 +1,4 @@
-local Func = require(game:GetService("ReplicatedStorage").Novarine)
-setfenv(1, Func())
+shared()
 
 local SvcLoad           = {
     "Players";
@@ -214,7 +213,7 @@ Core.Svc = setmetatable({}, {
     end;
 })
 
-Func({
+shared({
     Client = Core;
     Server = Core;
 })

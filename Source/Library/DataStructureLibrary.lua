@@ -1,5 +1,4 @@
-local Func = require(game:GetService("ReplicatedStorage").Novarine)
-setfenv(1, Func())
+shared()
 
 local DataStructures    = {
     TypeVar             = "TYPE";
@@ -158,7 +157,7 @@ function DataStructures:CanBuild(TypeName)
     return (self.BuildFunctions[TypeName] == nil and false or true)
 end
 
-Func({
+shared({
     Client = {DataStructures = DataStructures};
     Server = {DataStructures = DataStructures};
 })

@@ -1,4 +1,4 @@
-setfenv(1, require(game:GetService("ReplicatedStorage").Novarine)())
+shared()
 
 local TweenValue = Class:FromName(script.Name) {
     SingleTransition        = {}; -- Transitions over a defined table of control points

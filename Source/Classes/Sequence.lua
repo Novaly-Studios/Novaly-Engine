@@ -1,4 +1,4 @@
-setfenv(1, require(game:GetService("ReplicatedStorage").Novarine)())
+shared()
 
 local CHECK_ANIMATION_TYPE = "Animation"
 local Sequence = Class:FromName(script.Name)

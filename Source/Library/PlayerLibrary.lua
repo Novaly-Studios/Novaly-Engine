@@ -1,5 +1,4 @@
-local Func = require(game:GetService("ReplicatedStorage").Novarine)
-setfenv(1, Func())
+shared()
 
 local Version                   = CONFIG.pVersion
 local PlayerData                = {}
@@ -178,7 +177,7 @@ end
 Client.PlayerDataManagement.WaitForItem = WaitForItem
 Server.PlayerDataManagement.WaitForItem = WaitForItem
 
-Func({
+shared({
     Client = Client;
     Server = Server;
 })

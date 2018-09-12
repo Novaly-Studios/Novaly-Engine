@@ -1,5 +1,4 @@
-Func = require(game:GetService("ReplicatedStorage").Novarine)
-setfenv(1, Func())
+shared()
 
 local Graphics                  = {
     EffectSequences             = {};
@@ -274,7 +273,7 @@ function Graphics:RegisterFlare(Collection)
     Graphics.LensFlareItems[#Graphics.LensFlareItems + 1] = Collection
 end
 
-Func({
+shared({
     Client = {Graphics = Graphics, Init = ClientInit};
     Server = {};
 })

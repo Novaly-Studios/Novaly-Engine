@@ -1,4 +1,4 @@
-setfenv(1, require(game:GetService("ReplicatedStorage").Novarine)())
+shared()
 
 local Hierarchy = Class:FromName("Hierarchy") {
     PropertySet = "H_PropertySet";

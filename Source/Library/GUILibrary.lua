@@ -1,5 +1,4 @@
-local Func = require(game:GetService("ReplicatedStorage").Novarine)
-setfenv(1, Func())
+shared()
 
 local GUI = {
     OverStatusObjects = {};
@@ -155,7 +154,7 @@ function GUI:GetMouseOverIndicator(Button, MouseEnterFunc, MouseLeaveFunc)
     end
 end
 
-Func({
+shared({
     Client = {GUI = GUI};
     Server = {};
 })

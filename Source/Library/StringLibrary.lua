@@ -1,5 +1,4 @@
-local Func = require(game:GetService("ReplicatedStorage").Novarine)
-setfenv(1, Func())
+shared()
 
 local String = setmetatable({}, {__index = OriginalEnv["string"]})
 
@@ -126,7 +125,7 @@ end
 
 Table.ApplyKeyMapping(String, Mappings)
 
-Func({
+shared({
     Client = {string = String, String = String};
     Server = {string = String, String = String};
 })

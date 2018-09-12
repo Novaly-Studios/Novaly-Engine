@@ -1,5 +1,4 @@
-local Func = require(game:GetService("ReplicatedStorage").Novarine)
-setfenv(1, Func())
+shared()
 
 local InputLibrary = {
     Keys        = {};
@@ -118,7 +117,7 @@ function InputLibrary:UnblockInput(Name)
     ContextActionService:UnbindAction(Name)
 end
 
-Func({
+shared({
     Client = {InputLibrary = InputLibrary, Init = ClientInit};
     Server = {};
 })

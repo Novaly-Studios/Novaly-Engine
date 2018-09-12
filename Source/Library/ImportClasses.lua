@@ -1,5 +1,4 @@
-local Func = require(game:GetService("ReplicatedStorage").Novarine)
-setfenv(1, Func())
+shared()
 
 local Structures = {}
 local ClassItems = Classes:GetChildren()
@@ -24,7 +23,7 @@ for Item = 1, #ClassItems do
     Structures.ImportClass(Item, Name)
 end
 
-Func({
+shared({
     Client = Structures;
     Server = Structures;
 })

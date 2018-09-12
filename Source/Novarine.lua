@@ -1,10 +1,20 @@
 local ReplicatedStorage     = game:GetService("ReplicatedStorage")
+local ServerScriptService   = game:GetService("ServerScriptService")
+local StarterPlayer         = game:GetService("StarterPlayer")
+local StarterGui            = game:GetService("StarterGui")
 local RunService            = game:GetService("RunService")
 
 local Server                = RunService:IsServer()
 local Library               = ReplicatedStorage.Library
+local ConfigFolder          = ReplicatedStorage.Configuration
+local LoadOrder             = require(ConfigFolder.LoadOrder)
+
+local Indicator             = Server and "Server" or "Client"
+local TargetName            = string.format("%sGameLoader", Indicator)
 
 local Loaded                = false
+
+local CachedEnvironments    = {}
 
 local Environment           = {}
 local EnvironmentMT         = {
@@ -26,6 +36,12 @@ Environment["Classes"]          = ReplicatedStorage.Classes
 Environment["Assets"].Name      = "Assets"
 Environment["OriginalEnv"]      = getfenv()
 
+local function MapEnv(Target)
+    for Key, Value in pairs(Environment) do
+        Target[Key] = Value
+    end
+end
+
 local function AddPlugin(Plugin)
     
     local Object = (Server and Plugin.Server or Plugin.Client)
@@ -42,25 +58,44 @@ local function AddPlugin(Plugin)
             Environment[Key] = Value
         end
     end
-end
 
-return function(Value)
-
-    if Value then
-        local TypeStr = type(Value)
-        if (TypeStr == "string") then
-            if (Value:lower() == "wait") then
-                while (Loaded == false) do
-                    wait()
-                end
-            elseif (Value:lower() == "complete") then
-                Loaded = true
-            end
-        elseif (TypeStr == "table") then
-            AddPlugin(Value)
-            return
-        end
+    for _, Env in pairs(CachedEnvironments) do
+        MapEnv(Env)
     end
-
-    return setmetatable({getfenv(0)}, EnvironmentMT)
 end
+
+setmetatable(shared, {
+    __call = function(Self, Value)
+
+        if Value then
+            local ValueType = type(Value)
+            if (ValueType == "table") then
+                AddPlugin(Value)
+                return
+            end
+        end
+
+        local Target = getfenv(0)
+        MapEnv(Target)
+        table.insert(CachedEnvironments, Target)
+    end;
+})
+
+Environment["CONFIG"] = require(ConfigFolder.Config)
+
+for Key, Value in pairs(LoadOrder) do
+    local Library = ReplicatedStorage.Library:FindFirstChild(Value)
+    if Library then
+        local Now = tick()
+        require(Library)
+        print("[Load Order " .. Key .. "] Library: " .. Library.Name .. " Loaded on " .. Indicator ..
+            " (" .. ("%.2f"):format((tick() - Now) * 1000) .. "ms)")
+    end
+end
+
+require(ReplicatedStorage:FindFirstChild(TargetName, true) or
+        ServerScriptService:FindFirstChild(TargetName, true) or
+        StarterPlayer:FindFirstChild(TargetName, true) or
+        StarterGui:FindFirstChild(TargetName, true))
+
+return true

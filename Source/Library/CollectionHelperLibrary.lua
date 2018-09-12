@@ -1,5 +1,4 @@
-local Func = require(game:GetService("ReplicatedStorage").Novarine)
-setfenv(1, Func())
+shared()
 
 local CollectionHelper = {}
 
@@ -82,7 +81,7 @@ function CollectionHelper:GetFirstTagged(Tag)
     return CollectionService:GetTagged(Tag)[1]
 end
 
-Func({
+shared({
     Client = {CollectionHelper = CollectionHelper};
     Server = {CollectionHelper = CollectionHelper};
 })

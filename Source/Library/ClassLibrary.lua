@@ -1,5 +1,4 @@
-local Func = require(game:GetService("ReplicatedStorage").Novarine)
-setfenv(1, Func())
+shared()
 
 local Class = {
     NameKey             = "ClassName";
@@ -90,8 +89,7 @@ function Class:IsEquivalentType(Subject, CheckSuperclass)
     return false
 end
 
-
-Func({
+shared({
     Client = {Class = Class};
     Server = {Class = Class};
 })

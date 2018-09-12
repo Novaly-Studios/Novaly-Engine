@@ -1,5 +1,4 @@
-local Func = require(game:GetService("ReplicatedStorage").Novarine)
-setfenv(1, Func())
+shared()
 
 local Maths = setmetatable({}, {__index = OriginalEnv["math"]})
 
@@ -371,7 +370,7 @@ Maths["Tau"]            = 2 * Maths.PI
 
 Final = {math = Maths, Math = Maths, Curve = Curve}
 
-Func({
+shared({
     Client = Final;
     Server = Final;
 })

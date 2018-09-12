@@ -1,5 +1,4 @@
-local Func = require(game:GetService("ReplicatedStorage").Novarine)
-setfenv(1, Func())
+shared()
 
 local Geometry = {}
 
@@ -32,7 +31,7 @@ function Geometry:StripAxis(Point, ClassRef, ...)
     return ClassRef.new(Unpack(Args))
 end
 
-Func({
+shared({
     Client = {Geometry = Geometry};
     Server = {Geometry = Geometry};
 })

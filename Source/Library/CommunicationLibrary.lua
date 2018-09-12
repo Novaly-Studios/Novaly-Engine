@@ -1,5 +1,4 @@
-local Func = require(game:GetService("ReplicatedStorage").Novarine)
-setfenv(1, Func())
+shared()
 
 local Mutual            = {}
 local Client            = {}
@@ -145,7 +144,7 @@ for Key, Value in Pairs(Mutual) do
     Server[Key] = Value
 end
 
-Func({
+shared({
     Client = Client;
     Server = Server;
 })

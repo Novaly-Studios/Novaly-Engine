@@ -1,5 +1,4 @@
-local Func = require(game:GetService("ReplicatedStorage").Novarine)
-setfenv(1, Func())
+shared()
 
 local Coroutine = SetMetatable({}, {__index = OriginalEnv["coroutine"]})
 
@@ -14,7 +13,7 @@ local Mappings = {
 
 Table.ApplyKeyMapping(Coroutine, Mappings)
 
-Func({
+shared({
     Client = {coroutine = Coroutine, Coroutine = Coroutine};
     Server = {coroutine = Coroutine, Coroutine = Coroutine};
 })

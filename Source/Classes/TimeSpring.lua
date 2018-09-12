@@ -1,4 +1,6 @@
-setfenv(1, require(game:GetService("ReplicatedStorage").Novarine)())
+print(11112222, script:GetFullName(), script.Name)
+shared()
+print(22223333, script:GetFullName(), script.Name)
 
 local TimeSpring = Class:FromName(script.Name)
 local Euler = 2.7182818284590452353602875
@@ -24,7 +26,7 @@ function TimeSpring:TimeSpring(Properties)
 
     return Object
 end
- 
+
 function TimeSpring:UpdateAt(CurrentTime)
 
     local Damping       = self.Damping

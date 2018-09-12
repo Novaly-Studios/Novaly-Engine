@@ -1,5 +1,4 @@
-local Func = require(game:GetService("ReplicatedStorage").Novarine)
-setfenv(1, Func())
+shared()
 
 local Weld = {}
 
@@ -36,7 +35,7 @@ end
 Weld.WeldModel = Weld.Model
 Weld.WeldPart = Weld.Part
 
-Func({
+shared({
     Client = {Weld = Weld};
     Server = {Weld = Weld};
 })

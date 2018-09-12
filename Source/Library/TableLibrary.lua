@@ -1,5 +1,4 @@
-local Func = require(game:GetService("ReplicatedStorage").Novarine)
-setfenv(1, Func())
+shared()
 
 local Table = setmetatable({}, {__index = OriginalEnv["table"]})
 
@@ -157,6 +156,18 @@ function Table.ProtectedForeachI(Arr, Func)
     end
 end
 
+function Table.ApplyKeyMapping(Array, Append)
+    for Key, Value in pairs(Append) do
+        Array[Value] = Array[Key]
+    end
+end
+
+function Table.ApplyValueMapping(Array, Append)
+    for Key, Value in pairs(Append) do
+        Array[Key] = Array[Value]
+    end
+end
+
 function Table.ApplyTemplate(Previous, Template)
     for Key, Value in pairs(Template) do
         local Target = Previous[Key]
@@ -205,7 +216,7 @@ end
 
 Table.ApplyKeyMapping(Table, Mappings)
 
-Func({
+shared({
     Client = {table = Table, Table = Table};
     Server = {table = Table, Table = Table};
 })

@@ -1,4 +1,5 @@
-setfenv(1, require(game:GetService("ReplicatedStorage").Novarine)())
+shared()
+
 local LinkedList = Class:FromName(script.Name)
 
 function LinkedList:LinkedList()

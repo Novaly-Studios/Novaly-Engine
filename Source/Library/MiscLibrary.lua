@@ -1,5 +1,4 @@
-local Func = require(game:GetService("ReplicatedStorage").Novarine)
-setfenv(1, Func())
+shared()
 
 local Misc = {}
 
@@ -18,7 +17,7 @@ function Misc:TableFromTreeValues(Root)
     return Result
 end
 
-Func({
+shared({
     Client = {Misc = Misc};
     Server = {Misc = Misc};
 })
