@@ -1,3 +1,0 @@
-shared()
-
-return true
