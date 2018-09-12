@@ -191,9 +191,76 @@ function Core.Reduce(Item, Operator)
 end
 
 --[[
-    'Cart' Usage:
-    (todo)
+    'GetNaryLoop' Usage:
+    GetNaryLoop({1, 10}, {1, 10}, {1, 10})(function(Iters)
+        local a, b, c = Iters[1], Iters[2], Iters[3]
+        print(a, b, c)
+    end)
+
+
+    Equivalent to...
+    for a = 1, 10 do
+        for b = 1, 10 do
+            for c = 1, 10 do
+                print(a, b, c)
+            end
+        end
+    end
 ]]
+
+function Core.GetNaryLoop(Bounds)
+
+    local Recursive
+    local Loops = #Bounds
+    local IterValues = {}
+
+    function Recursive(Run, Level)
+
+        local Level = Level or 1
+        local TargetBounds = Bounds[Level]
+
+        if (Level > Loops) then
+            Run(IterValues)
+        else
+            for Iter = TargetBounds[1], TargetBounds[2] do
+                IterValues[Level] = Iter
+                Recursive(Run, Level + 1)
+            end
+        end
+    end
+
+    return Recursive
+end
+
+--[[
+    'Product' Usage:
+    local Subjects = {
+        {1, 2, 3};
+        {"x", "y"};
+        {3000};
+    }
+    local Combos = Product(Subjects)
+]]
+
+function Core.Product(Sample)
+
+    local Ranges = {}
+    local Pairings = {}
+
+    for Index, Value in pairs(Sample) do
+        Ranges[Index] = {1, #Value}
+    end
+
+    Core.GetNaryLoop(Ranges)(function(Chain)
+        local Pairing = {}
+        for Index = 1, #Chain do
+            table.insert(Pairing, Sample[Index][Chain[Index]])
+        end
+        table.insert(Pairings, Pairing)
+    end)
+
+    return Pairings
+end
 
 for Index = 1, #SvcLoad do
     local Value = SvcLoad[Index]
