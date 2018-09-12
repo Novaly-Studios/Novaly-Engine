@@ -1,0 +1,2 @@
+shared()
+return true
