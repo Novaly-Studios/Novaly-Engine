@@ -19,6 +19,8 @@ local Config = {
 
     gEnableGraphics = true;
     gEnableLensFlare = true;
+    gTransparentPartsPerFrame = 15;
+    gModelsPerFrame = 30;
 
     sConditionalTimeTolerance = 1 / 60;
 

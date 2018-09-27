@@ -24,7 +24,7 @@ function OperationQueue:Next(Count)
 
     for Iter = 1, Count or 1 do
         if (Queue:PeekFirst()) then
-            Coroutine.Wrap(Handler)(Queue:Next(), Queue, Iter)
+            Handler(Queue:Next(), Queue, Iter)
         else
             return true
         end

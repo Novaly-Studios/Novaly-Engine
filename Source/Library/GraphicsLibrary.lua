@@ -1,27 +1,18 @@
 shared()
 
 local Graphics                  = {
+    Tags = {
+        TransparentPart         = "Graphics:TransparentPart";
+        Model                   = "Graphics:Model";
+    };
     EffectSequences             = {};
     LensFlareItems              = {};
     SurfaceBillboards           = {};
+    TransparentParts            = {};
     HalfHorizontalFoV           = 0;
     AspectRatio                 = 0;
     EffectsEnabled              = true;
-}
-
-function Graphics:NewRenderWait(Func, WaitFunc)
-
-    WaitFunc = WaitFunc or SteppedWait
-
-    Coroutine.Wrap(function()
-        while true do
-            if (Graphics.EffectsEnabled) then
-                Func()
-            end
-            WaitFunc()
-        end
-    end)()
-end
+};
 
 function Graphics:UpdateScreenValues()
 
@@ -74,33 +65,6 @@ function Graphics:TweenEffect(Item, Property, To, Time, Style, Wait)
     if Wait then
         TweenSequence:Wait()
     end
-
-    --[[if (Sequence:Exists(SequenceName)) then
-        Sequence:Delete(SequenceName)
-    end
-
-    Sequence:New(SequenceName, Time)
-    Sequence:NewAnim(
-        SequenceName,
-        Enum.AnimationType.TwoPoint,
-        Enum.AnimationControlPointState.Static,
-        0,
-        Item,
-        Property,
-        {
-            Item[Property];
-            To;
-        },
-        Style,
-        Time
-    )
-    Sequence:Start(SequenceName)
-
-    if Wait then
-        Sequence:Wait(SequenceName)
-    end]]
-
-
 end
 
 function Graphics:DetectPlayer()
@@ -185,6 +149,43 @@ function Graphics:RegisterSurfaceBillboard(Item)
     Table.Insert(self.SurfaceBillboards, Item)
 end
 
+function Graphics:HandlePartTransparency(Item)
+    if Item then
+        local SettingsFolder = Item:FindFirstChild("Settings")
+        if SettingsFolder then
+            local Settings = Misc:TableFromTreeValues(SettingsFolder)
+            local MinDist, MaxDist, InitialTransparency, ChangedTransparency = Settings.MinDist, Settings.MaxDist, Settings.InitialTransparency, Settings.ChangedTransparency
+            if (MinDist and MaxDist and InitialTransparency and ChangedTransparency) then
+                if (Item:IsA("Part")) then
+                    Item.Transparency = Math.Lerp(InitialTransparency, ChangedTransparency, Math.Clamp(
+                        ((Graphics.Camera.CFrame.p - Item.Position).magnitude - MinDist) / (MaxDist - MinDist)
+                    , 0, 1))
+                end
+            end
+        end
+    end
+end
+
+function Graphics:HandleModel(Item)
+    if Item then
+        local SettingsFolder = Item:FindFirstChild("Settings")
+        if SettingsFolder then
+            local MaxDist = SettingsFolder:FindFirstChild("MaxDist")
+            if MaxDist then
+                local MaxDist = MaxDist.Value
+                for _, Object in Pairs(Item:GetDescendants()) do
+                    if (Object:IsA("BasePart")) then
+                        local OriginalTransparency = Object:FindFirstChild("OriginalTransparency")
+                        if OriginalTransparency then
+                            Object.Transparency = ((Graphics.Camera.CFrame.p - Item.Position).magnitude > MaxDist and 1 or OriginalTransparency.Value)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+
 function ClientInit()
 
     if (CONFIG.gEnableGraphics == false) then
@@ -201,6 +202,14 @@ function ClientInit()
     local Tint = Instance.new("ColorCorrectionEffect", Lighting)
     local SunRays = Instance.new("SunRaysEffect", Lighting)
 
+    local TransparentPartHandler = OperationTable.New(function(Part)
+        Graphics:HandlePartTransparency(Part)
+    end)
+
+    --[[local ModelHandler = OperationTable.New(function(Model)
+        Graphics:HandleModel(Model)
+    end)]]
+
     Blur.Size           = 0
     Bloom.Intensity     = 0
     SunRays.Intensity   = 0.03
@@ -211,7 +220,7 @@ function ClientInit()
     Graphics.Tint       = Tint
     Graphics.SunRays    = SunRays
     
-    Graphics.Camera = workspace.CurrentCamera
+    Graphics.Camera = Workspace.CurrentCamera
     Graphics.UpdateScreenValues()
 
     Graphics.AnimateItems   = {
@@ -233,9 +242,42 @@ function ClientInit()
         Graphics.GraphicsGui = GraphicsGui
     end
 
-    Graphics:NewRenderWait(Graphics.UpdateLensFlares)
-    Graphics:NewRenderWait(Graphics.UpdateBillboards)
-    Graphics:NewRenderWait(Graphics.DetectPlayer, Wait)
+    local function Clean(_, Value)
+        return not Value
+    end
+
+    RunService.Heartbeat:Connect(function(Step)
+        local PartIters = Math.Floor(CONFIG.gTransparentPartsPerFrame * CONFIG._TargetFramerate / (1 / Step))
+        local ModelIters = Math.Floor(CONFIG.gModelsPerFrame * CONFIG._TargetFramerate / (1 / Step))
+        Graphics:UpdateLensFlares()
+        Graphics:UpdateBillboards()
+        TransparentPartHandler:Next(PartIters)
+        TransparentPartHandler:Clean(Clean, PartIters)
+        --[[ModelHandler:Next(ModelIters)
+        ModelHandler:Clean(Clean, ModelIters)]]
+    end)
+
+    Coroutine.Wrap(function()
+        while Wait(1/15) do
+            Graphics:DetectPlayer()
+        end
+    end)
+
+    CollectionService:GetInstanceAddedSignal(Graphics.Tags.TransparentPart):Connect(function(Part)
+        TransparentPartHandler:Add(Part)
+    end)
+
+    for _, Part in Pairs(CollectionService:GetTagged(Graphics.Tags.TransparentPart)) do
+        TransparentPartHandler:Add(Part)
+    end
+
+    --[[CollectionService:GetInstanceAddedSignal(Graphics.Tags.Model):Connect(function(Part)
+        ModelHandler:Add(Part)
+    end)
+
+    for _, Part in Pairs(CollectionService:GetTagged(Graphics.Tags.Model)) do
+        ModelHandler:Add(Part)
+    end]]
 
     Graphics.Camera.Changed:Connect(function(Property)
         if (Property == "ViewportSize" or Property == "FieldOfView") then
@@ -245,6 +287,30 @@ function ClientInit()
 
     GraphicsGui.Name = "GraphicsGui"
     LensFlareFrame.Name = "LensFlareFrame"
+end
+
+function ServerInit()
+    Coroutine.Wrap(function()
+        for Index, Part in Pairs(CollectionService:GetTagged(Graphics.Tags.TransparentPart)) do
+            local Settings = Part:FindFirstChild("Settings")
+            if Settings then
+                Settings.InitialTransparency.Value = Part.Transparency
+            end
+            if (Index % 50 == 0) then
+                Wait()
+            end
+        end
+        --[[for Index, Model in Pairs(CollectionService:GetTagged(Graphics.Tags.Model)) do
+            for _, Object in Pairs(Model:GetDescendants()) do
+                if (Object:IsA("BasePart")) then
+                    Object.
+                end
+            end
+            if (Index % 50 == 0) then
+                Wait()
+            end
+        end]]
+    end)()
 end
 
 function Graphics:IsVisible(Subject, Target, Tolerance)
@@ -275,7 +341,7 @@ end
 
 shared({
     Client = {Graphics = Graphics, Init = ClientInit};
-    Server = {};
+    Server = {Init = ServerInit};
 })
 
 return true

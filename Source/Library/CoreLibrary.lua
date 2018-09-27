@@ -7,6 +7,7 @@ local SvcLoad           = {
     "StarterGui";
     "RunService";
     "AssetService";
+    "PhysicsService";
     "TeleportService";
     "DataStoreService";
     "UserInputService";
@@ -197,7 +198,6 @@ end
         print(a, b, c)
     end)
 
-
     Equivalent to...
     for a = 1, 10 do
         for b = 1, 10 do
@@ -260,6 +260,28 @@ function Core.Product(Sample)
     end)
 
     return Pairings
+end
+
+--[[
+    'Switch' Usage:
+    Switch("Abc") {
+        Xyz = function() print'Xyz' end;
+        Abc = function() print'Abc' end;
+        Def = function() print'Def' end;
+    }
+]]
+
+function Core.Switch(Value)
+    return function(Cases)
+        local Target = Cases[Value] or Cases["Default"]
+        local Final = Cases["Finally"]
+        if Target then
+            Target()
+        end
+        if Final then
+            Final()
+        end
+    end
 end
 
 for Index = 1, #SvcLoad do

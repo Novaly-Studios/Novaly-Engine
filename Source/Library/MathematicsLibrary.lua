@@ -310,6 +310,28 @@ function Maths.PiecewiseInterpolate(Points, InterpolateFunction, DefaultArgs, Cu
 end
 
 --[[
+    Maths.AngleDist
+
+    Returns the shortest distance between two angles
+]]
+
+function Maths.AngleDist(Angle0, Angle1)
+    local Max = Math.PI * 2
+    local DiffAngle = (Angle1 - Angle0) % Max
+    return 2 * DiffAngle % Max - DiffAngle
+end
+
+--[[
+    Maths.AngleLerp
+
+    Linearly interpolates an angle across the shortest path
+]]
+
+function Maths.AngleLerp(Angle0, Angle1, Factor)
+    return Angle0 + Maths.AngleDist(Angle0, Angle1) * Factor
+end
+
+--[[
     Curve.InterpolateBezier
     
     Interpolates down a bezier curve.

@@ -15,12 +15,12 @@ return
     "DataStructureLibrary";
     "CommunicationLibrary";
     "SequenceLibrary";
+    "MiscLibrary";
     "GraphicsLibrary";
     "GUILibrary";
     "ReplicationLibrary";
     "PlayerLibrary";
     "WeldLibrary";
     "CollectionHelperLibrary";
-    "MiscLibrary";
     "InputLibrary";
 };

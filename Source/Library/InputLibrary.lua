@@ -7,7 +7,8 @@ local InputLibrary = {
     Mouse       = {
         IgnoreTag   = {};
         Ignore      = {};
-        Pos         = nil;
+        Pos         = Vector3.new(0, 0, 0);
+        XY          = Vector2.new(0, 0);
         Target      = nil;
         Dist        = 300;
     };
@@ -48,11 +49,7 @@ function ClientInit()
 
     UserInputService.InputChanged:Connect(function(Input, GameProcessed)
         if (Input.UserInputType == Enum.UserInputType.MouseMovement) then
-            local XY = Input.Position
-            local MouseRay = Graphics.Camera:ScreenPointToRay(XY.X + 0.5, XY.Y + 0.5)
-            local Hit, Pos, Normal = Workspace:FindPartOnRayWithIgnoreList(Ray.new(MouseRay.Origin, MouseRay.Direction * Mouse.Dist), Mouse.Ignore)
-            Mouse.Target = Hit
-            Mouse.Pos = Pos
+            Mouse.XY = Input.Position
         end
     end)
 
@@ -72,6 +69,19 @@ function ClientInit()
             Button1Up:Fire()
         end
     end)
+
+    RunService:BindToRenderStep("MouseInput", Enum.RenderPriority.Input.Value + 1, function()
+        InputLibrary:UpdateMouse()
+    end)
+end
+
+function InputLibrary:UpdateMouse()
+    local Mouse = self.Mouse
+    local XY = Mouse.XY
+    local MouseRay = Graphics.Camera:ScreenPointToRay(XY.X + 0.5, XY.Y + 0.5)
+    local Hit, Pos, Normal = Workspace:FindPartOnRayWithIgnoreList(Ray.new(MouseRay.Origin, MouseRay.Direction * Mouse.Dist), Mouse.Ignore)
+    Mouse.Target = Hit
+    Mouse.Pos = Pos
 end
 
 function InputLibrary:AddMouseIgnoreTag(Tag)

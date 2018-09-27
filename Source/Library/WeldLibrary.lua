@@ -24,9 +24,32 @@ function Weld.Part(Class, Part0, Part1, C0, C1)
 end
 
 function Weld.Model(Class, Model, Base, WeldC1)
-    for Key, Value in Pairs(Model:GetChildren()) do
+    for _, Value in Pairs(Model:GetChildren()) do
         if (Value ~= Base and Value:IsA("BasePart")) then
-            Weld.WeldPart(Class, Base, Value, Base.CFrame:toObjectSpace(Value.CFrame))
+            Weld.Part(Class, Base, Value, Base.CFrame:toObjectSpace(Value.CFrame))
+        end
+    end
+end
+
+function Weld.ConstrainPart(Part0, Part1)
+    local Constraint = Instance.new("WeldConstraint", Part0)
+    Constraint.Part0 = Part0
+    Constraint.Part1 = Part1
+    return Constraint
+end
+
+function Weld.ConstrainModel(Model, Base)
+    for _, Value in Pairs(Model:GetChildren()) do
+        if (Value ~= Base and Value:IsA("BasePart")) then
+            Weld.ConstrainPart(Base, Value)
+        end
+    end
+end
+
+function Weld.ConstrainModelRecursive(Model, Base)
+    for _, Value in Pairs(Model:GetDescendants()) do
+        if (Value ~= Base and Value:IsA("BasePart")) then
+            Weld.ConstrainPart(Base, Value)
         end
     end
 end
