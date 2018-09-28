@@ -183,9 +183,9 @@ end
 ]]
 
 function Core.Reduce(Item, Operator)
-    local Result = Item[1] - Item[1]
+    local Result = Item[1]
     local Count = #Item
-    for Index = 1, Count do
+    for Index = 2, Count do
         Result = Operator(Result, Item[Index], Index, Count, Index == Count)
     end
     return Result
