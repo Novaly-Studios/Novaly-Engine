@@ -57,7 +57,7 @@ local function AddPlugin(Plugin)
 end
 
 setmetatable(shared, {
-    __call = function(_, Value)
+    __call = function(self, Value)
 
         if Value then
             local ValueType = type(Value)

@@ -116,7 +116,7 @@ end
 
 function Core.With(...)
     local Items = {...}
-    return setmetatable({}, {__call = function(Self, Append)
+    return setmetatable({}, {__call = function(self, Append)
         for _, Item in pairs(Items) do
             for Key, Value in pairs(Append) do
                 Item[Key] = Value
@@ -294,11 +294,11 @@ for Key, Value in pairs(NameSubstitutes) do
 end
 
 Core.Svc = setmetatable({}, {
-    __index = function(Self, Key)
+    __index = function(self, Key)
         return game:GetService(Key)
     end;
-    __call = function(Self, Key)
-        return Self[Key]
+    __call = function(self, Key)
+        return self[Key]
     end;
 })
 

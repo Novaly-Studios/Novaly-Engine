@@ -17,16 +17,16 @@ local CWrapReplicatedData           = nil
 
 function GetNewIndexHandler(IsServer)
 
-    return function(Self, Key, Value)
+    return function(self, Key, Value)
 
         local WrapFunc = (
             IsServer == true and SWrapReplicatedData or CWrapReplicatedData
         )
 
         -- Allow __newindex to fire again
-        RawSet(Self, Key, nil)
-        local KeyList = RawGet(Self, "KeyList")
-        local Vars = RawGet(Self, "Vars")
+        RawSet(self, Key, nil)
+        local KeyList = RawGet(self, "KeyList")
+        local Vars = RawGet(self, "Vars")
         local Send = Value
         local NewKeys = {}
         local Count = #KeyList
@@ -54,8 +54,8 @@ function GetNewIndexHandler(IsServer)
     end
 end
 
-function IndexHandler(Self, Key)
-    return RawGet(Self, Key) or RawGet(Self, "Vars")[Key]
+function IndexHandler(self, Key)
+    return RawGet(self, Key) or RawGet(self, "Vars")[Key]
 end
 
 function GetWrapReplicatedData(Metatable)

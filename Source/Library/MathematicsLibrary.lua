@@ -373,8 +373,8 @@ end
 
 function Curve.New(Points)
     return SetMetatable(Points, {
-        __index = function(Self, Key)
-            return RawGet(Self, Key) or Curve[Key]
+        __index = function(self, Key)
+            return RawGet(self, Key) or Curve[Key]
         end;
     })
 end
