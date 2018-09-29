@@ -10,7 +10,6 @@ function SpringAnimation:SpringAnimation(Properties, Springs)
     }
 
     for Key, Value in Pairs(Properties) do
-        local ValueType = Type(Value)
         local DefaultValue = Object[Key]
         Assert(DefaultValue ~= nil, String.Format("Invalid animation property '%s'", Key))
         Object[Key] = Value

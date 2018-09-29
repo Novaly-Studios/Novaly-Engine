@@ -13,7 +13,6 @@ function SimpleSpring:SimpleSpring(Start, Target, Constant, Decay)
 end
 
 function SimpleSpring:Update()
-	
 	local Current = self.Current
 	local Velocity = self.Velocity
 

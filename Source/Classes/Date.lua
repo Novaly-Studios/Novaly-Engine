@@ -146,7 +146,7 @@ function Date.Add(Subject, Days)
     local DayValue, MonthValue, YearValue = Subject.Day, Subject.Month, Subject.Year
     local NewConstants = Date.GetConstants(Date.IsLeapYear(YearValue))
 
-    for x = 1, Days do
+    for _ = 1, Days do
 
         DayValue = DayValue + 1
 

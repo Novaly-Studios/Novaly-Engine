@@ -15,7 +15,6 @@ function TweenValue.SingleTransition:Linear(Points, CurrentTime, Duration)
     local EasingStyle       = Data.EasingStyle
     local From              = Points[1]
     local To                = Points[2]
-    local Result
 
     -- Apply easing style to the interpolation percentile
     if EasingStyle then
@@ -93,8 +92,7 @@ function TweenValue.SingleTransition:HermiteSpline(Points, CurrentTime, Duration
             Tension,
             Bias
         )
-    elseif (DataType == "UDim2") then
-
+    -- elseif (DataType == "UDim2") then
     end
 
     return Math.HermiteInterpolate(
@@ -112,7 +110,6 @@ function TweenValue.PiecewiseTransition:Linear(Points, CurrentTime, Duration)
 
     local Data              = self.TransitionerData
     local CountLines        = #Points - 1
-    local EasingStyle       = Data.EasingStyle
     local SuperEasingStyle  = Data.SuperEasingStyle
 
     if SuperEasingStyle then
@@ -136,7 +133,6 @@ end
 function TweenValue.PiecewiseTransition:HermiteSpline(Points, CurrentTime, Duration)
 
     local Data              = self.TransitionerData
-    local EasingStyle       = Data.EasingStyle
     local SuperEasingStyle  = Data.SuperEasingStyle
 
     if SuperEasingStyle then
@@ -150,7 +146,7 @@ function TweenValue.PiecewiseTransition:HermiteSpline(Points, CurrentTime, Durat
     return Math.PiecewiseInterpolate(Points, Wrapper, {}, CurrentTime, Duration, 1, NumberRange.new(-2, 1))
 end
 
-function TweenValue:Change(Properties)
+function TweenValue:Change()
     -- Todo: return new copied TweenValue with user-specified changes
 end
 
