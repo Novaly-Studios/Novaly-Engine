@@ -1,5 +1,5 @@
 shared()
-Core = {}
+local Core = {}
 
 shared({
     Client = Core;

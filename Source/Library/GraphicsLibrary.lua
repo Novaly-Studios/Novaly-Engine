@@ -44,7 +44,7 @@ function Graphics:TweenEffect(Item, Property, To, Time, Style, Wait)
         TweenSequence:Destroy()
     end
 
-    local TweenSequence = Sequence.New({
+    TweenSequence = Sequence.New({
         Duration = Time;
     })
     local PropertyTransition = TweenValue.New("SingleTransition", "Linear", CONFIG["_TargetFramerate"], {
@@ -68,7 +68,7 @@ function Graphics:TweenEffect(Item, Property, To, Time, Style, Wait)
 end
 
 function Graphics:DetectPlayer()
-    
+
     if Players.LocalPlayer == nil then return end
     local Char = Players.LocalPlayer.Character
 
@@ -83,11 +83,11 @@ function Graphics:DetectPlayer()
 end
 
 function Graphics:UpdateLensFlares()
-    
+
     if (CONFIG.gEnableLensFlare == true) then
-        
+
         for _, FlareCollection in Pairs(Graphics.LensFlareItems) do
-            
+
             local Adornee = FlareCollection.Adornee
             local MaxDistance = FlareCollection.MaxDistance
 
@@ -186,7 +186,7 @@ function Graphics:HandleModel(Item)
     end
 end
 
-function ClientInit()
+local function ClientInit()
 
     if (CONFIG.gEnableGraphics == false) then
         return
@@ -219,7 +219,7 @@ function ClientInit()
     Graphics.Blur       = Blur
     Graphics.Tint       = Tint
     Graphics.SunRays    = SunRays
-    
+
     Graphics.Camera = Workspace.CurrentCamera
     Graphics.UpdateScreenValues()
 
@@ -248,7 +248,7 @@ function ClientInit()
 
     RunService.Heartbeat:Connect(function(Step)
         local PartIters = Math.Floor(CONFIG.gTransparentPartsPerFrame * CONFIG._TargetFramerate / (1 / Step))
-        local ModelIters = Math.Floor(CONFIG.gModelsPerFrame * CONFIG._TargetFramerate / (1 / Step))
+        -- local ModelIters = Math.Floor(CONFIG.gModelsPerFrame * CONFIG._TargetFramerate / (1 / Step))
         Graphics:UpdateLensFlares()
         Graphics:UpdateBillboards()
         TransparentPartHandler:Next(PartIters)
@@ -289,7 +289,7 @@ function ClientInit()
     LensFlareFrame.Name = "LensFlareFrame"
 end
 
-function ServerInit()
+local function ServerInit()
     Coroutine.Wrap(function()
         for Index, Part in Pairs(CollectionService:GetTagged(Graphics.Tags.TransparentPart)) do
             local Settings = Part:FindFirstChild("Settings")

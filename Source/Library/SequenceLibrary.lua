@@ -34,7 +34,7 @@ function Sequencer:Deregister(Target)
 end
 
 function Sequencer:PreRender(Target)
-   -- Todo 
+   -- Todo
 end
 
 function Sequencer:AddEasingStyle(Name, Spring)
@@ -43,7 +43,7 @@ function Sequencer:AddEasingStyle(Name, Spring)
     end
 end
 
-function ClientInit()
+local function ClientInit()
 
     -- Main update event
     RunService.Stepped:Connect(function(_, Step)

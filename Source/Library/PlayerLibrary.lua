@@ -1,6 +1,5 @@
 shared()
 
-local Version                   = CONFIG.pVersion
 local PlayerData                = {}
 local Client                    = {
     PlayerDataManagement        = {};
@@ -122,7 +121,7 @@ function Server.Init()
         local function TryGet()
             Server.PlayerDataStore = Svc("DataStoreService"):GetDataStore(CONFIG.pDataStoreName .. CONFIG.pDataStoreVersion)
         end
-        
+
         TryGet()
 
         while (Server.PlayerDataStore == nil) do
@@ -141,14 +140,14 @@ function Client.PlayerDataManagement.WaitForMyData()
 end
 
 function Client.Init()
-    
+
     while (Players.LocalPlayer == nil) do
         Wait()
     end
 
     local LocalPlayer = Players.LocalPlayer
     Client.Player = LocalPlayer
-    
+
     repeat Wait() until LocalPlayer.Character ~= nil
     Client.Character = LocalPlayer.Character
 

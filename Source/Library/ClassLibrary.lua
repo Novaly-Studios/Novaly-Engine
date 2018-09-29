@@ -33,7 +33,7 @@ function Class:New(Name, ClassTable)
         Result[self.ClassRefKey] = ClassTable
         SetMetatable(Result, ClassTable)
 
-        for Key, Value in Pairs(Result) do
+        for _, Value in Pairs(Result) do
             if (Type(Value) == "function") then
                 GetFunctionEnv(Value).self = Result
             end

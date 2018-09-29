@@ -48,7 +48,7 @@ function GUI:TouchingElement(A, B)
 end
 
 function GUI:RotatedClip(Element, Parent)
-    Element.Changed:Connect(function(Property)
+    Element.Changed:Connect(function()
         Element.Visible = GUI.TouchingElement(Element, Parent)
     end)
 end
@@ -132,7 +132,9 @@ function GUI:GetMouseOverIndicator(Button, MouseEnterFunc, MouseLeaveFunc)
     }
     local OverStatusObjects = self.OverStatusObjects
 
-    local Connection1 = Button.MouseEnter:Connect(function()
+    -- NOTE These never get cleaned up. Could this leak?
+
+    Button.MouseEnter:Connect(function()
         self:CorrectMouseOver()
         OverObject.Status = true
         if MouseEnterFunc then
@@ -140,7 +142,7 @@ function GUI:GetMouseOverIndicator(Button, MouseEnterFunc, MouseLeaveFunc)
         end
     end)
 
-    local Connection2 = Button.MouseLeave:Connect(function()
+    Button.MouseLeave:Connect(function()
         self:CorrectMouseOver()
         if MouseLeaveFunc then
             MouseLeaveFunc()

@@ -87,7 +87,7 @@ end
 
 function Core.Count(Array)
     local Count = 0
-    for Key, Value in pairs(Array) do
+    for _ in pairs(Array) do
         Count = Count + 1
     end
     return Count
@@ -215,8 +215,7 @@ function Core.GetNaryLoop(Bounds)
     local IterValues = {}
 
     function Recursive(Run, Level)
-
-        local Level = Level or 1
+        Level = Level or 1
         local TargetBounds = Bounds[Level]
 
         if (Level > Loops) then

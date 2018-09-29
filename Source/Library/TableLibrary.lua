@@ -39,7 +39,7 @@ end
 
 function Table.PrintTable(Item, Tabs)
 
-    local Tabs = Tabs or (function()
+    Tabs = Tabs or (function()
         print("BaseTable = {")
         return "\t"
     end)()
@@ -187,7 +187,7 @@ end
 
 function Table.WaitFor(YieldFunction, Array, ...)
     local Iter = 1
-    for Key, Value in pairs({...}) do
+    for _, Value in pairs({...}) do
         local Next = Array[Value]
         while (not Next) do
             YieldFunction()

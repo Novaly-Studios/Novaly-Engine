@@ -14,10 +14,10 @@ local InputLibrary = {
     };
 };
 
-function ClientInit()
+local function ClientInit()
 
     local Mouse = InputLibrary.Mouse
-    
+
     local Button1Up = Event.New()
     Mouse.Button1Up = Button1Up
 
@@ -47,7 +47,7 @@ function ClientInit()
         end
     end)
 
-    UserInputService.InputChanged:Connect(function(Input, GameProcessed)
+    UserInputService.InputChanged:Connect(function(Input)
         if (Input.UserInputType == Enum.UserInputType.MouseMovement) then
             Mouse.XY = Input.Position
         end
@@ -79,7 +79,7 @@ function InputLibrary:UpdateMouse()
     local Mouse = self.Mouse
     local XY = Mouse.XY
     local MouseRay = Graphics.Camera:ScreenPointToRay(XY.X + 0.5, XY.Y + 0.5)
-    local Hit, Pos, Normal = Workspace:FindPartOnRayWithIgnoreList(Ray.new(MouseRay.Origin, MouseRay.Direction * Mouse.Dist), Mouse.Ignore)
+    local Hit, Pos = Workspace:FindPartOnRayWithIgnoreList(Ray.new(MouseRay.Origin, MouseRay.Direction * Mouse.Dist), Mouse.Ignore)
     Mouse.Target = Hit
     Mouse.Pos = Pos
 end
