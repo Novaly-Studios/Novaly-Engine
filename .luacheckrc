@@ -40,10 +40,6 @@ stds.roblox = {
   }
 }
 
-exclude_files = {
-  "src/ReplicatedStorage/Lib/**"
-}
-
 ignore = {
   "self",
 	"421", -- shadowing local variable
