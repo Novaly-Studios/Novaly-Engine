@@ -57,7 +57,7 @@ function Core.Sub(F, ...)
     return coroutine.resume(coroutine.create(F), ...)
 end
 
-function Core.RunServiceWait()
+function Core.RenderWait()
     RunService.RenderStepped:Wait()
 end
 

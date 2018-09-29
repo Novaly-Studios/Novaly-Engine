@@ -1,4 +1,5 @@
 local ReplicatedStorage     = game:GetService("ReplicatedStorage")
+local ReplicatedFirst       = game:GetService("ReplicatedStorage")
 local ServerScriptService   = game:GetService("ServerScriptService")
 local StarterPlayer         = game:GetService("StarterPlayer")
 local StarterGui            = game:GetService("StarterGui")
@@ -46,7 +47,7 @@ local function AddPlugin(Plugin)
     
     local Object = (Server and Plugin.Server or Plugin.Client)
     
-    if Object["Init"] then
+    if (Object["Init"]) then
         Object["Init"]()
     end
 
@@ -65,7 +66,7 @@ local function AddPlugin(Plugin)
 end
 
 setmetatable(shared, {
-    __call = function(Self, Value)
+    __call = function(_, Value)
 
         if Value then
             local ValueType = type(Value)

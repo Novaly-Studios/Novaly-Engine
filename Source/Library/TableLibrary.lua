@@ -1,6 +1,6 @@
 shared()
 
-local Table = setmetatable({}, {__index = OriginalEnv["table"]})
+local Table = {}
 
 local Mappings = {
     setn    = "SetN";
@@ -156,15 +156,15 @@ function Table.ProtectedForeachI(Arr, Func)
     end
 end
 
-function Table.ApplyKeyMapping(Array, Append)
+function Table.ApplyKeyMapping(Array, Append, From)
     for Key, Value in pairs(Append) do
-        Array[Value] = Array[Key]
+        Array[Value] = From[Key]
     end
 end
 
-function Table.ApplyValueMapping(Array, Append)
+function Table.ApplyValueMapping(Array, Append, From)
     for Key, Value in pairs(Append) do
-        Array[Key] = Array[Value]
+        Array[Key] = From[Value]
     end
 end
 
@@ -214,11 +214,11 @@ function Table.ProtectedGet(Array, Key)
     return Success, Result
 end
 
-Table.ApplyKeyMapping(Table, Mappings)
+Table.ApplyKeyMapping(Table, Mappings, table)
 
 shared({
-    Client = {table = Table, Table = Table};
-    Server = {table = Table, Table = Table};
+    Client = {Table = Table};
+    Server = {Table = Table};
 })
 
 return true

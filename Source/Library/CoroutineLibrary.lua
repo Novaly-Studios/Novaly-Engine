@@ -1,6 +1,6 @@
 shared()
 
-local Coroutine = SetMetatable({}, {__index = OriginalEnv["coroutine"]})
+local Coroutine = {}
 
 local Mappings = {
     create 	= "Create";
@@ -11,11 +11,11 @@ local Mappings = {
     yield 	= "Yield";
 }
 
-Table.ApplyKeyMapping(Coroutine, Mappings)
+Table.ApplyKeyMapping(Coroutine, Mappings, coroutine)
 
 shared({
-    Client = {coroutine = Coroutine, Coroutine = Coroutine};
-    Server = {coroutine = Coroutine, Coroutine = Coroutine};
+    Client = {Coroutine = Coroutine};
+    Server = {Coroutine = Coroutine};
 })
 
 return true

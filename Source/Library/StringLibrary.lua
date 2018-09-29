@@ -1,6 +1,6 @@
 shared()
 
-local String = setmetatable({}, {__index = OriginalEnv["string"]})
+local String = {}
 
 local Mappings = {
     sub     = "SetN";
@@ -123,11 +123,11 @@ function String.NumberComma(Input)
     return Formatted
 end
 
-Table.ApplyKeyMapping(String, Mappings)
+Table.ApplyKeyMapping(String, Mappings, string)
 
 shared({
-    Client = {string = String, String = String};
-    Server = {string = String, String = String};
+    Client = {String = String};
+    Server = {String = String};
 })
 
 return true

@@ -1,6 +1,6 @@
 shared()
 
-local Maths = setmetatable({}, {__index = OriginalEnv["math"]})
+local Maths = {}
 
 local Mappings = {
     log         = "Log";
@@ -381,7 +381,7 @@ end
 
 -- Let's Apply CoolPascalCasing ;)
 
-Table.ApplyKeyMapping(Maths, Mappings)
+Table.ApplyKeyMapping(Maths, Mappings, math)
 
 -- Mathematical Constants
 
@@ -390,7 +390,7 @@ Maths["Inf"]            = 1/0
 Maths["Radian"]         = Maths.PI / 180
 Maths["Tau"]            = 2 * Maths.PI
 
-Final = {math = Maths, Math = Maths, Curve = Curve}
+Final = {Math = Maths, Curve = Curve}
 
 shared({
     Client = Final;
