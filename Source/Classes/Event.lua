@@ -20,7 +20,7 @@ function Event:Listen(Func)
     }, {__index = self})
 end
 
-function Event:Connect(Func, Index)
+function Event:Connect(Func)
     local Handlers = self.Handlers
     local Index = #Handlers + 1
     Handlers[Index] = Func

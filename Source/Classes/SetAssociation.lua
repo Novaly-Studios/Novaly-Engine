@@ -14,7 +14,7 @@ function SetAssociation:Relate(Set, Value)
     local Unordered = self.Unordered
     local Rep = {}
 
-    for Index = 1, #Set do
+    for _ = 1, #Set do
         table.insert(Rep, Set)
     end
 
@@ -26,7 +26,7 @@ function SetAssociation:Relate(Set, Value)
 end
 
 function SetAssociation:Get(Set)
-    return Association:GetRelationInternal(self.Unordered, Set) 
+    return Association:GetRelationInternal(self.Unordered, Set)
 end
 
 return SetAssociation

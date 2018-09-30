@@ -28,7 +28,7 @@ end
 
 -- Adds an animation object to the current sequence
 function Sequence:AddAnimation(AnimationObject)
-    Assert(AnimationObject[Class.NameKey] == CHECK_ANIMATION_TYPE, 
+    Assert(AnimationObject[Class.NameKey] == CHECK_ANIMATION_TYPE,
         String.Format("Animation object is an incorrect type (%s)", CHECK_ANIMATION_TYPE))
     self.Animations[AnimationObject] = AnimationObject
     return self

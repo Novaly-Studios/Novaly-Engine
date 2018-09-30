@@ -1,28 +1,19 @@
 local ReplicatedStorage     = game:GetService("ReplicatedStorage")
-local ReplicatedFirst       = game:GetService("ReplicatedStorage")
 local ServerScriptService   = game:GetService("ServerScriptService")
 local StarterPlayer         = game:GetService("StarterPlayer")
 local StarterGui            = game:GetService("StarterGui")
 local RunService            = game:GetService("RunService")
 
 local Server                = RunService:IsServer()
-local Library               = ReplicatedStorage.Library
 local ConfigFolder          = ReplicatedStorage.Configuration
 local LoadOrder             = require(ConfigFolder.LoadOrder)
 
 local Indicator             = Server and "Server" or "Client"
 local TargetName            = string.format("%sGameLoader", Indicator)
 
-local Loaded                = false
-
 local CachedEnvironments    = {}
 
 local Environment           = {}
-local EnvironmentMT         = {
-    __index = function(Self, Key)
-        return Environment[Key] or rawget(Self, 1)[Key]
-    end;
-}
 
 if Server then
     Environment["Assets"] = ReplicatedStorage:FindFirstChild("Assets") or Instance.new("Folder", ReplicatedStorage)
@@ -44,9 +35,9 @@ local function MapEnv(Target)
 end
 
 local function AddPlugin(Plugin)
-    
+
     local Object = (Server and Plugin.Server or Plugin.Client)
-    
+
     if (Object["Init"]) then
         Object["Init"]()
     end
@@ -66,7 +57,7 @@ local function AddPlugin(Plugin)
 end
 
 setmetatable(shared, {
-    __call = function(_, Value)
+    __call = function(self, Value)
 
         if Value then
             local ValueType = type(Value)

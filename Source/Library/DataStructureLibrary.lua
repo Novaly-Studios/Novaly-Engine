@@ -88,7 +88,7 @@ DataStructures.BuildFunctions = {
     end;
 }
 
-function Test(Var, Property)
+local function Test(Var, Property)
     local Result, Value = ProtectedCall(function()
         return Var[Property]
     end)

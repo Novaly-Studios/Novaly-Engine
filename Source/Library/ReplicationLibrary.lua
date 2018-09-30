@@ -15,18 +15,18 @@ local SharedData                    = {} -- Data replicated between scripts on t
 local SWrapReplicatedData           = nil
 local CWrapReplicatedData           = nil
 
-function GetNewIndexHandler(IsServer)
+local function GetNewIndexHandler(IsServer)
 
-    return function(Self, Key, Value)
+    return function(self, Key, Value)
 
         local WrapFunc = (
             IsServer == true and SWrapReplicatedData or CWrapReplicatedData
         )
 
         -- Allow __newindex to fire again
-        RawSet(Self, Key, nil)
-        local KeyList = RawGet(Self, "KeyList")
-        local Vars = RawGet(Self, "Vars")
+        RawSet(self, Key, nil)
+        local KeyList = RawGet(self, "KeyList")
+        local Vars = RawGet(self, "Vars")
         local Send = Value
         local NewKeys = {}
         local Count = #KeyList
@@ -43,22 +43,22 @@ function GetNewIndexHandler(IsServer)
                 Send = Replication.StripReplicatedData(Value)
             end
         end
-        
+
         Vars[Key] = Value
-        
+
         if IsServer then
             Broadcast("ReplicateData", NewKeys, Send)
         end
-        
+
         Replication.CallBinds(Unpack(NewKeys))
     end
 end
 
-function IndexHandler(Self, Key)
-    return RawGet(Self, Key) or RawGet(Self, "Vars")[Key]
+local function IndexHandler(self, Key)
+    return RawGet(self, Key) or RawGet(self, "Vars")[Key]
 end
 
-function GetWrapReplicatedData(Metatable)
+local function GetWrapReplicatedData(Metatable)
 
     local function SelfFunc(KeyList, Data)
 
@@ -169,8 +169,8 @@ function Replication.CallBinds(...)
     end
 end
 
-function ServerInit()
-    
+local function ServerInit()
+
     -- Wrap top level of replicated data table; the rest will be recursive
     SWrapReplicatedData({}, ReplicatedData)
     ReplicatedData.TransferCheck = true
@@ -193,7 +193,7 @@ function Replication.Wait(Item)
     return Result
 end
 
-function ClientInit()
+local function ClientInit()
 
     CWrapReplicatedData({}, ReplicatedData)
 
@@ -203,7 +203,7 @@ function ClientInit()
             ReplicatedData[Key] = Value
         end
     end)
-    
+
     -- Client requests data download
     FireRemoteEvent("GetReplicatedData")
 

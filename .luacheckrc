@@ -48,6 +48,7 @@ ignore = {
   "self",
 	"421", -- shadowing local variable
 	"422", -- shadowing argument
+  "423", -- shadowing loop variable
 	"431", -- shadowing upvalue
   "432", -- shadowing upvalue argument
 }

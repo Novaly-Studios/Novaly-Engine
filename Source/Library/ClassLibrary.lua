@@ -6,12 +6,12 @@ local Class = {
     SuperclassRefKey    = "Super";
     ConstructorNames    = {"new", "New", "Create"};
     ClassMetatable      = {
-        __call = function(Self, Static)
+        __call = function(self, Static)
             Assert(Type(Static) == "table", "Static vars must be a table.")
             for Key, Value in Pairs(Static) do
-                RawSet(Self, Key, Value)
+                RawSet(self, Key, Value)
             end
-            return Self
+            return self
         end;
     };
 }
@@ -22,7 +22,7 @@ function Class:New(Name, ClassTable)
 
         local Result = SetMetatable({Class = ClassTable}, ClassTable)
         local Func = ClassTable[Name]
-        GetFunctionEnv(Func).Self = Result
+        GetFunctionEnv(Func).self = Result
 
         local Object = Func(Result, ...)
 
@@ -33,9 +33,9 @@ function Class:New(Name, ClassTable)
         Result[self.ClassRefKey] = ClassTable
         SetMetatable(Result, ClassTable)
 
-        for Key, Value in Pairs(Result) do
+        for _, Value in Pairs(Result) do
             if (Type(Value) == "function") then
-                GetFunctionEnv(Value).Self = Result
+                GetFunctionEnv(Value).self = Result
             end
         end
 
@@ -64,8 +64,8 @@ function Class:FromExtension(Name, Other)
 
     local Result = self:FromName(Name)
 
-    Result["__index"] = function(Self, Key)
-        return (RawGet(Self, Key) or RawGet(Self, "Class")[Key] or Other[Key])
+    Result["__index"] = function(self, Key)
+        return (RawGet(self, Key) or RawGet(self, "Class")[Key] or Other[Key])
     end
     Result[self.SuperclassRefKey] = Other
 

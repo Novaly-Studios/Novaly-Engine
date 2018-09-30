@@ -118,7 +118,7 @@ end
 
 --[[
     Maths.CountDigits
-    
+
     Counts the digits of a decimal or integer
 ]]
 
@@ -129,7 +129,7 @@ end
 
 --[[
     Maths.StripRoll
-    
+
     Strips the roll component from a CFrame
 --]]
 
@@ -140,20 +140,20 @@ end
         M10, M11, M12,
         M20, M21, M22
         = CF:components()
-    
+
     return CFrame.new(
         x, y, z,
         1, 0, 0,
         0, M11, M12,
-        
+
     )
 end]]
 
 --[[
     Maths.HermiteInterpolate
-    
+
     Interpolates down a spline given two points and two tangents, as well as the tension and bias of the curve.
-    
+
     Parameter [Numeric] 'P0' - Point which forms first tangent
     Paremeter [Numeric] 'P1' - First point
     Parameter [Numeric] 'P2' - Second point
@@ -179,17 +179,17 @@ end
 
 --[[
     Maths.HermiteInterpolateCFrame
-    
+
     An extension of Maths.HermiteInterpolate which works on CFrames.
 ]]
 
 function Maths.HermiteInterpolateCFrame(P0, P1, P2, P3, Mul, Tension, Bias)
 
     local P0P, P1P, P2P, P3P = P0.p, P1.p, P2.p, P3.p
-    local P0 = Quaternion.FromCFrame(P0)
-    local P1 = Quaternion.FromCFrame(P1)
-    local P2 = Quaternion.FromCFrame(P2)
-    local P3 = Quaternion.FromCFrame(P3)
+    P0 = Quaternion.FromCFrame(P0)
+    P1 = Quaternion.FromCFrame(P1)
+    P2 = Quaternion.FromCFrame(P2)
+    P3 = Quaternion.FromCFrame(P3)
     local M00, M01, M02, M10, M11, M12, M20, M21, M22 = Maths.HermiteInterpolate(P0, P1, P2, P3, Mul, Tension, Bias):ToRotationMatrix()
     local Position = Maths.HermiteInterpolate(P0P, P1P, P2P, P3P, Mul, Tension, Bias)
 
@@ -198,9 +198,9 @@ end
 
 --[[
     Maths.CubicInterpolate
-    
+
     Standard cubic spline interpolation through two intermediary points with two tangents.
-    
+
     Parameter [Numeric] 'P0' - Point which forms first tangent
     Paremeter [Numeric] 'P1' - First point
     Parameter [Numeric] 'P2' - Second point
@@ -221,7 +221,7 @@ end
 
 --[[
     Maths.Clamp
-    
+
     Keeps Num within a minimum and maximum numerical boundary.
 
     Paremeter [Number] 'Num' - The number which will be subject to the clamp.
@@ -251,9 +251,9 @@ end
 
 --[[
     Curve.InterpolatePiecewiseCubic
-    
+
     Used for 'joining' cubic spline interpolations together.
-    
+
     Parameter [Number] 'Mul' - A number between 0 and 1 which will represent how far along the curve to travel.
     Parameter [Function] 'InterpolationFunc' - The cubic spline interpolation function (it should take in two tangents formed by two points and two points to interpolate).
 --]]
@@ -333,9 +333,9 @@ end
 
 --[[
     Curve.InterpolateBezier
-    
+
     Interpolates down a bezier curve.
-    
+
     Parameter [Number] 'Mul' - A number between 0 and 1 which will represent how far along the curve to travel.
     Parameter [Function] 'LerpFunc' - An optional parameter which will utilise a custom interpolation function with three arguments.
 ]]
@@ -367,14 +367,14 @@ end
     Curve.New
 
     Constructs a new wrapped table storing a multitude of points and an object identifier for integration with DataStructureLibrary.
-    
+
     Parameter [Table] 'Points' - An array of objects or numbers which MUST support common numerical operators.
 --]]
 
 function Curve.New(Points)
     return SetMetatable(Points, {
-        __index = function(Self, Key)
-            return RawGet(Self, Key) or Curve[Key]
+        __index = function(self, Key)
+            return RawGet(self, Key) or Curve[Key]
         end;
     })
 end
@@ -390,7 +390,7 @@ Maths["Inf"]            = 1/0
 Maths["Radian"]         = Maths.PI / 180
 Maths["Tau"]            = 2 * Maths.PI
 
-Final = {Math = Maths, Curve = Curve}
+local Final = {Math = Maths, Curve = Curve}
 
 shared({
     Client = Final;

@@ -17,7 +17,7 @@ function Structures.ImportClass(Item, Name)
 end
 
 for Item = 1, #ClassItems do
-    local Item = ClassItems[Item]
+    Item = ClassItems[Item]
     local Name = Item.Name
     Log(1, "Importing Class '" .. Name .. "'")
     Structures.ImportClass(Item, Name)

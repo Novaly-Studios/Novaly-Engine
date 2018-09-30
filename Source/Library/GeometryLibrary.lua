@@ -20,9 +20,7 @@ function Geometry:PointIsWithinPolygon(Point, Polygon)
 end
 
 function Geometry:StripAxis(Point, ClassRef, ...)
-
     local Args = {...}
-    local Count = #Args
 
     for Key, Index in Pairs(Args) do
         Args[Key] = Point[Index]

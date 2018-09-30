@@ -116,7 +116,7 @@ function Quaternion:__mul(Other)
 
         local W1, W2 = self.W, Other.W
         local Vec1, Vec2 = self:ToVector3(), Other:ToVector3()
-        
+
         return Quaternion.FromVector(
             W1 * W2 - Vec1:Dot(Vec2),
             W1 * Vec2 + W2 * Vec1 + Vec1:Cross(Vec2)

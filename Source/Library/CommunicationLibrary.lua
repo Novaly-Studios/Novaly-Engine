@@ -106,7 +106,7 @@ function Server.Init()
 
         if not Player then return end
         local Event = Binds.Events[Name]
-          
+
         if (Type(Name) ~= "string") then
             Log(0, "Warning, client " .. Player.Name .. " has sent an empty or non-string request name.")
         elseif (Event == nil) then
@@ -115,7 +115,7 @@ function Server.Init()
             Event(Player, ...)
         end
     end)
-    
+
     RemoteFunction.OnServerInvoke = function(Player, Name, ...)
 
         if not Player then return end
