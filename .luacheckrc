@@ -1,14 +1,16 @@
 files[".luacheckrc"].global = false
 
-stds.novaly = {
-  -- These are all the globals exposed by the engine to each module.
+stds.services = {
   globals = {
-    -- Services
     "StarterGui", "CollectionService", "PhysicsService", "ReplicatedStorage",
     "TeleportService", "Players", "UserInputService", "RunService",
     "DataStoreService", "AssetService", "LocalizationService", "Lighting",
     "ContextActionService",
+  }
+}
 
+stds.engine = {
+  globals = {
     "With", "Assets", "LensFlare", "GetNaryLoop", "TypeChain", "SetAssociation", "DataStructures",
     "PlayerDataManagement", "InputLibrary", "CollectionHelper", "Weld", "Classes", "Character", "PlayerData", "Filter",
     "Sub", "UnyieldSequence", "Reduce", "TimeSpring", "Log", "Replication", "SharedData", "Class", "ReplicatedData",
@@ -51,4 +53,4 @@ ignore = {
 
 max_line_length = false
 
-std = "lua51+roblox+novaly"
+std = "lua51+roblox+engine+services"
