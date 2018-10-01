@@ -20,6 +20,7 @@ stds.engine = {
     "OriginalEnv", "OperationQueue", "SurfaceBillboard", "Geometry", "Curve", "LinkedList", "CONFIG", "GetFunctionEnv",
     "Product", "SimpleSpring", "LinkedNode", "ImportClass", "Svc", "Association", "Quaternion", "Date", "Line",
     "Modules", "SpringAnimation", "SteppedWait", "Range", "TweenValue", "Player", "RunServiceWait", "CircularBuffer",
+    "String", "Math", "Table"
   }
 }
 
