@@ -78,10 +78,10 @@ function Core.pairs(Object)
 end
 
 function Core.ipairs(Array)
-    if (type(Object) == "table") then
-        return Core.OldIPairs(Object.Vars == nil and Object or Object.Vars)
+    if (type(Array) == "table") then
+        return Core.OldIPairs(Array.Vars == nil and Array or Array.Vars)
     else
-        return Core.OldIPairs(Object)
+        return Core.OldIPairs(Array)
     end
 end
 
