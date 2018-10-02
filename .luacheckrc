@@ -39,7 +39,8 @@ stds.roblox = {
     "UserSettings", "version", "wait", "warn",
     -- classes
     "CFrame", "Color3", "Instance", "PhysicalProperties", "Ray", "Rect",
-    "Region3", "TweenInfo", "UDim", "UDim2", "Vector2", "Vector3", "Random"
+    "Region3", "TweenInfo", "UDim", "UDim2", "Vector2", "Vector3", "Random",
+    "NumberRange", "NumberSequence", "ColorSequence"
   }
 }
 
