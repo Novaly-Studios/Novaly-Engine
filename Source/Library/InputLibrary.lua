@@ -131,5 +131,3 @@ return {
     Client = {InputLibrary = InputLibrary, Init = ClientInit};
     Server = {};
 }
-
-return true
