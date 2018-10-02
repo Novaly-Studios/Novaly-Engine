@@ -193,8 +193,8 @@ function Table.WaitFor(YieldFunction, Array, ...)
             YieldFunction()
             Iter = Iter + 1
             if (Iter == 150) then
-                Warn(String.Format("Possible endless wait on '%s' for property '%s'.", (Array.Name or ToString(Array)), ToString(Value)))
-                Warn(debug.traceback())
+                warn(String.Format("Possible endless wait on '%s' for property '%s'.", (Array.Name or tostring(Array)), tostring(Value)))
+                warn(debug.traceback())
             end
             Next = Array[Value]
         end
@@ -208,7 +208,7 @@ function Table.WaitForItem(Array, Key)
 end
 
 function Table.ProtectedGet(Array, Key)
-    local Success, Result = ProtectedCall(function()
+    local Success, Result = pcall(function()
         return Array[Key]
     end)
     return Success, Result

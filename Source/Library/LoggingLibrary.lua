@@ -5,7 +5,7 @@ shared()
 local Log = {}
 
 function Log.Log(Level, Str)
-    Print(("\t"):rep(Level) .. Str)
+    print(("\t"):rep(Level) .. Str)
 end
 
 shared({

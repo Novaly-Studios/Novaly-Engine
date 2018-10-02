@@ -3,7 +3,7 @@ shared()
 local OperationTable = Class:FromName(script.Name)
 
 function OperationTable:OperationTable(Handler)
-    Assert(Handler)
+    assert(Handler)
     return {
         Current = 1;
         Handler = Handler;

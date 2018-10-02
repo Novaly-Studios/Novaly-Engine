@@ -6,7 +6,7 @@ local SpringSequence = Class:FromName(script.Name)
 function SpringSequence:SpringSequence()
 
     local Object = {
-        ["Animations"]          = SetMetatable({}, {__mode = "k"}); -- A table of spring animation objects
+        ["Animations"]          = setmetatable({}, {__mode = "k"}); -- A table of spring animation objects
         ["Play"]                = false; -- When true, allows the sequence to step
     }
 
@@ -15,7 +15,7 @@ end
 
 -- Adds an animation object to the current sequence
 function SpringSequence:AddAnimation(AnimationObject)
-    Assert(AnimationObject[Class.NameKey] == CHECK_ANIMATION_TYPE,
+    assert(AnimationObject[Class.NameKey] == CHECK_ANIMATION_TYPE,
         String.Format("Animation object is an incorrect type (%s)", CHECK_ANIMATION_TYPE))
     self.Animations[AnimationObject] = AnimationObject
     return self
@@ -50,7 +50,7 @@ end
 
 function SpringSequence:Destroy()
     Sequencer:Deregister(self)
-    for Key in Pairs(self) do
+    for Key in pairs(self) do
         self[Key] = nil
     end
 end
@@ -72,7 +72,7 @@ function SpringSequence:Step()
         StepBind(self)
     end
 
-    for Animation, _ in Pairs(self.Animations) do
+    for Animation, _ in pairs(self.Animations) do
         Animation:Update()
     end
 

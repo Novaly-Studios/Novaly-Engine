@@ -93,7 +93,7 @@ end
 function String.Compress(Str, Method, ...)
 
     local TargetCompression = Compression[Method]
-    Assert(TargetCompression, "Compression method '" .. Method .. "' does not exist.")
+    assert(TargetCompression, "Compression method '" .. Method .. "' does not exist.")
 
     return TargetCompression.Compress(Str, ...)
 end
@@ -101,7 +101,7 @@ end
 function String.Uncompress(Str, Method, ...)
 
     local TargetCompression = Compression[Method]
-    Assert(TargetCompression, "Compression method '" .. Method .. "' does not exist.")
+    assert(TargetCompression, "Compression method '" .. Method .. "' does not exist.")
 
     return TargetCompression.Decompress(Str, ...)
 end

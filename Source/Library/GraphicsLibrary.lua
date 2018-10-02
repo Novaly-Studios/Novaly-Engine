@@ -86,7 +86,7 @@ function Graphics:UpdateLensFlares()
 
     if (CONFIG.gEnableLensFlare == true) then
 
-        for _, FlareCollection in Pairs(Graphics.LensFlareItems) do
+        for _, FlareCollection in pairs(Graphics.LensFlareItems) do
 
             local Adornee = FlareCollection.Adornee
             local MaxDistance = FlareCollection.MaxDistance
@@ -104,7 +104,7 @@ function Graphics:UpdateLensFlares()
 
                     if (FlareCollection.Transparency < 1) then
 
-                        for _, Pairing in Pairs(FlareCollection.LensFlares) do
+                        for _, Pairing in pairs(FlareCollection.LensFlares) do
 
                             local FlareObject = Pairing[1]
                             local ImageLabel = Pairing[2]
@@ -135,7 +135,7 @@ function Graphics:UpdateBillboards()
 
     local SurfaceBillboards = Graphics.SurfaceBillboards
 
-    for Key, Value in Pairs(SurfaceBillboards) do
+    for Key, Value in pairs(SurfaceBillboards) do
         if (Value.Part.Parent) then
             Value:Update()
         else
@@ -173,7 +173,7 @@ function Graphics:HandleModel(Item)
             local MaxDist = SettingsFolder:FindFirstChild("MaxDist")
             if MaxDist then
                 local MaxDist = MaxDist.Value
-                for _, Object in Pairs(Item:GetDescendants()) do
+                for _, Object in pairs(Item:GetDescendants()) do
                     if (Object:IsA("BasePart")) then
                         local OriginalTransparency = Object:FindFirstChild("OriginalTransparency")
                         if OriginalTransparency then
@@ -220,7 +220,7 @@ local function ClientInit()
     Graphics.Tint       = Tint
     Graphics.SunRays    = SunRays
 
-    Graphics.Camera = Workspace.CurrentCamera
+    Graphics.Camera = workspace.CurrentCamera
     Graphics.UpdateScreenValues()
 
     Graphics.AnimateItems   = {
@@ -229,11 +229,11 @@ local function ClientInit()
         ["Blur"]            = Blur;
         ["Tint"]            = Tint;
         ["SunRays"]         = SunRays;
-        ["Terrain"]         = Workspace:WaitForChild("Terrain");
+        ["Terrain"]         = workspace:WaitForChild("Terrain");
     }
 
-    Workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
-        Graphics.Camera = Workspace.CurrentCamera
+    workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
+        Graphics.Camera = workspace.CurrentCamera
     end)
 
     if (CONFIG.gEnableLensFlare == true) then
@@ -257,8 +257,8 @@ local function ClientInit()
         ModelHandler:Clean(Clean, ModelIters)]]
     end)
 
-    Coroutine.Wrap(function()
-        while Wait(1/15) do
+    coroutine.wrap(function()
+        while wait(1/15) do
             Graphics:DetectPlayer()
         end
     end)
@@ -267,7 +267,7 @@ local function ClientInit()
         TransparentPartHandler:Add(Part)
     end)
 
-    for _, Part in Pairs(CollectionService:GetTagged(Graphics.Tags.TransparentPart)) do
+    for _, Part in pairs(CollectionService:GetTagged(Graphics.Tags.TransparentPart)) do
         TransparentPartHandler:Add(Part)
     end
 
@@ -275,7 +275,7 @@ local function ClientInit()
         ModelHandler:Add(Part)
     end)
 
-    for _, Part in Pairs(CollectionService:GetTagged(Graphics.Tags.Model)) do
+    for _, Part in pairs(CollectionService:GetTagged(Graphics.Tags.Model)) do
         ModelHandler:Add(Part)
     end]]
 
@@ -290,24 +290,24 @@ local function ClientInit()
 end
 
 local function ServerInit()
-    Coroutine.Wrap(function()
-        for Index, Part in Pairs(CollectionService:GetTagged(Graphics.Tags.TransparentPart)) do
+    coroutine.wrap(function()
+        for Index, Part in pairs(CollectionService:GetTagged(Graphics.Tags.TransparentPart)) do
             local Settings = Part:FindFirstChild("Settings")
             if Settings then
                 Settings.InitialTransparency.Value = Part.Transparency
             end
             if (Index % 50 == 0) then
-                Wait()
+                wait()
             end
         end
-        --[[for Index, Model in Pairs(CollectionService:GetTagged(Graphics.Tags.Model)) do
-            for _, Object in Pairs(Model:GetDescendants()) do
+        --[[for Index, Model in pairs(CollectionService:GetTagged(Graphics.Tags.Model)) do
+            for _, Object in pairs(Model:GetDescendants()) do
                 if (Object:IsA("BasePart")) then
                     Object.
                 end
             end
             if (Index % 50 == 0) then
-                Wait()
+                wait()
             end
         end]]
     end)()
@@ -332,7 +332,7 @@ end
 
 function Graphics:RegisterFlare(Collection)
 
-    for _, FlareObject in Pairs(Collection.LensFlares) do
+    for _, FlareObject in pairs(Collection.LensFlares) do
         FlareObject[2].Parent = Graphics.GraphicsGui.LensFlareFrame
     end
 

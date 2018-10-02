@@ -10,16 +10,16 @@ function Sequence:Sequence(Properties)
         ["Increment"]           = 1.0;  -- A multiplier on framely time delta
         ["CurrentTime"]         = 0.0;  -- Current time of the sequence
         ["TimePercentile"]      = 0.0;  -- A number between 0 and 1 denoting whole sequence progress
-        ["Animations"]          = SetMetatable({}, {__mode = "k"}); -- A table of animation objects
+        ["Animations"]          = setmetatable({}, {__mode = "k"}); -- A table of animation objects
         ["AutoStop"]            = true;  -- Automatically stops the sequence when done
         ["Play"]                = false; -- When true, allows the sequence to step
     }
 
-    for Key, Value in Pairs(Properties) do
-        local ValueType = Type(Value)
+    for Key, Value in pairs(Properties) do
+        local ValueType = type(Value)
         local DefaultValue = Object[Key]
-        Assert(DefaultValue ~= nil, String.Format("Invalid sequence property '%s'", Key))
-        Assert(ValueType == Type(DefaultValue), String.Format("Invalid type for property '%s'", Key))
+        assert(DefaultValue ~= nil, String.Format("Invalid sequence property '%s'", Key))
+        assert(ValueType == type(DefaultValue), String.Format("Invalid type for property '%s'", Key))
         Object[Key] = Value
     end
 
@@ -28,7 +28,7 @@ end
 
 -- Adds an animation object to the current sequence
 function Sequence:AddAnimation(AnimationObject)
-    Assert(AnimationObject[Class.NameKey] == CHECK_ANIMATION_TYPE,
+    assert(AnimationObject[Class.NameKey] == CHECK_ANIMATION_TYPE,
         String.Format("Animation object is an incorrect type (%s)", CHECK_ANIMATION_TYPE))
     self.Animations[AnimationObject] = AnimationObject
     return self
@@ -44,7 +44,7 @@ function Sequence:GetActiveAnimationsAtTime(CurrentTime)
 
     local Active = {}
 
-    for Animation in Pairs(self.Animations) do
+    for Animation in pairs(self.Animations) do
         if (CurrentTime >= Animation.StartTime) then
             if (CurrentTime <= Animation.EndTime) then
                 Active[Animation] = true
@@ -86,7 +86,7 @@ end
 
 function Sequence:Destroy()
     Sequencer:Deregister(self)
-    for Key in Pairs(self) do
+    for Key in pairs(self) do
         self[Key] = nil
     end
 end
@@ -112,7 +112,7 @@ function Sequence:Step(TimeDelta)
     if (self.AutoStop) then
         if (CurrentTime < 0 or CurrentTime > self.Duration) then
             self.Play = false
-            for Animation, Update in Pairs(CurrentAnimations) do
+            for Animation, Update in pairs(CurrentAnimations) do
                 if Update then
                     Animation.CurrentTime = (self.Increment > 0 and Animation.Duration or 0)
                     Animation:Update()
@@ -133,7 +133,7 @@ function Sequence:Step(TimeDelta)
 
     local PreviousAnimations = self:GetActiveAnimationsAtTime(PreviousTime)
 
-    for Animation, Active in Pairs(CurrentAnimations) do
+    for Animation, Active in pairs(CurrentAnimations) do
         if Active then
             Animation.CurrentTime = CurrentTime - Animation.StartTime
             Animation:Update()

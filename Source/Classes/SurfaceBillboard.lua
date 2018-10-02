@@ -5,11 +5,11 @@ local SurfaceBillboard = Class:FromName(script.Name)
 function SurfaceBillboard:SurfaceBillboard(Part, Adornee, MaxDistance, Offset)
 
     if (Part.CanCollide) then
-        Warn(String.Format("Warning: Surface billboard '%s' is CanCollide.", Part.Name))
+        warn(String.Format("Warning: Surface billboard '%s' is CanCollide.", Part.Name))
     end
 
     if (not Part.Anchored) then
-        Warn(String.Format("Warning: Surface billboard '%s' is not anchored.", Part.Name))
+        warn(String.Format("Warning: Surface billboard '%s' is not anchored.", Part.Name))
     end
 
     return {

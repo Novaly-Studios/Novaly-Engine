@@ -2,7 +2,7 @@ shared()
 
 local Sequencer = {
     Sequences       = {};
-    EasingStyles    = Require(Modules.Sequence.TweeningStyles);
+    EasingStyles    = require(Modules.Sequence.TweeningStyles);
     PresetEasing    = {
         ["LowElastic"] = {
             Target      = 1.0;
@@ -47,14 +47,14 @@ local function ClientInit()
 
     -- Main update event
     RunService.Stepped:Connect(function(_, Step)
-        for Subject in Pairs(Sequencer.Sequences) do
+        for Subject in pairs(Sequencer.Sequences) do
             if (Subject.Play) then
                 Subject:Step(Step)
             end
         end
     end)
 
-    for Name, Properties in Pairs(Sequencer.PresetEasing) do
+    for Name, Properties in pairs(Sequencer.PresetEasing) do
         Sequencer:AddEasingStyle(Name, TimeSpring.New(Properties))
     end
 end

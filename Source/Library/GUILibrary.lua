@@ -115,7 +115,7 @@ end
 
 function GUI:CorrectMouseOver()
     local OverStatusObjects = self.OverStatusObjects
-    for _, Object in Pairs(OverStatusObjects) do
+    for _, Object in pairs(OverStatusObjects) do
         Object.Status = false
         if (Object.MouseLeaveFunc) then
             Object.MouseLeaveFunc()

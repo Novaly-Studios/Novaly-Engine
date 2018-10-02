@@ -79,7 +79,7 @@ function InputLibrary:UpdateMouse()
     local Mouse = self.Mouse
     local XY = Mouse.XY
     local MouseRay = Graphics.Camera:ScreenPointToRay(XY.X + 0.5, XY.Y + 0.5)
-    local Hit, Pos = Workspace:FindPartOnRayWithIgnoreList(Ray.new(MouseRay.Origin, MouseRay.Direction * Mouse.Dist), Mouse.Ignore)
+    local Hit, Pos = workspace:FindPartOnRayWithIgnoreList(Ray.new(MouseRay.Origin, MouseRay.Direction * Mouse.Dist), Mouse.Ignore)
     Mouse.Target = Hit
     Mouse.Pos = Pos
 end
@@ -89,7 +89,7 @@ function InputLibrary:AddMouseIgnoreTag(Tag)
     CollectionService:GetInstanceAddedSignal(Tag):Connect(function(Object)
         Table.Insert(Mouse.Ignore, Object)
     end)
-    for _, Object in Pairs(CollectionService:GetTagged(Tag)) do
+    for _, Object in pairs(CollectionService:GetTagged(Tag)) do
         Table.Insert(Mouse.Ignore, Object)
     end
 end
@@ -119,7 +119,7 @@ function InputLibrary:BlockInput(Name, Keys)
         end,
         false,
         2,
-        Unpack(Keys)
+        unpack(Keys)
     )
 end
 
