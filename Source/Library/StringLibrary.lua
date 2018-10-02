@@ -61,9 +61,8 @@ function Compression.LZW.Decompress(Data)
     local Dictionary = {}
     local Size = 255
     local Last = ""
-    local Entry = ""
     local Result = ""
-    local Val = ""
+    local Entry, Val
 
     for x = 0, 255 do
         Dictionary[x] = ("" .. x):char()
