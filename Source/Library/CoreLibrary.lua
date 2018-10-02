@@ -301,9 +301,7 @@ Core.Svc = setmetatable({}, {
     end;
 })
 
-shared({
+return {
     Client = Core;
     Server = Core;
-})
-
-return true
+}

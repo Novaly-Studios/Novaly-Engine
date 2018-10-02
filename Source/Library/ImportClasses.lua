@@ -23,9 +23,7 @@ for Item = 1, #ClassItems do
     Structures.ImportClass(Item, Name)
 end
 
-shared({
+return {
     Client = Structures;
     Server = Structures;
-})
-
-return true
+}

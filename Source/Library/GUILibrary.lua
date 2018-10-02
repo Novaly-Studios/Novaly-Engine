@@ -156,9 +156,7 @@ function GUI:GetMouseOverIndicator(Button, MouseEnterFunc, MouseLeaveFunc)
     end
 end
 
-shared({
+return {
     Client = {GUI = GUI};
     Server = {};
-})
-
-return true
+}

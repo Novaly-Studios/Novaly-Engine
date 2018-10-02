@@ -144,9 +144,7 @@ for Key, Value in Pairs(Mutual) do
     Server[Key] = Value
 end
 
-shared({
+return {
     Client = Client;
     Server = Server;
-})
-
-return true
+}

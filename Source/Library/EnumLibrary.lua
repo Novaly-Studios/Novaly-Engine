@@ -17,9 +17,7 @@ function Enums:NewCollection(Name, Values)
     return Enums
 end
 
-shared({
+return {
     Client = {Enum = Enums};
     Server = {Enum = Enums};
-})
-
-return true
+}

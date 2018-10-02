@@ -216,9 +216,7 @@ end
 
 Table.ApplyKeyMapping(Table, Mappings, table)
 
-shared({
+return {
     Client = {Table = Table};
     Server = {Table = Table};
-})
-
-return true
+}

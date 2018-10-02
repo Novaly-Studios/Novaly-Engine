@@ -8,9 +8,7 @@ function Log.Log(Level, Str)
     Print(("\t"):rep(Level) .. Str)
 end
 
-shared({
+return {
     Client = Log;
     Server = Log;
-})
-
-return true
+}

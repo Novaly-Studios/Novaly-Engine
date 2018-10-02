@@ -127,9 +127,9 @@ function InputLibrary:UnblockInput(Name)
     ContextActionService:UnbindAction(Name)
 end
 
-shared({
+return {
     Client = {InputLibrary = InputLibrary, Init = ClientInit};
     Server = {};
-})
+}
 
 return true

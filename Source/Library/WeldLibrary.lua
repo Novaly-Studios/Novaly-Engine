@@ -58,9 +58,7 @@ end
 Weld.WeldModel = Weld.Model
 Weld.WeldPart = Weld.Part
 
-shared({
+return {
     Client = {Weld = Weld};
     Server = {Weld = Weld};
-})
-
-return true
+}

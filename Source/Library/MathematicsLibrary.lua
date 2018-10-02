@@ -392,9 +392,7 @@ Maths["Tau"]            = 2 * Maths.PI
 
 local Final = {Math = Maths, Curve = Curve}
 
-shared({
+return {
     Client = Final;
     Server = Final;
-})
-
-return true
+}

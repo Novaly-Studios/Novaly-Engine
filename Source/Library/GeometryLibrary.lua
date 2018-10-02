@@ -29,9 +29,7 @@ function Geometry:StripAxis(Point, ClassRef, ...)
     return ClassRef.new(Unpack(Args))
 end
 
-shared({
+return {
     Client = {Geometry = Geometry};
     Server = {Geometry = Geometry};
-})
-
-return true
+}

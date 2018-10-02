@@ -17,9 +17,7 @@ function Misc:TableFromTreeValues(Root)
     return Result
 end
 
-shared({
+return {
     Client = {Misc = Misc};
     Server = {Misc = Misc};
-})
-
-return true
+}

@@ -339,9 +339,7 @@ function Graphics:RegisterFlare(Collection)
     Graphics.LensFlareItems[#Graphics.LensFlareItems + 1] = Collection
 end
 
-shared({
+return {
     Client = {Graphics = Graphics, Init = ClientInit};
     Server = {Init = ServerInit};
-})
-
-return true
+}

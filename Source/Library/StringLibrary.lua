@@ -125,9 +125,7 @@ end
 
 Table.ApplyKeyMapping(String, Mappings, string)
 
-shared({
+return {
     Client = {String = String};
     Server = {String = String};
-})
-
-return true
+}

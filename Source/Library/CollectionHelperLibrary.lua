@@ -81,9 +81,7 @@ function CollectionHelper:GetFirstTagged(Tag)
     return CollectionService:GetTagged(Tag)[1]
 end
 
-shared({
+return {
     Client = {CollectionHelper = CollectionHelper};
     Server = {CollectionHelper = CollectionHelper};
-})
-
-return true
+}

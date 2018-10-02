@@ -59,9 +59,7 @@ local function ClientInit()
     end
 end
 
-shared({
+return {
     Client = {Sequencer = Sequencer, Init = ClientInit};
     Server = {};
-})
-
-return true
+}

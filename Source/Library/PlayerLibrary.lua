@@ -176,9 +176,7 @@ end
 Client.PlayerDataManagement.WaitForItem = WaitForItem
 Server.PlayerDataManagement.WaitForItem = WaitForItem
 
-shared({
+return {
     Client = Client;
     Server = Server;
-})
-
-return true
+}

@@ -89,9 +89,7 @@ function Class:IsEquivalentType(Subject, CheckSuperclass)
     return false
 end
 
-shared({
+return {
     Client = {Class = Class};
     Server = {Class = Class};
-})
-
-return true
+}

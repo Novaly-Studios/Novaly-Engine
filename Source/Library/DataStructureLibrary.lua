@@ -157,9 +157,7 @@ function DataStructures:CanBuild(TypeName)
     return (self.BuildFunctions[TypeName] == nil and false or true)
 end
 
-shared({
+return {
     Client = {DataStructures = DataStructures};
     Server = {DataStructures = DataStructures};
-})
-
-return true
+}
