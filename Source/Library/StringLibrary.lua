@@ -109,7 +109,7 @@ end
 function String.NumberComma(Input)
 
     local Formatted = Input
-    local Index = 0
+    local Index
 
     while true do
 
