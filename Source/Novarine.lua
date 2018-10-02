@@ -12,7 +12,6 @@ local Indicator             = Server and "Server" or "Client"
 local TargetName            = string.format("%sGameLoader", Indicator)
 
 local CachedEnvironments    = {}
-
 local Environment           = {}
 
 if Server then
@@ -79,7 +78,7 @@ for Key, Value in pairs(LoadOrder) do
     local Library = ReplicatedStorage.Library:FindFirstChild(Value)
     if Library then
         local Now = tick()
-        require(Library)
+        AddPlugin(require(Library))
         print("[Load Order " .. Key .. "] Library: " .. Library.Name .. " Loaded on " .. Indicator ..
             " (" .. ("%.2f"):format((tick() - Now) * 1000) .. "ms)")
     end
