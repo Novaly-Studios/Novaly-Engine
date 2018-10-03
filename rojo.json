@@ -1,22 +1,32 @@
 {
-    "name": "RaceCity",
+    "name": "Novaly-Engine",
     "servePort": 8000,
     "partitions":
     {
-        "engine":
+        "classes":
         {
-            "path": "Source",
-            "target": "ReplicatedStorage"
+            "path": "Source/Classes",
+            "target": "ReplicatedStorage.Classes"
         },
-        "server":
+        "configuration":
         {
-            "path": "Loaders/Server",
-            "target": "ServerScriptService"
+            "path": "Source/configuration",
+            "target": "ReplicatedStorage.configuration"
         },
-        "client":
+        "library":
         {
-            "path": "Loaders/Client",
-            "target": "StarterGui"
+            "path": "Source/Library",
+            "target": "ReplicatedStorage.Library"
+        },
+        "modules":
+        {
+            "path": "Source/Modules",
+            "target": "ReplicatedStorage.Modules"
+        },
+        "loader":
+        {
+            "path": "Source/Loader",
+            "target": "ReplicatedStorage.Loader"
         }
     }
 }

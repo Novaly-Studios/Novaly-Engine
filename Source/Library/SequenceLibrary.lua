@@ -2,7 +2,7 @@ shared()
 
 local Sequencer = {
     Sequences       = {};
-    EasingStyles    = Require(Modules.Sequence.TweeningStyles);
+    EasingStyles    = Require(Modules.TweeningStyles);
     PresetEasing    = {
         ["LowElastic"] = {
             Target      = 1.0;

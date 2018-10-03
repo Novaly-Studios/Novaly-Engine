@@ -4,7 +4,7 @@ local TweenValue = Class:FromName(script.Name) {
     SingleTransition        = {}; -- Transitions over a defined table of control points
     PiecewiseTransition     = {}; -- Repeated single transitions over an arbitrary table of control points
     NthDegreeTransition     = {}; -- Full, non-pieced transitions over an arbitrary table of control points
-    EasingStyles            = Require(Modules.Sequence.TweeningStyles);
+    EasingStyles            = Require(Modules.TweeningStyles);
 };
 
 function TweenValue.SingleTransition:Linear(Points, CurrentTime, Duration)
