@@ -28,10 +28,25 @@ local Class = {
     name and a table of static variables.
 
     @function Class.New
+    @usage
+        local Test = Class:New("Test", {Static = 300})
+        function Test:Test(Var)
+            self.Var = Var
+        end
+        function Test:Compute()
+            return self.Var * self.Static
+        end
+        print(Test.New(20):Compute())
 
+    @param Name The name of the class, used as its type.
+    @param ClassTable The table of static class data.
+
+    @return The class metatable.
 ]]
 
 function Class:New(Name, ClassTable)
+
+    ClassTable = ClassTable or {}
 
     local function Constructor(...)
 
@@ -69,11 +84,6 @@ function Class:New(Name, ClassTable)
     return ClassTable
 end
 
--- Create class from name
-function Class:FromName(Name)
-    return self:New(Name, {})
-end
-
 -- Create class as an extension of another
 function Class:FromExtension(Name, Other)
 
@@ -103,6 +113,12 @@ function Class:IsEquivalentType(Subject, CheckSuperclass)
 
     return false
 end
+
+--[[
+    @deprecate Use Class.New instead
+    @todo Replace all Class.FromName with Class.New
+]]
+Class.FromName = Class.New
 
 return {
     Client = {Class = Class};
