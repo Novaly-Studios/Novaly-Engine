@@ -2,6 +2,7 @@
     Novarine Core Function Library --
     This library provides various core functions.
 
+    @module CoreLibrary
     @author TPC9000
 ]]
 

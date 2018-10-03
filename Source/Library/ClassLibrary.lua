@@ -1,3 +1,10 @@
+--[[
+    Allows for the construction, inheritance and typing of classes.
+
+    @classmod ClassLibrary
+    @author TPC9000
+]]
+
 shared()
 
 local Class = {
@@ -15,6 +22,14 @@ local Class = {
         end;
     };
 }
+
+--[[
+    Class.New constructs a new class with a given
+    name and a table of static variables.
+
+    @function Class.New
+
+]]
 
 function Class:New(Name, ClassTable)
 
