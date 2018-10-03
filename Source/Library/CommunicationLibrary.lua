@@ -1,3 +1,12 @@
+--[[
+    Shortens the process of making server RemoteFunction or RemoteEvent
+    calls by adding quick access functions.
+
+    @module Communication Libary
+    @todo Multiple connections using an Event object for RemoteEvents and BindableEvents
+    @author TPC9000
+]]
+
 shared()
 
 local Mutual            = {}

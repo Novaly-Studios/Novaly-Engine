@@ -1,7 +1,7 @@
 --[[
     Allows for the construction, inheritance and typing of classes.
 
-    @classmod ClassLibrary
+    @module ClassLibrary
     @author TPC9000
 ]]
 
@@ -24,10 +24,11 @@ local Class = {
 }
 
 --[[
-    Class.New constructs a new class with a given
+    @function Class.New
+
+    Constructs a new class with a given
     name and a table of static variables.
 
-    @function Class.New
     @usage
         local Test = Class:New("Test", {Static = 300})
         function Test:Test(Var)
@@ -84,20 +85,54 @@ function Class:New(Name, ClassTable)
     return ClassTable
 end
 
--- Create class as an extension of another
+--[[
+    @function Class.FromExtension
+
+    Creates a class as an extension of another.
+
+    @usage
+        local Class1 = Class:New("Class1") {
+            A = 2;
+        }
+        local Class2 = Class:FromExtension("Class2", Class1) {
+            B = 3;
+        }
+        function Class2:Test()
+            print(self.A * self.B)
+        end
+
+    @param Name The name of the class being created.
+    @param Other The class being extended.
+
+    @return The extended class.
+]]
+
 function Class:FromExtension(Name, Other)
 
     local Result = self:FromName(Name)
 
     Result["__index"] = function(self, Key)
-        return (RawGet(self, Key) or RawGet(self, "Class")[Key] or Other[Key])
+        return (RawGet(self, Key) or RawGet(self, self.ClassRefKey)[Key] or Other[Key])
     end
     Result[self.SuperclassRefKey] = Other
 
     return Result
 end
 
--- Check if two classes are of equal type
+--[[
+    @function Class.IsEquivalentType
+
+    Checks if two objects are of equal type.
+
+    @usage
+        local Class1 = Class:New("Class1") {}
+
+    @param Subject The first class or object which will be checked.
+    @param CheckSuperclass The second class or object which will be checked.
+
+    @return A boolean denoting whether the two classes or objects are of the same type.
+]]
+
 function Class:IsEquivalentType(Subject, CheckSuperclass)
 
     local SuperKey = self.SuperclassRefKey

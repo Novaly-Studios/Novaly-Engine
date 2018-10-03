@@ -1,8 +1,23 @@
 shared()
 
+--[[
+    Allows for the construction, inheritance and typing of classes.
+
+    @module Data Structure and Serialisation Library
+    @alias DataStructureLibrary
+    @author TPC9000
+]]
+
 local DataStructures    = {
     TypeVar             = "TYPE";
 }
+
+--[[
+    A table of data types and their fields. This is used
+    to determine the type of the object.
+
+    @table DataStructures.Built
+]]
 
 DataStructures.Built    = {
     Vector2 = {
@@ -42,6 +57,13 @@ DataStructures.Built    = {
     };
 }
 
+--[[
+    A table of functions which take an input object
+    and return a table representation of that object.
+
+    @table DataStructures.SerialiseFunctions
+]]
+
 DataStructures.SerialiseFunctions = {
     Color3 = function(Object)
         return {
@@ -65,28 +87,46 @@ DataStructures.SerialiseFunctions = {
     end;
 }
 
+--[[
+    A table of functions which take a serialised table
+    and return a deserialised object from that table.
+
+    @table DataStructures.SerialiseFunctions
+]]
+
 DataStructures.BuildFunctions = {
     Color3 = function(Object)
-        return {
-            Object.r;
-            Object.g;
-            Object.b;
-        }
+        return Color3.new(
+            Object.r,
+            Object.g,
+            Object.b
+        )
     end;
     Vector3 = function(Object)
-        return {
-            Object.X;
-            Object.Y;
-            Object.Z;
-        }
+        return Vector3.new(
+            Object.X,
+            Object.Y,
+            Object.Z
+        )
     end;
     Vector2 = function(Object)
-        return {
-            Object.X;
-            Object.Y;
-        }
+        return Vector2.new(
+            Object.X,
+            Object.Y
+        )
     end;
 }
+
+--[[
+    @function Test
+
+    Tests an object which would likely error when indexed
+    with a non-existant property and returns any value found.
+
+    @param Var The object to test.
+    @param Property The name of the property to look for.
+    @return An obtained value from the object if any is present, or nil.
+]]
 
 local function Test(Var, Property)
     local Result, Value = ProtectedCall(function()
@@ -95,11 +135,27 @@ local function Test(Var, Property)
     return (Result == false and nil or Value)
 end
 
+--[[
+    @function DataStructures.GetType
+
+    Returns the type of a userdata defined by the
+    defintions in DataStructures.Built. If the type
+    of the provided object is anything other than
+    a userdata or a table then its primitive type
+    is returned.
+
+    @param Var The object to test.
+    @return A string denoting the type of the object being tested.
+
+    @todo Recursive definitions.
+    @todo Integration with class library.
+]]
+
 function DataStructures:GetType(Var)
 
     local Found = Type(Var)
 
-    if (Found ~= "userdata") then
+    if (Found ~= "userdata" and Found ~= "table") then
         return Found
     else
 
@@ -124,6 +180,15 @@ function DataStructures:GetType(Var)
     end
 end
 
+--[[
+    @function DataStructures.Serialise
+
+    Serialises an object into a single table.
+
+    @param Item The object to serialise.
+    @return A serialised table.
+]]
+
 function DataStructures:Serialise(Item)
 
     local ItemType = self:GetType(Item)
@@ -135,23 +200,52 @@ function DataStructures:Serialise(Item)
     return Result
 end
 
+--[[
+    @function DataStructures.Build
+
+    Builds a serialised object back into
+    its full form.
+
+    @param Serialised The serialised table to convert.
+    @return The built object.
+]]
+
 function DataStructures:Build(Serialised)
 
     local ItemType = Serialised[self.TypeVar]
     Assert(ItemType, "Data passed to this function must be serialised!")
 
-    local Class = GetFunctionEnv()[ItemType]
-    Assert(Class, String.Format("No class exists under the name %s!", ItemType))
+    Assert(GetFunctionEnv()[ItemType], String.Format("No class exists under the name %s!", ItemType))
 
     local BuildFunction = self.BuildFunctions[ItemType]
     Assert(BuildFunction, String.Format("No build function exists for %s!", ItemType))
 
-    return Class.new(Unpack(BuildFunction(Serialised)))
+    return BuildFunction(Serialised)
 end
+
+--[[
+    @function DataStructures.CanSerialise
+
+    Determines whether a type serialisation
+    exists in the current data.
+
+    @param TypeName The type to check for.
+    @return A boolean denoting whether the serialisation function exists.
+]]
 
 function DataStructures:CanSerialise(TypeName)
     return (self.SerialiseFunctions[TypeName] == nil and false or true)
 end
+
+--[[
+    @function DataStructures.CanBuild
+
+    Determines whether an object builder
+    exists in the current data.
+
+    @param TypeName The type to check for.
+    @return A boolean denoting whether the builder function exists.
+]]
 
 function DataStructures:CanBuild(TypeName)
     return (self.BuildFunctions[TypeName] == nil and false or true)
