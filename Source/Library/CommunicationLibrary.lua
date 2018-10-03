@@ -3,6 +3,7 @@
     calls by adding quick access functions.
 
     @module Communication Libary
+    @alias CommunicationLibrary
     @todo Multiple connections using an Event object for RemoteEvents and BindableEvents
     @author TPC9000
 ]]

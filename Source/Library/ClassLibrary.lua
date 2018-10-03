@@ -1,7 +1,8 @@
 --[[
     Allows for the construction, inheritance and typing of classes.
 
-    @module ClassLibrary
+    @module Class Library
+    @alias ClassLibrary
     @author TPC9000
 ]]
 
