@@ -3,30 +3,10 @@
     "servePort": 8000,
     "partitions":
     {
-        "classes":
+        "engine":
         {
-            "path": "Source/Classes",
-            "target": "ReplicatedStorage.Classes"
-        },
-        "configuration":
-        {
-            "path": "Source/Configuration",
-            "target": "ReplicatedStorage.Configuration"
-        },
-        "library":
-        {
-            "path": "Source/Library",
-            "target": "ReplicatedStorage.Library"
-        },
-        "modules":
-        {
-            "path": "Source/Modules",
-            "target": "ReplicatedStorage.Modules"
-        },
-        "loader":
-        {
-            "path": "Source/Loader",
-            "target": "ReplicatedStorage.Loader"
+            "path": "Source",
+            "target": "ReplicatedFirst.Novarine"
         }
     }
 }

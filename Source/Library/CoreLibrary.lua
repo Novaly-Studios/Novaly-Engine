@@ -16,6 +16,7 @@ local SvcLoad           = {
     "RunService";
     "AssetService";
     "PhysicsService";
+    "ReplicatedFirst";
     "TeleportService";
     "DataStoreService";
     "UserInputService";

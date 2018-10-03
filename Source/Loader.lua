@@ -1,11 +1,13 @@
 local ReplicatedStorage     = game:GetService("ReplicatedStorage")
+local ReplicatedFirst       = game:GetService("ReplicatedFirst")
 local ServerScriptService   = game:GetService("ServerScriptService")
 local StarterPlayer         = game:GetService("StarterPlayer")
 local StarterGui            = game:GetService("StarterGui")
 local RunService            = game:GetService("RunService")
 
+local Parent                = script.Parent
 local Server                = RunService:IsServer()
-local ConfigFolder          = ReplicatedStorage.Configuration
+local ConfigFolder          = Parent.Configuration
 local LoadOrder             = require(ConfigFolder.LoadOrder)
 
 local Indicator             = Server and "Server" or "Client"
@@ -22,8 +24,8 @@ else
     end))
 end
 
-Environment["Modules"]          = ReplicatedStorage.Modules
-Environment["Classes"]          = ReplicatedStorage.Classes
+Environment["Modules"]          = Parent.Modules
+Environment["Classes"]          = Parent.Classes
 Environment["Assets"].Name      = "Assets"
 Environment["OriginalEnv"]      = getfenv()
 
@@ -75,7 +77,7 @@ setmetatable(shared, {
 Environment["CONFIG"] = require(ConfigFolder.Config)
 
 for Key, Value in pairs(LoadOrder) do
-    local Library = ReplicatedStorage.Library:FindFirstChild(Value)
+    local Library = Parent.Library:FindFirstChild(Value)
     if Library then
         local Now = tick()
         AddPlugin(require(Library))
@@ -86,6 +88,7 @@ end
 
 require(ReplicatedStorage:FindFirstChild(TargetName, true) or
         ServerScriptService:FindFirstChild(TargetName, true) or
+        ReplicatedFirst:FindFirstChild(TargetName, true) or
         StarterPlayer:FindFirstChild(TargetName, true) or
         StarterGui:FindFirstChild(TargetName, true))
 
