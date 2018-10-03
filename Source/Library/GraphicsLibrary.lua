@@ -3,7 +3,6 @@ shared()
 local Graphics                  = {
     Tags = {
         TransparentPart         = "Graphics:TransparentPart";
-        Model                   = "Graphics:Model";
     };
     EffectSequences             = {};
     LensFlareItems              = {};
@@ -166,26 +165,6 @@ function Graphics:HandlePartTransparency(Item)
     end
 end
 
-function Graphics:HandleModel(Item)
-    if Item then
-        local SettingsFolder = Item:FindFirstChild("Settings")
-        if SettingsFolder then
-            local MaxDist = SettingsFolder:FindFirstChild("MaxDist")
-            if MaxDist then
-                local MaxDist = MaxDist.Value
-                for _, Object in Pairs(Item:GetDescendants()) do
-                    if (Object:IsA("BasePart")) then
-                        local OriginalTransparency = Object:FindFirstChild("OriginalTransparency")
-                        if OriginalTransparency then
-                            Object.Transparency = ((Graphics.Camera.CFrame.p - Item.Position).magnitude > MaxDist and 1 or OriginalTransparency.Value)
-                        end
-                    end
-                end
-            end
-        end
-    end
-end
-
 local function ClientInit()
 
     if (CONFIG.gEnableGraphics == false) then
@@ -205,10 +184,6 @@ local function ClientInit()
     local TransparentPartHandler = OperationTable.New(function(Part)
         Graphics:HandlePartTransparency(Part)
     end)
-
-    --[[local ModelHandler = OperationTable.New(function(Model)
-        Graphics:HandleModel(Model)
-    end)]]
 
     Blur.Size           = 0
     Bloom.Intensity     = 0
@@ -247,14 +222,14 @@ local function ClientInit()
     end
 
     RunService.Heartbeat:Connect(function(Step)
-        local PartIters = Math.Floor(CONFIG.gTransparentPartsPerFrame * CONFIG._TargetFramerate / (1 / Step))
-        -- local ModelIters = Math.Floor(CONFIG.gModelsPerFrame * CONFIG._TargetFramerate / (1 / Step))
+        local PartIters = Math.Floor(CONFIG.gTransparentPartsPerFrame * (1 / Step) / CONFIG._TargetFramerate)
+
+        print(PartIters)
+
         Graphics:UpdateLensFlares()
         Graphics:UpdateBillboards()
         TransparentPartHandler:Next(PartIters)
         TransparentPartHandler:Clean(Clean, PartIters)
-        --[[ModelHandler:Next(ModelIters)
-        ModelHandler:Clean(Clean, ModelIters)]]
     end)
 
     Coroutine.Wrap(function()
@@ -270,14 +245,6 @@ local function ClientInit()
     for _, Part in Pairs(CollectionService:GetTagged(Graphics.Tags.TransparentPart)) do
         TransparentPartHandler:Add(Part)
     end
-
-    --[[CollectionService:GetInstanceAddedSignal(Graphics.Tags.Model):Connect(function(Part)
-        ModelHandler:Add(Part)
-    end)
-
-    for _, Part in Pairs(CollectionService:GetTagged(Graphics.Tags.Model)) do
-        ModelHandler:Add(Part)
-    end]]
 
     Graphics.Camera.Changed:Connect(function(Property)
         if (Property == "ViewportSize" or Property == "FieldOfView") then
@@ -300,16 +267,6 @@ local function ServerInit()
                 Wait()
             end
         end
-        --[[for Index, Model in Pairs(CollectionService:GetTagged(Graphics.Tags.Model)) do
-            for _, Object in Pairs(Model:GetDescendants()) do
-                if (Object:IsA("BasePart")) then
-                    Object.
-                end
-            end
-            if (Index % 50 == 0) then
-                Wait()
-            end
-        end]]
     end)()
 end
 
