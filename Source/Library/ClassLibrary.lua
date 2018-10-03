@@ -15,9 +15,9 @@ local Class = {
     ConstructorNames    = {"new", "New", "Create"};
     ClassMetatable      = {
         __call = function(self, Static)
-            Assert(Type(Static) == "table", "Static vars must be a table.")
-            for Key, Value in Pairs(Static) do
-                RawSet(self, Key, Value)
+            assert(type(Static) == "table", "Static vars must be a table.")
+            for Key, Value in pairs(Static) do
+                rawset(self, Key, Value)
             end
             return self
         end;
@@ -52,7 +52,7 @@ function Class:New(Name, ClassTable)
 
     local function Constructor(...)
 
-        local Result = SetMetatable({Class = ClassTable}, ClassTable)
+        local Result = setmetatable({Class = ClassTable}, ClassTable)
         local Func = ClassTable[Name]
         GetFunctionEnv(Func).self = Result
 
@@ -63,10 +63,10 @@ function Class:New(Name, ClassTable)
         end
 
         Result[self.ClassRefKey] = ClassTable
-        SetMetatable(Result, ClassTable)
+        setmetatable(Result, ClassTable)
 
-        for _, Value in Pairs(Result) do
-            if (Type(Value) == "function") then
+        for _, Value in pairs(Result) do
+            if (type(Value) == "function") then
                 GetFunctionEnv(Value).self = Result
             end
         end
@@ -74,14 +74,14 @@ function Class:New(Name, ClassTable)
         return Result
     end
 
-    for _, Value in Pairs(self.ConstructorNames) do
+    for _, Value in pairs(self.ConstructorNames) do
         ClassTable[Value] = Constructor
     end
 
     ClassTable[self.NameKey] = Name
     ClassTable["__index"] = ClassTable
 
-    SetMetatable(ClassTable, self.ClassMetatable)
+    setmetatable(ClassTable, self.ClassMetatable)
 
     return ClassTable
 end
@@ -113,7 +113,7 @@ function Class:FromExtension(Name, Other)
     local Result = self:FromName(Name)
 
     Result["__index"] = function(self, Key)
-        return (RawGet(self, Key) or RawGet(self, self.ClassRefKey)[Key] or Other[Key])
+        return (rawget(self, Key) or rawget(self, self.ClassRefKey)[Key] or Other[Key])
     end
     Result[self.SuperclassRefKey] = Other
 

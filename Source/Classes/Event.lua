@@ -38,13 +38,13 @@ function Event:Update()
 end
 
 function Event:Fire()
-    for _, Handler in Pairs(self.Handlers) do
+    for _, Handler in pairs(self.Handlers) do
         Handler()
     end
 end
 
 function Event:ShouldFire()
-    for Listener in Pairs(self.Listeners) do
+    for Listener in pairs(self.Listeners) do
         if (Listener(self.State)) then
             return true
         end

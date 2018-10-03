@@ -30,7 +30,7 @@ function UnyieldSequence:Run()
     local Last = {}
 
     for Index = 1, #Actions do
-        Last = {Actions[Index](Unpack(Last))}
+        Last = {Actions[Index](unpack(Last))}
         if (not Last[1]) then
             self.Fail(Last[2])
             break

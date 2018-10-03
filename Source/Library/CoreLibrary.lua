@@ -27,38 +27,6 @@ local SvcLoad           = {
     "ContextActionService";
 }
 
-local NameSubstitutes   = {
-    -- Built-in functions
-    ["assert"]          = "Assert";
-    ["collectgarbage"]  = "CollectGarbage";
-    ["error"]           = "Error";
-    ["getfenv"]         = "GetFunctionEnv";
-    ["getmetatable"]    = "GetMetatable";
-    ["ipairs"]          = "IPairs";
-    ["loadstring"]      = "LoadString";
-    ["next"]            = "Next";
-    ["pairs"]           = "Pairs";
-    ["pcall"]           = "ProtectedCall";
-    ["print"]           = "Print";
-    ["rawequal"]        = "RawEqual";
-    ["rawget"]          = "RawGet";
-    ["rawset"]          = "RawSet";
-    ["require"]         = "Require";
-    ["select"]          = "Select";
-    ["setfenv"]         = "SetFunctionEnv";
-    ["setmetatable"]    = "SetMetatable";
-    ["tick"]            = "Tick";
-    ["tonumber"]        = "ToNumber";
-    ["tostring"]        = "ToString";
-    ["type"]            = "Type";
-    ["unpack"]          = "Unpack";
-    ["warn"]            = "Warn";
-    ["wait"]            = "Wait";
-    -- Services and objects
-    ["Workspace"]       = "workspace";
-    ["game"]            = "Game";
-}
-
 local Core              = {}
 Core.OldPairs           = pairs
 Core.OldIPairs          = ipairs
@@ -448,10 +416,6 @@ end
 for Index = 1, #SvcLoad do
     local Value = SvcLoad[Index]
     Core[Value] = game:GetService(Value)
-end
-
-for Key, Value in pairs(NameSubstitutes) do
-    Core[Value] = Core[Key] or getfenv()[Key]
 end
 
 Core.Svc = setmetatable({}, {

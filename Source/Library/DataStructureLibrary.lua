@@ -129,7 +129,7 @@ DataStructures.BuildFunctions = {
 ]]
 
 local function Test(Var, Property)
-    local Result, Value = ProtectedCall(function()
+    local Result, Value = pcall(function()
         return Var[Property]
     end)
     return (Result == false and nil or Value)
@@ -153,7 +153,7 @@ end
 
 function DataStructures:GetType(Var)
 
-    local Found = Type(Var)
+    local Found = type(Var)
 
     if (Found ~= "userdata" and Found ~= "table") then
         return Found
@@ -162,12 +162,12 @@ function DataStructures:GetType(Var)
         local Prev = 0
         local Found = nil
 
-        for Key, Value in Pairs(self.Built) do
+        for Key, Value in pairs(self.Built) do
 
             local Count = 0
 
-            for Key, Value in Pairs(Value) do
-                Count = Count + (Type(Test(Var, Key)) == Value and 1 or -1)
+            for Key, Value in pairs(Value) do
+                Count = Count + (type(Test(Var, Key)) == Value and 1 or -1)
             end
 
             if (Count >= Prev) then
@@ -193,7 +193,7 @@ function DataStructures:Serialise(Item)
 
     local ItemType = self:GetType(Item)
     local Handler = self.SerialiseFunctions[ItemType]
-    Assert(Handler, String.Format("No serialisation function exists for %s!", ItemType))
+    assert(Handler, String.Format("No serialisation function exists for %s!", ItemType))
 
     local Result = Handler(Item)
     Result[self.TypeVar] = ItemType
@@ -213,12 +213,12 @@ end
 function DataStructures:Build(Serialised)
 
     local ItemType = Serialised[self.TypeVar]
-    Assert(ItemType, "Data passed to this function must be serialised!")
+    assert(ItemType, "Data passed to this function must be serialised!")
 
-    Assert(GetFunctionEnv()[ItemType], String.Format("No class exists under the name %s!", ItemType))
+    assert(GetFunctionEnv()[ItemType], String.Format("No class exists under the name %s!", ItemType))
 
     local BuildFunction = self.BuildFunctions[ItemType]
-    Assert(BuildFunction, String.Format("No build function exists for %s!", ItemType))
+    assert(BuildFunction, String.Format("No build function exists for %s!", ItemType))
 
     return BuildFunction(Serialised)
 end

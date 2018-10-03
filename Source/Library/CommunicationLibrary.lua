@@ -47,7 +47,7 @@ function Client.Init()
 
         local Event = Binds.Events[Name]
 
-        if (Type(Name) ~= "string") then
+        if (type(Name) ~= "string") then
             Log(0, "Warning, server has sent an empty or non-string request name.")
         elseif (Event == nil) then
             Log(0, "Warning, no event '" .. Name .. "' found in event collection.")
@@ -60,7 +60,7 @@ function Client.Init()
 
         local Function = Binds.Functions[Name]
 
-        if (Type(Name) ~= "string") then
+        if (type(Name) ~= "string") then
             Log(0, "Warning, servers has sent an empty or non-string request name.")
             return false
         elseif (Function == nil) then
@@ -81,11 +81,11 @@ function Server.WaitForTransmissionReady(Player)
 
     while (Server.TransmissionReady[Player.Name] == nil) do
 
-        Wait(CONFIG.coPollInterval)
+        wait(CONFIG.coPollInterval)
         Tries = Tries + 1
 
         if (Tries == CONFIG.coMaxTries) then
-            Error("Max transmission attempts reached for player " .. Player.Name .. "!")
+            error("Max transmission attempts reached for player " .. Player.Name .. "!")
             return
         end
     end
@@ -117,7 +117,7 @@ function Server.Init()
         if not Player then return end
         local Event = Binds.Events[Name]
 
-        if (Type(Name) ~= "string") then
+        if (type(Name) ~= "string") then
             Log(0, "Warning, client " .. Player.Name .. " has sent an empty or non-string request name.")
         elseif (Event == nil) then
             Log(0, "Warning, no event '" .. Name .. "' found in event collection.")
@@ -131,7 +131,7 @@ function Server.Init()
         if not Player then return end
         local Function = Binds.Functions[Name]
 
-        if (Type(Name) ~= "string") then
+        if (type(Name) ~= "string") then
             Log(0, "Warning, client " .. Player.Name .. " has sent an empty or non-string request name.")
             return false
         elseif (Function == nil) then
@@ -143,13 +143,13 @@ function Server.Init()
 
     Players.PlayerAdded:Connect(function(Player)
         while (Server.InvokeRemoteFunction("Ready", Player) == nil) do
-            Wait(CONFIG.coPollInterval)
+            wait(CONFIG.coPollInterval)
         end
         Server.TransmissionReady[Player.Name] = true
     end)
 end
 
-for Key, Value in Pairs(Mutual) do
+for Key, Value in pairs(Mutual) do
     Client[Key] = Value
     Server[Key] = Value
 end

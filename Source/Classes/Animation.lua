@@ -5,19 +5,19 @@ local Animation = Class:FromName(script.Name)
 function Animation:Animation(Properties, Transitions)
 
     local Object = {
-        ["Target"]              = Workspace;  -- Target instance to animate
+        ["Target"]              = workspace;  -- Target instance to animate
         ["Duration"]            = 0.0;  -- The duration of the animation
         ["StartTime"]           = 0.0;  -- Time in the sequence at which this animation will begin
         ["CurrentTime"]         = 0.0;  -- Current time of the animation
     }
 
-    for Key, Value in Pairs(Properties) do
+    for Key, Value in pairs(Properties) do
         local DefaultValue = Object[Key]
-        Assert(DefaultValue ~= nil, String.Format("Invalid animation property '%s'", Key))
+        assert(DefaultValue ~= nil, String.Format("Invalid animation property '%s'", Key))
         Object[Key] = Value
     end
 
-    Assert(Transitions, "No TweenValue transitions provided!")
+    assert(Transitions, "No TweenValue transitions provided!")
     Object["EndTime"] = Object.StartTime + Object.Duration
     Object["Transitions"] = Transitions
 
@@ -25,14 +25,14 @@ function Animation:Animation(Properties, Transitions)
 end
 
 function Animation:Update()
-    for Property, Transition in Pairs(self.Transitions) do
+    for Property, Transition in pairs(self.Transitions) do
         self.Target[Property] = Transition:GetValueAt(self.CurrentTime, self.Duration)
     end
     return self
 end
 
 function Animation:Destroy()
-    for Key in Pairs(self) do
+    for Key in pairs(self) do
         self[Key] = nil
     end
 end

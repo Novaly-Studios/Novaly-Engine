@@ -12,12 +12,12 @@ function TimeSpring:TimeSpring(Properties)
         Target      = 0.0;
         Compression = 1.0;
         Damping     = 0.2;
-        InitialTime = Tick();
+        InitialTime = tick();
     }
 
-    for Key, Value in Pairs(Properties) do
+    for Key, Value in pairs(Properties) do
         local DefaultValue = Object[Key]
-        Assert(DefaultValue ~= nil, String.Format("Invalid spring property '%s'", Key))
+        assert(DefaultValue ~= nil, String.Format("Invalid spring property '%s'", Key))
         Object[Key] = Value
     end
 
@@ -41,7 +41,7 @@ function TimeSpring:UpdateAt(CurrentTime)
 end
 
 function TimeSpring:Update()
-    return self:UpdateAt(Tick() - self.InitialTime)
+    return self:UpdateAt(tick() - self.InitialTime)
 end
 
 return TimeSpring

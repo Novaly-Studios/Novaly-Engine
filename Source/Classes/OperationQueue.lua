@@ -3,7 +3,7 @@ shared()
 local OperationQueue = Class:FromName(script.Name)
 
 function OperationQueue:OperationQueue(Handler)
-    Assert(Handler)
+    assert(Handler)
     return {
         Handler = Handler;
         Queue = LinkedList.New();
@@ -12,7 +12,7 @@ end
 
 function OperationQueue:Add(...)
     local Queue = self.Queue
-    for _, Item in Pairs({...}) do
+    for _, Item in pairs({...}) do
         Queue:PushTail(Item)
     end
 end

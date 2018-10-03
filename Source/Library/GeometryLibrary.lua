@@ -22,11 +22,11 @@ end
 function Geometry:StripAxis(Point, ClassRef, ...)
     local Args = {...}
 
-    for Key, Index in Pairs(Args) do
+    for Key, Index in pairs(Args) do
         Args[Key] = Point[Index]
     end
 
-    return ClassRef.new(Unpack(Args))
+    return ClassRef.new(unpack(Args))
 end
 
 return {

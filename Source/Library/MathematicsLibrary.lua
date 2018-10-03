@@ -302,11 +302,11 @@ function Maths.PiecewiseInterpolate(Points, InterpolateFunction, DefaultArgs, Cu
 
     Table.Insert(Result, CorrectedRatio)
 
-    for _, Arg in Pairs(DefaultArgs) do
+    for _, Arg in pairs(DefaultArgs) do
         Table.Insert(Result, Arg)
     end
 
-    return InterpolateFunction(Unpack(Result))
+    return InterpolateFunction(unpack(Result))
 end
 
 --[[
@@ -372,9 +372,9 @@ end
 --]]
 
 function Curve.New(Points)
-    return SetMetatable(Points, {
+    return setmetatable(Points, {
         __index = function(self, Key)
-            return RawGet(self, Key) or Curve[Key]
+            return rawget(self, Key) or Curve[Key]
         end;
     })
 end

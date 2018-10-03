@@ -6,7 +6,7 @@ local Hierarchy = Class:FromName("Hierarchy") {
 
 function Hierarchy.new(Structure)
 
-    SetMetatable(Structure, {__mode = "k"})
+    setmetatable(Structure, {__mode = "k"})
 
     return {
         Structure = Structure;
@@ -15,7 +15,7 @@ function Hierarchy.new(Structure)
 end
 
 function Hierarchy:AddPropertySet(ID, Properties)
-    Assert(Type(Properties) == "table")
+    assert(type(Properties) == "table")
     self.PropertySets[ID] = Properties
     return self
 end
@@ -27,7 +27,7 @@ function Hierarchy:ApplyProperty(Object, Key, Value)
 end
 
 function Hierarchy:ApplyProperties(Object, Properties)
-    for Key, Value in Pairs(Properties) do
+    for Key, Value in pairs(Properties) do
         self:ApplyProperty(Object, Key, Value)
     end
 end
@@ -36,9 +36,9 @@ function Hierarchy:Apply(Object, Struct)
 
     local Target = (Struct or self.Structure)
 
-    for Key, Value in Pairs(Target) do
+    for Key, Value in pairs(Target) do
 
-        if (Type(Key) == "table") then
+        if (type(Key) == "table") then
 
             local Name = Key[1]
             local ClassType = Key[2]
@@ -49,17 +49,17 @@ function Hierarchy:Apply(Object, Struct)
                 Subordinate.Name = Name
             end
 
-            Assert(Subordinate:IsA(ClassType), String.Format("Object '%s' is not of the specified type '%s' in the Hierarchy", Subordinate.Name, ClassType))
+            assert(Subordinate:IsA(ClassType), String.Format("Object '%s' is not of the specified type '%s' in the Hierarchy", Subordinate.Name, ClassType))
             self:Apply(Subordinate, Value)
             Subordinate.Parent = Object
 
         elseif (Key == self.PropertySet) then
 
             local Properties = self.PropertySets[Value]
-            Assert(Properties, String.Format("No property set '%s' exists", Value))
+            assert(Properties, String.Format("No property set '%s' exists", Value))
             self:ApplyProperties(Object, Properties)
 
-        elseif (String.Find(ToString(Object[Key]), "Signal") and Type(Value) == "function") then
+        elseif (String.Find(tostring(Object[Key]), "Signal") and type(Value) == "function") then
 
             local Func = Value
             local Connection

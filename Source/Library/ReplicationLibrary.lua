@@ -24,9 +24,9 @@ local function GetNewIndexHandler(IsServer)
         )
 
         -- Allow __newindex to fire again
-        RawSet(self, Key, nil)
-        local KeyList = RawGet(self, "KeyList")
-        local Vars = RawGet(self, "Vars")
+        rawset(self, Key, nil)
+        local KeyList = rawget(self, "KeyList")
+        local Vars = rawget(self, "Vars")
         local Send = Value
         local NewKeys = {}
         local Count = #KeyList
@@ -37,7 +37,7 @@ local function GetNewIndexHandler(IsServer)
 
         NewKeys[Count + 1] = Key
 
-        if (Type(Value) == "table") then
+        if (type(Value) == "table") then
             if (Value.Object == nil) then
                 WrapFunc(NewKeys, Value)
                 Send = Replication.StripReplicatedData(Value)
@@ -50,12 +50,12 @@ local function GetNewIndexHandler(IsServer)
             Broadcast("ReplicateData", NewKeys, Send)
         end
 
-        Replication.CallBinds(Unpack(NewKeys))
+        Replication.CallBinds(unpack(NewKeys))
     end
 end
 
 local function IndexHandler(self, Key)
-    return RawGet(self, Key) or RawGet(self, "Vars")[Key]
+    return rawget(self, Key) or rawget(self, "Vars")[Key]
 end
 
 local function GetWrapReplicatedData(Metatable)
@@ -67,7 +67,7 @@ local function GetWrapReplicatedData(Metatable)
 
         for Key, Value in next, Data do -- Iterate through each data item, wrap if table
             if (Key ~= "Vars" and Key ~= "KeyList") then
-                if (Type(Value) == "table") then
+                if (type(Value) == "table") then
                     if (Value.Object == nil) then -- Check for wrapped instances
                         --[[
                             Append new key (from iteration) onto end of previous list, but copy (important)
@@ -80,7 +80,7 @@ local function GetWrapReplicatedData(Metatable)
                 Data[Key] = nil
             end
         end
-        SetMetatable(Data, Metatable)
+        setmetatable(Data, Metatable)
     end
 
     return SelfFunc
@@ -104,7 +104,7 @@ function Replication.StripReplicatedData(Data)
     local Result = {}
 
     for Key, Value in next, Data.Vars do
-        if (Type(Value) == "table") then
+        if (type(Value) == "table") then
             if (Value.Object == nil) then -- Don't iterate through wrapped instances
                 Value = Replication.StripReplicatedData(Value)
             end
@@ -186,7 +186,7 @@ function Replication.Wait(Item)
     local Result = ReplicatedData[Item]
 
     while (Result == nil) do
-        Wait()
+        wait()
         Result = ReplicatedData[Item]
     end
 
@@ -211,7 +211,7 @@ local function ClientInit()
 
         Replication.Wait()
 
-        if Type(Keys) == "table" then
+        if type(Keys) == "table" then
 
             local FinalKey = Keys[#Keys]
             local PreviousTable = ReplicatedData
@@ -233,14 +233,14 @@ function SharedData.Wait(Item)
     local Result = SharedData[Item]
 
     while (Result == nil) do
-        Wait()
+        wait()
     end
 
     return Result
 end
 
 function SharedData.Append(Elements)
-    if Type(Elements) == "table" then
+    if type(Elements) == "table" then
         for Key, Value in next, Elements do
             SharedData[Key] = Value
         end

@@ -4,7 +4,7 @@ local TweenValue = Class:FromName(script.Name) {
     SingleTransition        = {}; -- Transitions over a defined table of control points
     PiecewiseTransition     = {}; -- Repeated single transitions over an arbitrary table of control points
     NthDegreeTransition     = {}; -- Full, non-pieced transitions over an arbitrary table of control points
-    EasingStyles            = Require(Modules.TweeningStyles);
+    EasingStyles            = require(Modules.TweeningStyles);
 };
 
 function TweenValue.SingleTransition:Linear(Points, CurrentTime, Duration)
@@ -153,16 +153,16 @@ end
 function TweenValue:TweenValue(TransitionClassificationName, TransitionerName, TargetFramerate, TransitionerData, Points)
 
     local TransitionClass = TweenValue[TransitionClassificationName]
-    Assert(TransitionClass, String.Format("No transition class '%s' exists!", TransitionClassificationName))
+    assert(TransitionClass, String.Format("No transition class '%s' exists!", TransitionClassificationName))
 
     local Transitioner = TransitionClass[TransitionerName]
-    Assert(Transitioner, String.Format("No transitioner '%s' found under transition classification '%s'!", TransitionerName, TransitionClassificationName))
+    assert(Transitioner, String.Format("No transitioner '%s' found under transition classification '%s'!", TransitionerName, TransitionClassificationName))
 
     local ControlPointsDynamic = false
     local FirstPoint = Points[1]
 
-    for _, Point in Pairs(Points) do
-        if (Type(Point) == "function") then
+    for _, Point in pairs(Points) do
+        if (type(Point) == "function") then
             ControlPointsDynamic = true
             break
         end
@@ -215,7 +215,7 @@ function TweenValue:GetValueAt(CurrentTime, Duration)
 end
 
 function TweenValue:Destroy()
-    for Key in Pairs(self) do
+    for Key in pairs(self) do
         self[Key] = nil
     end
 end
