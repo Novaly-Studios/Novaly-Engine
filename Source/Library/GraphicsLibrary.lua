@@ -222,9 +222,8 @@ local function ClientInit()
     end
 
     RunService.Heartbeat:Connect(function(Step)
-        local PartIters = Math.Floor(CONFIG.gTransparentPartsPerFrame * (1 / Step) / CONFIG._TargetFramerate)
 
-        print(PartIters)
+        local PartIters = Math.Floor(CONFIG.gTransparentPartsPerFrame * (1 / Step) / CONFIG._TargetFramerate)
 
         Graphics:UpdateLensFlares()
         Graphics:UpdateBillboards()
