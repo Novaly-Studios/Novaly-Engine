@@ -263,7 +263,7 @@ end
     function. Necessary for other functions like Product.
 
     @usage
-        local Loop = GetNaryLoop({Range(1, 10), Range(1, 10), Range(1, 10)})
+        local Loop = GetNaryLoop({{1, 10}, {1, 10}, {1, 10}})
         Loop(function(Iters)
             local a, b, c = Iters[1], Iters[2], Iters[3]
             print(a, b, c)
