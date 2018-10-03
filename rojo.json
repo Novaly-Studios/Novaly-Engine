@@ -10,8 +10,8 @@
         },
         "configuration":
         {
-            "path": "Source/configuration",
-            "target": "ReplicatedStorage.configuration"
+            "path": "Source/Configuration",
+            "target": "ReplicatedStorage.Configuration"
         },
         "library":
         {
