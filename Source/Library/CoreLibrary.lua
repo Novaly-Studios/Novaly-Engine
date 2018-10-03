@@ -61,27 +61,7 @@ Core.OldPairs           = pairs
 Core.OldIPairs          = ipairs
 
 --[[
-    SubPairs returns a pairs iterator through a sub-table.
-
-    @usage
-        for Key, Value in SubPairs(ReplicatedData, Player.UserId) do
-            Print(Key, "=", Value)
-        end
-
-    @param Items The table to pass to the pairs iterator.
-    @param SubKey The key of the sub-table.
-
-    @return A pairs iterator passed the sub-table.
-]]
-
-function Core.SubPairs(Items, SubKey)
-    local SubTable = Items[SubKey]
-    Assert(SubTable)
-    return pairs(SubTable)
-end
-
---[[
-    @deprecated Use SubPairs
+    @deprecated
     @todo Verify that no internal engine functionality still relies on this
 ]]
 
@@ -94,7 +74,7 @@ function Core.pairs(Object)
 end
 
 --[[
-    @deprecated Use SubPairs
+    @deprecated
     @todo Verify that no internal engine functionality still relies on this
 ]]
 
