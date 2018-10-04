@@ -113,7 +113,7 @@ function Class:FromExtension(Name, Other)
     local Result = self:FromName(Name)
 
     Result["__index"] = function(self, Key)
-        return (rawget(self, Key) or rawget(self, self.ClassRefKey)[Key] or Other[Key])
+        return (rawget(self, Key) or rawget(self, "Class")[Key] or Other[Key])
     end
     Result[self.SuperclassRefKey] = Other
 
