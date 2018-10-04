@@ -54,7 +54,7 @@ function Class:New(Name, ClassTable)
 
         local Result = setmetatable({Class = ClassTable}, ClassTable)
         local Func = ClassTable[Name]
-        GetFunctionEnv(Func).self = Result
+        getfenv(Func).self = Result
 
         local Object = Func(Result, ...)
 
@@ -67,7 +67,7 @@ function Class:New(Name, ClassTable)
 
         for _, Value in pairs(Result) do
             if (type(Value) == "function") then
-                GetFunctionEnv(Value).self = Result
+                getfenv(Value).self = Result
             end
         end
 

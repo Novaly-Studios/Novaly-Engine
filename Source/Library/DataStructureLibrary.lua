@@ -215,7 +215,7 @@ function DataStructures:Build(Serialised)
     local ItemType = Serialised[self.TypeVar]
     assert(ItemType, "Data passed to this function must be serialised!")
 
-    assert(GetFunctionEnv()[ItemType], String.Format("No class exists under the name %s!", ItemType))
+    assert(getfenv()[ItemType], String.Format("No class exists under the name %s!", ItemType))
 
     local BuildFunction = self.BuildFunctions[ItemType]
     assert(BuildFunction, String.Format("No build function exists for %s!", ItemType))
