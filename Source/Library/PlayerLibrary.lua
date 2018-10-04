@@ -51,7 +51,7 @@ end
 
 function Server.PlayerDataManagement.Save(Player)
 
-    Server.PlayerDataManagement.waitForPlayerData(Player)
+    Server.PlayerDataManagement.WaitForPlayerData(Player)
 
     local UserId = tostring(Player.UserId)
     local Stripped = Replication.StripReplicatedData(PlayerData[UserId])
@@ -67,7 +67,7 @@ end
 function Server.PlayerDataManagement.LeaveSave(Player)
 
     local UserId = tostring(Player.UserId)
-    Server.PlayerDataManagement.waitForPlayerData(Player)
+    Server.PlayerDataManagement.WaitForPlayerData(Player)
     local Stripped = Replication.StripReplicatedData(PlayerData[UserId])
     local Serial = Server.PlayerDataManagement.RecursiveSerialise(Stripped)
 
@@ -88,7 +88,7 @@ function Server.Init()
 
     Players.PlayerAdded:Connect(function(Player)
 
-        Server.PlayerDataManagement.waitForDataStore()
+        Server.PlayerDataManagement.WaitForDataStore()
 
         local Success, Data = pcall(function()
             return Server.PlayerDataStore:GetAsync(tostring(Player.UserId))
@@ -131,12 +131,12 @@ function Server.Init()
     end)
 end
 
-function Client.PlayerDataManagement.waitForPlayerData(Player)
-    return Table.waitFor(wait, PlayerData, tostring(Player.UserId))
+function Client.PlayerDataManagement.WaitForPlayerData(Player)
+    return Table.WaitFor(wait, PlayerData, tostring(Player.UserId))
 end
 
-function Client.PlayerDataManagement.waitForMyData()
-    return Table.waitFor(wait, Client.PlayerDataManagement, "MyData")
+function Client.PlayerDataManagement.WaitForMyData()
+    return Table.WaitFor(wait, Client.PlayerDataManagement, "MyData")
 end
 
 function Client.Init()
@@ -152,15 +152,15 @@ function Client.Init()
     Client.Character = LocalPlayer.Character
 
     Sub(function()
-        Replication.wait("PlayerData")
+        Replication.Wait("PlayerData")
         PlayerData = ReplicatedData.PlayerData
         Client.PlayerDataManagement.PlayerData = PlayerData
-        Client.PlayerDataManagement.waitForPlayerData(LocalPlayer)
+        Client.PlayerDataManagement.WaitForPlayerData(LocalPlayer)
         Client.PlayerDataManagement.MyData = PlayerData[tostring(LocalPlayer.UserId)]
     end)
 end
 
-local function waitForItem(Player, Key)
+local function WaitForItem(Player, Key)
 
     local UserId = tostring(Player.UserId)
     local Result = PlayerData[UserId][Key]
@@ -173,8 +173,8 @@ local function waitForItem(Player, Key)
     return Result
 end
 
-Client.PlayerDataManagement.waitForItem = waitForItem
-Server.PlayerDataManagement.waitForItem = waitForItem
+Client.PlayerDataManagement.WaitForItem = WaitForItem
+Server.PlayerDataManagement.WaitForItem = WaitForItem
 
 return {
     Client = Client;
