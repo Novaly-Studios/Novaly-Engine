@@ -1,3 +1,12 @@
+--[[
+    Adds custom graphical effects.
+
+    @module Graphics Library
+    @alias GraphicsLibrary
+    @author TPC9000
+    @todo 
+]]
+
 shared()
 
 local Graphics                  = {
@@ -13,6 +22,16 @@ local Graphics                  = {
     EffectsEnabled              = true;
 };
 
+--[[
+    @function Graphics.UpdateScreenValues
+
+    Updates the relevant screen information
+    used by some other processes.
+
+    @usage
+        Graphics:UpdateScreenValues()
+]]
+
 function Graphics:UpdateScreenValues()
 
     -- Screen Values and Aspect Ratio
@@ -24,6 +43,10 @@ function Graphics:UpdateScreenValues()
     -- Horizontal Field of View
     Graphics.HalfHorizontalFoV = Math.ATan(Math.Tan(Math.Rad(Graphics.Camera.FieldOfView / 2)) * Graphics.AspectRatio)
 end
+
+--[[
+    
+]]
 
 function Graphics:SetEffect(Item, Property, To)
     self.AnimateItems[Item][Property] = To

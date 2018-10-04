@@ -20,13 +20,18 @@ local Binds             = {
     Functions           = {};
 }
 
-function Mutual.BindRemoteEvent(Name, Handler)
+local function BindRemoteEvent(Name, Handler)
     Binds.Events[Name] = Handler
 end
 
-function Mutual.BindRemoteFunction(Name, Handler)
+local function BindRemoteFunction(Name, Handler)
     Binds.Functions[Name] = Handler
 end
+
+Client.BindRemoteEvent      = BindRemoteEvent
+Client.BindRemoteFunction   = BindRemoteFunction
+Server.BindRemoteEvent      = BindRemoteEvent
+Server.BindRemoteFunction   = BindRemoteFunction
 
 function Client.FireRemoteEvent(...)
     Client.RemoteEvent:FireServer(...)
@@ -147,11 +152,6 @@ function Server.Init()
         end
         Server.TransmissionReady[Player.Name] = true
     end)
-end
-
-for Key, Value in pairs(Mutual) do
-    Client[Key] = Value
-    Server[Key] = Value
 end
 
 return {
