@@ -195,9 +195,26 @@ local function ClientInit()
     end
 
     local Player = Players.LocalPlayer
-    local PlayerGui = Player:WaitForChild("PlayerGui")
-    local GraphicsGui = Instance.new("ScreenGui", PlayerGui)
-    local LensFlareFrame = Instance.new("Frame", GraphicsGui)
+
+    Async.WaitForChild(Player, "PlayerGui")
+        :andThen(function(PlayerGui)
+            -- This is wrapped in a promise so the yield for PlayerGui doesn't
+            -- bog down initial load times.
+            local GraphicsGui = Instance.new("ScreenGui", PlayerGui)
+            GraphicsGui.Name = "GraphicsGui"
+
+            local LensFlareFrame = Instance.new("Frame", GraphicsGui)
+            LensFlareFrame.Name = "LensFlareFrame"
+
+            if (CONFIG.gEnableLensFlare == true) then
+                local FlareFrame = Instance.new("Frame", GraphicsGui)
+                FlareFrame.Name = "LensFlare"
+                Graphics.GraphicsGui = GraphicsGui
+            end
+        end)
+        :andThen(function()
+            print("all done :)")
+        end)
 
     local Bloom = Instance.new("BloomEffect", Lighting)
     local Blur = Instance.new("BlurEffect", Lighting)
@@ -234,12 +251,6 @@ local function ClientInit()
         Graphics.Camera = workspace.CurrentCamera
     end)
 
-    if (CONFIG.gEnableLensFlare == true) then
-        local FlareFrame = Instance.new("Frame", GraphicsGui)
-        FlareFrame.Name = "LensFlare"
-        Graphics.GraphicsGui = GraphicsGui
-    end
-
     local function Clean(_, Value)
         return not Value
     end
@@ -273,9 +284,6 @@ local function ClientInit()
             Graphics:UpdateScreenValues()
         end
     end)
-
-    GraphicsGui.Name = "GraphicsGui"
-    LensFlareFrame.Name = "LensFlareFrame"
 end
 
 local function ServerInit()
@@ -312,7 +320,7 @@ end
 function Graphics:RegisterFlare(Collection)
 
     for _, FlareObject in pairs(Collection.LensFlares) do
-        FlareObject[2].Parent = Graphics.GraphicsGui.LensFlareFrame
+        FlareObject[2].Parent = Table.WaitForItem(Graphics, "GraphicsGui"):WaitForChild("LensFlareFrame")
     end
 
     Graphics.LensFlareItems[#Graphics.LensFlareItems + 1] = Collection
