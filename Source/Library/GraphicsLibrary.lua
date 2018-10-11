@@ -212,9 +212,6 @@ local function ClientInit()
                 Graphics.GraphicsGui = GraphicsGui
             end
         end)
-        :andThen(function()
-            print("all done :)")
-        end)
 
     local Bloom = Instance.new("BloomEffect", Lighting)
     local Blur = Instance.new("BlurEffect", Lighting)
