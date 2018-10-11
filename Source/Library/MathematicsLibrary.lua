@@ -250,10 +250,10 @@ function Maths.PiecewiseInterpolate(Points, InterpolateFunction, DefaultArgs, Cu
         Iter = Iter + 1
     end
 
-    Table.Insert(Result, CorrectedRatio)
+    table.insert(Result, CorrectedRatio)
 
     for _, Arg in pairs(DefaultArgs) do
-        Table.Insert(Result, Arg)
+        table.insert(Result, Arg)
     end
 
     return InterpolateFunction(unpack(Result))

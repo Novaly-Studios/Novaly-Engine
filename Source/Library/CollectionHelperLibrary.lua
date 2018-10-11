@@ -62,7 +62,7 @@ function CollectionHelper:GetDescendantsWithTag(Root, ...)
 
     for _, Object in pairs(Root:GetDescendants()) do
         if (self:HasTags(Object, ...)) then
-            Table.Insert(Result, Object)
+            table.insert(Result, Object)
         end
     end
 
@@ -93,7 +93,7 @@ function CollectionHelper:GetChildrenWithTag(Root, ...)
 
     for _, Object in pairs(Root:GetChildren()) do
         if (self:HasTags(Object, ...)) then
-            Table.Insert(Result, Object)
+            table.insert(Result, Object)
         end
     end
 

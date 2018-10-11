@@ -87,10 +87,10 @@ end
 function InputLibrary:AddMouseIgnoreTag(Tag)
     local Mouse = self.Mouse
     CollectionService:GetInstanceAddedSignal(Tag):Connect(function(Object)
-        Table.Insert(Mouse.Ignore, Object)
+        table.insert(Mouse.Ignore, Object)
     end)
     for _, Object in pairs(CollectionService:GetTagged(Tag)) do
-        Table.Insert(Mouse.Ignore, Object)
+        table.insert(Mouse.Ignore, Object)
     end
 end
 

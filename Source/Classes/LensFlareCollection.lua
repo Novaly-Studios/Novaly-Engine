@@ -35,7 +35,7 @@ function LensFlareCollection:AddLensFlares(...)
         ImageLabel.BackgroundTransparency = 1
         ImageLabel.Size = GUI:V2U(nil, Value.Size)
 
-        Table.Insert(self.LensFlares, {Value, ImageLabel})
+        table.insert(self.LensFlares, {Value, ImageLabel})
 
         local FlareTransparency = TweenValue.New("PiecewiseTransition", "Linear", CONFIG._TargetFramerate, {}, Value.TransparencyValues)
         self.FlareSequence:AddAnimation(Animation.New({

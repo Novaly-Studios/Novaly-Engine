@@ -2,16 +2,6 @@ shared()
 
 local Table = {}
 
-local Mappings = {
-    setn    = "SetN";
-    insert  = "Insert";
-    getn    = "GetN";
-    foeachi = "ForeachI";
-    concat  = "Concat";
-    sort    = "Sort";
-    remove  = "Remove";
-}
-
 function Table.Find(Array, Item)
     for x = 1, #Array do
         if Array[x] == Item then
@@ -213,8 +203,6 @@ function Table.ProtectedGet(Array, Key)
     end)
     return Success, Result
 end
-
-Table.ApplyKeyMapping(Table, Mappings, table)
 
 return {
     Client = {Table = Table};

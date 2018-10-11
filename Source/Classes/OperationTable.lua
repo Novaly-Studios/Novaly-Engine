@@ -26,7 +26,7 @@ function OperationTable:Clean(Condition, Count)
 end
 
 function OperationTable:Add(Item)
-    Table.Insert(self.Items, Item)
+    table.insert(self.Items, Item)
 end
 
 function OperationTable:Next(Count)

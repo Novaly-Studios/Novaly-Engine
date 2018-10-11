@@ -10,7 +10,7 @@ function UnyieldSequence:UnyieldSequence(StatusFunction)
 end
 
 function UnyieldSequence:Next(NextAction)
-    Table.Insert(self.Actions, NextAction)
+    table.insert(self.Actions, NextAction)
     return self
 end
 

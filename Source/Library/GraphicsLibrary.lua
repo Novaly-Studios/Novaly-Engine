@@ -168,7 +168,7 @@ function Graphics:UpdateBillboards()
 end
 
 function Graphics:RegisterSurfaceBillboard(Item)
-    Table.Insert(self.SurfaceBillboards, Item)
+    table.insert(self.SurfaceBillboards, Item)
 end
 
 function Graphics:HandlePartTransparency(Item)

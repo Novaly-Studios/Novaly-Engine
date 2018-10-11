@@ -149,7 +149,7 @@ function GUI:GetMouseOverIndicator(Button, MouseEnterFunc, MouseLeaveFunc)
         end
     end)
 
-    Table.Insert(OverStatusObjects, OverObject)
+    table.insert(OverStatusObjects, OverObject)
 
     return function()
         return OverObject.Status
