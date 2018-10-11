@@ -117,7 +117,7 @@ function TweenValue.PiecewiseTransition:Linear(Points, CurrentTime, Duration)
     end
 
     local TimeRatio         = (CurrentTime * CountLines) / Duration % 1
-    local Segment           = Math.Floor(CountLines / Duration * CurrentTime) + 1
+    local Segment           = math.floor(CountLines / Duration * CurrentTime) + 1
     local From              = Points[Segment]
     local To                = Points[Segment + 1]
 
@@ -188,7 +188,7 @@ end
 
 function TweenValue:GetValueAt(CurrentTime, Duration)
 
-    local Frame = Math.Floor(CurrentTime * self.TargetFramerate + 0.5) -- Access the current frame we are on (e.g. 0.5 seconds through = 30 frames)
+    local Frame = math.floor(CurrentTime * self.TargetFramerate + 0.5) -- Access the current frame we are on (e.g. 0.5 seconds through = 30 frames)
     local ComputedPoints = self.ComputedPoints
     local UniquePoints = ComputedPoints[Duration]
 

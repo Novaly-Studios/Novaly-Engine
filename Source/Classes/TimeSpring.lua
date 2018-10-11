@@ -31,11 +31,11 @@ function TimeSpring:UpdateAt(CurrentTime)
     local Target        = self.Target
 
     local Diff          = (self.Start - Target)
-    local Mul           = Math.Sqrt(1 - Damping ^ 2)
+    local Mul           = math.sqrt(1 - Damping ^ 2)
     local WaveFeed      = (Mul * Math.Tau * Compression * CurrentTime)
 
     self.Current = Target + Euler ^ (-Math.Tau * Compression * Damping * CurrentTime)
-            * (Diff * Math.Cos(WaveFeed) + (Damping * Compression * Diff + self.Velocity) / (Compression * Mul) * Math.Sin(WaveFeed))
+            * (Diff * math.cos(WaveFeed) + (Damping * Compression * Diff + self.Velocity) / (Compression * Mul) * math.sin(WaveFeed))
 
     return self
 end

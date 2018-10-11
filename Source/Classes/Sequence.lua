@@ -106,7 +106,7 @@ function Sequence:Step(TimeDelta)
     local FinishBind = self.FinishBind
     local StepBind = self.StepBind
     local CurrentTime = PreviousTime + TimeDelta * self.Increment
-    local ClampedTime = Math.Clamp(CurrentTime, 0, self.Duration)
+    local ClampedTime = math.clamp(CurrentTime, 0, self.Duration)
     local CurrentAnimations = self:GetActiveAnimationsAtTime(ClampedTime)
 
     if (self.AutoStop) then

@@ -2,42 +2,6 @@ shared()
 
 local Maths = {}
 
-local Mappings = {
-    log         = "Log";
-    ldexp       = "LdExp";
-    rad         = "Rad";
-    cosh        = "CosH";
-    random      = "Random";
-    frexp       = "FrExp";
-    tanh        = "TanH";
-    floor       = "Floor";
-    max         = "Max";
-    sqrt        = "Sqrt";
-    modf        = "ModF";
-    huge        = "Huge";
-    pow         = "Pow";
-    atan        = "ATan";
-    tan         = "Tan";
-    cos         = "Cos";
-    sign        = "Sign";
-    clamp       = "Clamp";
-    log10       = "Log10";
-    noise       = "Noise";
-    acos        = "ACos";
-    abs         = "Abs";
-    pi          = "PI";
-    sinh        = "SinH";
-    asin        = "ASin";
-    min         = "Min";
-    deg         = "Deg";
-    fmod        = "FMod";
-    randomseed  = "RandomSeed";
-    atan2       = "ATan2";
-    ceil        = "Ceil";
-    sin         = "Sin";
-    exp         = "Exp";
-}
-
 local Curve = {}
 
 function Maths.Lerp(P0, P1, Mul)
@@ -113,7 +77,7 @@ end
 
 function Maths.NumberToLength(Num, Len)
     local Order = 10 ^ (Len - 1)
-    return Maths.Floor(Num * Order) / Order
+    return math.floor(Num * Order) / Order
 end
 
 --[[
@@ -220,20 +184,6 @@ function Maths.CubicInterpolate(P0, P1, P2, P3, Mul)
 end
 
 --[[
-    Maths.Clamp
-
-    Keeps Num within a minimum and maximum numerical boundary.
-
-    Paremeter [Number] 'Num' - The number which will be subject to the clamp.
-    Paremeter [Number] 'Min' - The minimum number which Num cannot be less than.
-    Parameter [Number] 'Max' - The maximum number which Num cannot be greater than.
-]]
-
-function Maths.Clamp(Num, Min, Max)
-    return (Num < Min and Min or Num > Max and Max or Num)
-end
-
---[[
     Maths.IsNaN
 ]]
 
@@ -246,7 +196,7 @@ end
 ]]
 
 function Maths.IsInf(Number)
-    return (Number == Math.Huge or Number == -Math.Huge)
+    return (Number == math.huge or Number == -math.huge)
 end
 
 --[[
@@ -316,7 +266,7 @@ end
 ]]
 
 function Maths.AngleDist(Angle0, Angle1)
-    local Max = Math.PI * 2
+    local Max = math.pi * 2
     local DiffAngle = (Angle1 - Angle0) % Max
     return 2 * DiffAngle % Max - DiffAngle
 end
@@ -379,16 +329,12 @@ function Curve.New(Points)
     })
 end
 
--- Let's Apply CoolPascalCasing ;)
-
-Table.ApplyKeyMapping(Maths, Mappings, math)
-
 -- Mathematical Constants
 
 Maths["NaN"]            = 0/0
 Maths["Inf"]            = 1/0
-Maths["Radian"]         = Maths.PI / 180
-Maths["Tau"]            = 2 * Maths.PI
+Maths["Radian"]         = math.pi / 180
+Maths["Tau"]            = 2 * math.pi
 
 local Final = {Math = Maths, Curve = Curve}
 

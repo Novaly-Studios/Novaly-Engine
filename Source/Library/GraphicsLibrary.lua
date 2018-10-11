@@ -4,7 +4,7 @@
     @module Graphics Library
     @alias GraphicsLibrary
     @author TPC9000
-    @todo 
+    @todo
 ]]
 
 shared()
@@ -41,11 +41,11 @@ function Graphics:UpdateScreenValues()
     Graphics.AspectRatio    = ScreenSize.X / ScreenSize.Y
 
     -- Horizontal Field of View
-    Graphics.HalfHorizontalFoV = Math.ATan(Math.Tan(Math.Rad(Graphics.Camera.FieldOfView / 2)) * Graphics.AspectRatio)
+    Graphics.HalfHorizontalFoV = math.atan(math.tan(math.rad(Graphics.Camera.FieldOfView / 2)) * Graphics.AspectRatio)
 end
 
 --[[
-    
+
 ]]
 
 function Graphics:SetEffect(Item, Property, To)
@@ -137,7 +137,7 @@ function Graphics:UpdateLensFlares()
                             -- Todo: rotate and scale
 
                             if (FlareObject.Rotate) then
-                                ImageLabel.Rotation = Math.Deg(Math.ATan2(
+                                ImageLabel.Rotation = math.deg(math.atan2(
                                     Vec2ScreenSpace.Y - Graphics.ScreenCentre.Y,
                                     Vec2ScreenSpace.X - Graphics.ScreenCentre.X
                                 ))
@@ -179,7 +179,7 @@ function Graphics:HandlePartTransparency(Item)
             local MinDist, MaxDist, InitialTransparency, ChangedTransparency = Settings.MinDist, Settings.MaxDist, Settings.InitialTransparency, Settings.ChangedTransparency
             if (MinDist and MaxDist and InitialTransparency and ChangedTransparency) then
                 if (Item:IsA("Part")) then
-                    Item.Transparency = Math.Lerp(InitialTransparency, ChangedTransparency, Math.Clamp(
+                    Item.Transparency = Math.Lerp(InitialTransparency, ChangedTransparency, math.clamp(
                         ((Graphics.Camera.CFrame.p - Item.Position).magnitude - MinDist) / (MaxDist - MinDist)
                     , 0, 1))
                 end
@@ -246,7 +246,7 @@ local function ClientInit()
 
     RunService.Heartbeat:Connect(function(Step)
 
-        local PartIters = Math.Floor(CONFIG.gTransparentPartsPerFrame * (1 / Step) / CONFIG._TargetFramerate)
+        local PartIters = math.floor(CONFIG.gTransparentPartsPerFrame * (1 / Step) / CONFIG._TargetFramerate)
 
         Graphics:UpdateLensFlares()
         Graphics:UpdateBillboards()
@@ -293,7 +293,7 @@ local function ServerInit()
 end
 
 function Graphics:IsVisible(Subject, Target, Tolerance)
-    return (Math.ACos(Subject.lookVector:Dot((Target - Subject.p).unit)) <= Tolerance)
+    return (math.acos(Subject.lookVector:Dot((Target - Subject.p).unit)) <= Tolerance)
 end
 
 function Graphics:AccurateIsVisible(Target)
