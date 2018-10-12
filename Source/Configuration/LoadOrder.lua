@@ -3,6 +3,7 @@
 return
 {
     "CoreLibrary";
+    "AsyncLibrary";
     "LoggingLibrary";
     "TableLibrary";
     "ClassLibrary";
