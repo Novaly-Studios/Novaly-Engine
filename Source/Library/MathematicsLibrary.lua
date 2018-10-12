@@ -45,7 +45,7 @@ function Maths.Lerp(P0, P1, Mul)
 end
 
 --[[
-    Maths.LerpUDim2
+    @function LerpUDim2
 
     Linearly interpolates a UDim2 object into another UDim2 object
 ]]
@@ -63,7 +63,7 @@ function Maths.LerpUDim2(P0, P1, m)
 end
 
 --[[
-    Maths.LerpUDim
+    @function LerpUDim
 
     Linearly interpolates a UDim object into another UDim object
 ]]
@@ -79,7 +79,7 @@ function Maths.LerpUDim(P0, P1, m)
 end
 
 --[[
-    Maths.LerpVector2
+    @function LerpVector2
 
     Linearly interpolates a Vector2 object into another Vector2 object
 ]]
@@ -95,7 +95,7 @@ function Maths.LerpVector2(P0, P1, m)
 end
 
 --[[
-    Maths.LerpColor3
+    @function LerpColor3
 
     Linearly interpolates a Color3 object into another Color3 object
 ]]
@@ -106,7 +106,7 @@ function Maths.LerpColor3(P0, P1, Mul)
 end
 
 --[[
-    Maths.NumberToLength
+    @function NumberToLength
 
     Strips a decimal number (not an integer) of 'Num' decimal places
 ]]
@@ -117,7 +117,7 @@ function Maths.NumberToLength(Num, Len)
 end
 
 --[[
-    Maths.CountDigits
+    @function CountDigits
 
     Counts the digits of a decimal or integer
 ]]
@@ -128,7 +128,7 @@ function Maths.CountDigits(Num)
 end
 
 --[[
-    Maths.StripRoll
+    @function StripRoll
 
     Strips the roll component from a CFrame
 --]]
@@ -150,7 +150,7 @@ end
 end]]
 
 --[[
-    Maths.HermiteInterpolate
+    @function HermiteInterpolate
 
     Interpolates down a spline given two points and two tangents, as well as the tension and bias of the curve.
 
@@ -178,7 +178,7 @@ function Maths.HermiteInterpolate(P0, P1, P2, P3, Mul, Tension, Bias)
 end
 
 --[[
-    Maths.HermiteInterpolateCFrame
+    @function HermiteInterpolateCFrame
 
     An extension of Maths.HermiteInterpolate which works on CFrames.
 ]]
@@ -197,7 +197,7 @@ function Maths.HermiteInterpolateCFrame(P0, P1, P2, P3, Mul, Tension, Bias)
 end
 
 --[[
-    Maths.CubicInterpolate
+    @function CubicInterpolate
 
     Standard cubic spline interpolation through two intermediary points with two tangents.
 
@@ -220,7 +220,7 @@ function Maths.CubicInterpolate(P0, P1, P2, P3, Mul)
 end
 
 --[[
-    Maths.Clamp
+    @function Clamp
 
     Keeps Num within a minimum and maximum numerical boundary.
 
@@ -234,7 +234,7 @@ function Maths.Clamp(Num, Min, Max)
 end
 
 --[[
-    Maths.IsNaN
+    @function IsNaN
 ]]
 
 function Maths.IsNaN(Number)
@@ -242,7 +242,7 @@ function Maths.IsNaN(Number)
 end
 
 --[[
-    Maths.IsInf
+    @function IsInf
 ]]
 
 function Maths.IsInf(Number)
@@ -282,7 +282,7 @@ function Curve:InterpolatePiecewiseCubic(Mul, InterpolationFunc, ...)
 end
 
 --[[
-    Maths.InterpolatePiecewise
+    @function Maths.InterpolatePiecewise
 ]]
 
 function Maths.PiecewiseInterpolate(Points, InterpolateFunction, DefaultArgs, CurrentTime, Duration, Offset, PullRange)
@@ -310,7 +310,7 @@ function Maths.PiecewiseInterpolate(Points, InterpolateFunction, DefaultArgs, Cu
 end
 
 --[[
-    Maths.AngleDist
+    @function Maths.AngleDist
 
     Returns the shortest distance between two angles
 ]]
@@ -322,7 +322,7 @@ function Maths.AngleDist(Angle0, Angle1)
 end
 
 --[[
-    Maths.AngleLerp
+    @function Maths.AngleLerp
 
     Linearly interpolates an angle across the shortest path
 ]]

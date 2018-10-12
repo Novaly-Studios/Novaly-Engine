@@ -31,6 +31,10 @@ function Event:Connect(Func)
     }, {__index = self})
 end
 
+function Event:Flush()
+    self.Handlers = {}
+end
+
 function Event:Update()
     if (self:ShouldFire()) then
         self:Fire()

@@ -1,5 +1,13 @@
 shared()
 
+--[[
+    Provides extra input-capturing capabilities.
+
+    @module Input Library
+    @alias InputLibrary
+    @author TPC9000
+]]
+
 local InputLibrary = {
     Keys        = {};
     DownBinds   = {};
@@ -75,6 +83,12 @@ local function ClientInit()
     end)
 end
 
+--[[
+    @function UpdateMouse
+
+    Updates the mouse with a raycast.
+]]
+
 function InputLibrary:UpdateMouse()
     local Mouse = self.Mouse
     local XY = Mouse.XY
@@ -84,31 +98,125 @@ function InputLibrary:UpdateMouse()
     Mouse.Pos = Pos
 end
 
+--[[
+    @function AddMouseIgnoreTag
+
+    Adds a CollectionService tag for the mouse raycast to ignore.
+
+    @usage
+        InputLibrary:AddMouseIgnoreTag("IgnoreThisPart")
+
+    @param Tag The tag to ignore.
+]]
+
 function InputLibrary:AddMouseIgnoreTag(Tag)
+
+    assert(typeof(Tag) == "string")
+
     local Mouse = self.Mouse
+
     CollectionService:GetInstanceAddedSignal(Tag):Connect(function(Object)
         Table.Insert(Mouse.Ignore, Object)
     end)
+
     for _, Object in pairs(CollectionService:GetTagged(Tag)) do
         Table.Insert(Mouse.Ignore, Object)
     end
 end
 
+--[[
+    @function BindOnKeyDown
+
+    Binds a function to the user pressing a key.
+
+    @usage
+        InputLibrary:BindOnKeyDown(Enum.KeyCode.Q, function()
+            print("Q key pressed")
+        end)
+
+    @param Key A KeyCode Enum representing the key to monitor.
+    @param AssociateFunction The function to run when the key is pressed.
+]]
+
 function InputLibrary:BindOnKeyDown(Key, AssociateFunction)
-    self.DownBinds[Key] = AssociateFunction
+
+    assert(typeof(AssociateFunction) == "function")
+
+    local DownBinds = self.DownBinds
+    local Target = DownBinds[Key] or Event.New()
+    Target:Connect(AssociateFunction)
+    DownBinds[Key] = Target
 end
+
+--[[
+    @function BindOnKeyUp
+
+    Binds a function to the user releasing a key.
+
+    @usage
+        InputLibrary:BindOnKeyUp(Enum.KeyCode.Q, function()
+            print("Q key released")
+        end)
+
+    @param Key A KeyCode Enum representing the key to monitor.
+    @param AssociateFunction The function to run when the key is released.
+]]
 
 function InputLibrary:BindOnKeyUp(Key, AssociateFunction)
-    self.UpBinds[Key] = AssociateFunction
+
+    assert(typeof(AssociateFunction) == "function")
+
+    local UpBinds = self.UpBinds
+    local Target = UpBinds[Key] or Event.New()
+    Target:Connect(AssociateFunction)
+    UpBinds[Key] = Target
 end
+
+--[[
+    @function UnbindOnKeyDown
+
+    Disconnects all actions associated with
+    the key down event.
+
+    @usage
+        InputLibrary:UnbindOnKeyDown(Enum.KeyCode.Q)
+
+    @param Key A KeyCode Enum representing the key to un-bind from the event.
+]]
 
 function InputLibrary:UnbindOnKeyDown(Key)
-    self.DownBinds[Key] = nil
+    local Target = self.DownBinds[Key]
+    if Target then
+        Target:Flush()
+    end
 end
 
+--[[
+    @function UnbindOnKeyUp
+
+    Disconnects all actions associated with
+    the key up event.
+
+    @usage
+        InputLibrary:UnbindOnKeyUp(Enum.KeyCode.Q)
+
+    @param Key A KeyCode Enum representing the key to un-bind from the event.
+]]
+
 function InputLibrary:UnbindOnKeyUp(Key)
-    self.UpBinds[Key] = nil
+    local Target = self.UpBinds[Key]
+    if Target then
+        Target:Flush()
+    end
 end
+
+--[[
+    @function BlockInput
+
+    Blocks scripts from receiving pressed keys.
+
+    @untested
+]]
 
 function InputLibrary:BlockInput(Name, Keys)
     ContextActionService:BindActionAtPriority(
