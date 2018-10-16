@@ -78,11 +78,17 @@ Environment["CONFIG"] = require(ConfigFolder.Config)
 
 for Key, Value in pairs(LoadOrder) do
     local Library = Parent.Library:FindFirstChild(Value)
+    local Test = Parent.Tests:FindFirstChild(Value)
     if Library then
         local Now = tick()
         AddPlugin(require(Library))
         print("[Load Order " .. Key .. "] Library: " .. Library.Name .. " Loaded on " .. Indicator ..
             " (" .. ("%.2f"):format((tick() - Now) * 1000) .. "ms)")
+    end
+    if Test then
+        for Index, Func in pairs(require(Test)) do
+            assert(Func(), string.format("Test %s(%s) failed.", Value, Index))
+        end
     end
 end
 

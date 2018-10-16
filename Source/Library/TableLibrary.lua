@@ -1,31 +1,102 @@
 shared()
 
+--[[
+    @module Table Extender
+
+    @alias Table
+]]
+
 local Table = {}
 
-function Table.Find(Array, Item)
-    for x = 1, #Array do
-        if Array[x] == Item then
-            return x
+local Mappings = {
+    setn    = "SetN";
+    insert  = "Insert";
+    getn    = "GetN";
+    foeachi = "ForeachI";
+    concat  = "Concat";
+    sort    = "Sort";
+    remove  = "Remove";
+}
+
+--[[
+    @function Table.IndexOf
+
+    Returns the index of a specific item in a table.
+
+    @usage
+        print(Table.IndexOf({"x", "y", "z"}, "y"))
+
+    @param Items The table to search.
+    @param Find The value to find.
+
+    @return The index of the found item, or false if not found.
+]]
+
+function Table.IndexOf(Items, Find)
+    for Index = 1, #Items do
+        if (Items[x] == Find) then
+            return Index
         end
     end
     return false
 end
 
-function Table.Reverse(Array)
-    local Num = #Array
+--[[
+    @function Table.Reverse
+
+    Returns a reversed form of a numeric index table.
+
+    @usage
+        Table.Reverse({3, 2, 1})
+
+    @param Items The table to reverse.
+    @return The reversed table.
+]]
+
+function Table.Reverse(Items)
+    local Num = #Items
     for Index = 1, Num / 2 do
         local Opposite = Num - Index
-        Array[Index], Array[Opposite] = Array[Opposite], Array[Index]
+        Items[Index], Items[Opposite] = Items[Opposite], Items[Index]
     end
 end
 
-function Table.ShallowClone(Array)
+--[[
+    @function Table.ShallowClone
+    
+    Clones the top-level values of each table.
+    Sub-objects will still be referenced, not
+    cloned.
+
+    @usage
+        local Test = Table.ShallowClone({"a", "b", "c"})
+
+    @param Items The table to shallow clone.
+    @return The shallow-cloned table.
+]]
+
+function Table.ShallowClone(Items)
     local Result = {}
-    for Key, Value in pairs(Array) do
+    for Key, Value in pairs(Items) do
         Result[Key] = Value
     end
     return Result
 end
+
+--[[
+    @function Table.PrintTable
+
+    Recursively prints a table's key-value structure.
+
+    @usage
+        Table.PrintTable({
+            {1, 2, 3};
+            {s = "Test"};
+        })
+
+    @param Item The table to print.
+    @param Tabs Internal; the indent accumulator.
+]]
 
 function Table.PrintTable(Item, Tabs)
 

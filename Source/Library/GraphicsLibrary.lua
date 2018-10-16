@@ -12,6 +12,7 @@ shared()
 local Graphics                  = {
     Tags = {
         TransparentPart         = "Graphics:TransparentPart";
+        SurfaceBillboard        = "Graphics:SurfaceBillboard";
     };
     EffectSequences             = {};
     LensFlareItems              = {};
@@ -43,10 +44,6 @@ function Graphics:UpdateScreenValues()
     -- Horizontal Field of View
     Graphics.HalfHorizontalFoV = math.atan(math.tan(math.rad(Graphics.Camera.FieldOfView / 2)) * Graphics.AspectRatio)
 end
-
---[[
-
-]]
 
 function Graphics:SetEffect(Item, Property, To)
     self.AnimateItems[Item][Property] = To
@@ -253,23 +250,45 @@ local function ClientInit()
     end
 
     RunService.Heartbeat:Connect(function(Step)
-
         local PartIters = math.floor(CONFIG.gTransparentPartsPerFrame * (1 / Step) / CONFIG._TargetFramerate)
-
         Graphics:UpdateLensFlares()
         Graphics:UpdateBillboards()
         TransparentPartHandler:Next(PartIters)
         TransparentPartHandler:Clean(Clean, PartIters)
     end)
 
-    coroutine.wrap(function()
+    Sub(function()
         while wait(1/15) do
             Graphics:DetectPlayer()
+            for Part, Object in pairs(Graphics.SurfaceBillboards) do
+                local Settings = Part:FindFirstChild("Settings")
+                if Settings then
+                    local SettingsTable = Misc:TableFromTreeValues(Settings)
+                    local MaxDistance = SettingsTable.MaxDistance
+                    local Offset = SettingsTable.Offset
+                    if (MaxDistance and Offset) then
+                        Object.MaxDistance = MaxDistance
+                        Object.OffsetPos = Offset
+                    end
+                end
+            end
         end
     end)
 
     CollectionService:GetInstanceAddedSignal(Graphics.Tags.TransparentPart):Connect(function(Part)
         TransparentPartHandler:Add(Part)
+    end)
+
+    CollectionService:GetInstanceAddedSignal(Graphics.Tags.SurfaceBillboard):Connect(function(Part)
+        Graphics.SurfaceBillboards[Part] = SurfaceBillboard.New(Part, Part.Parent, 0, CFrame.new())
+    end)
+
+    CollectionService:GetInstanceRemovedSignal(Graphics.Tags.SurfaceBillboard):Connect(function(Part)
+        local Target = Graphics.SurfaceBillboards[Part]
+        if Target then
+            Target:Destroy()
+            Graphics.SurfaceBillboards[Part] = nil
+        end
     end)
 
     for _, Part in pairs(CollectionService:GetTagged(Graphics.Tags.TransparentPart)) do

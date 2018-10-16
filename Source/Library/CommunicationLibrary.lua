@@ -10,18 +10,25 @@
 
 shared()
 
-local Mutual            = {}
-local Client            = {}
-local Server            = {
-    TransmissionReady   = {};
+local Client = {}
+local Server = {
+    TransmissionReady = {};
 }
-local Binds             = {
-    Events              = {};
-    Functions           = {};
+local Binds = {
+    Events = {};
+    Functions = {}
+}
+local CommunicationLibrary = {
+    Client = Client;
+    Server = Server;
+    Binds = Binds;
 }
 
 local function BindRemoteEvent(Name, Handler)
-    Binds.Events[Name] = Handler
+    local Events = Binds.Events
+    local Found = Events[Name] or Event.New()
+    Found:Connect(Handler)
+    Events[Name] = Found
 end
 
 local function BindRemoteFunction(Name, Handler)
@@ -57,7 +64,7 @@ function Client.Init()
         elseif (Event == nil) then
             Log(0, "Warning, no event '" .. Name .. "' found in event collection.")
         else
-            Event(...)
+            Event:Fire(...)
         end
     end)
 
@@ -127,7 +134,7 @@ function Server.Init()
         elseif (Event == nil) then
             Log(0, "Warning, no event '" .. Name .. "' found in event collection.")
         else
-            Event(Player, ...)
+            Event:Fire(Player, ...)
         end
     end)
 
@@ -154,7 +161,4 @@ function Server.Init()
     end)
 end
 
-return {
-    Client = Client;
-    Server = Server;
-}
+return CommunicationLibrary
