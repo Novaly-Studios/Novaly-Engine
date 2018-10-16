@@ -45,7 +45,7 @@ local function ClientInit()
             local Bind = InputLibrary.DownBinds[KeyCode]
             InputLibrary.Keys[KeyCode] = true
             if Bind then
-                Bind()
+                Bind:Fire()
             end
         elseif (InputType == Enum.UserInputType.MouseButton1) then
             if (not GameProcessed) then
@@ -68,7 +68,7 @@ local function ClientInit()
             local Bind = InputLibrary.UpBinds[KeyCode]
             InputLibrary.Keys[KeyCode] = false
             if Bind then
-                Bind()
+                Bind:Fire()
             end
         elseif (InputType == Enum.UserInputType.MouseButton1) then
             if (not GameProcessed) then

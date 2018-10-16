@@ -2,7 +2,6 @@ shared()
 
 --[[
     @classmod Stack
-    
 ]]
 
 local Stack = Class:FromName(script.Name)
@@ -20,7 +19,7 @@ function Stack:Push(Value)
     self.Size = Size
 end
 
-function Sack:Pop()
+function Stack:Pop()
 
     local StackTable = self.Stack
     local Size = self.Size

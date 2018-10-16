@@ -41,9 +41,9 @@ function Event:Update()
     end
 end
 
-function Event:Fire()
+function Event:Fire(...)
     for _, Handler in pairs(self.Handlers) do
-        Handler()
+        Handler(...)
     end
 end
 

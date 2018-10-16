@@ -11,17 +11,18 @@
 shared()
 
 local Client = {}
-local Server = {}
+local Server = {
+    TransmissionReady = {};
+}
 local Binds = {
     Events = {};
     Functions = {}
 }
-
 local CommunicationLibrary = {
     Client = Client;
     Server = Server;
     Binds = Binds;
-};
+}
 
 local function BindRemoteEvent(Name, Handler)
     local Events = Binds.Events

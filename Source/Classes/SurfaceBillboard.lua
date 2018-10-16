@@ -13,7 +13,6 @@ function SurfaceBillboard:SurfaceBillboard(Part, Adornee, MaxDistance, Offset)
     end
 
     return {
-        GUI         = Part:FindFirstChild("SurfaceGui") or Part:FindFirstChild("SurfaceGUI");
         Part        = Part;
         Offset      = Offset or CFrame.new(0, 0, 0);
         Adornee     = Adornee;
@@ -23,12 +22,18 @@ end
 
 function SurfaceBillboard:Update()
 
-    local GUI           = self.GUI
     local Part          = self.Part
     local Offset        = self.Offset
+    local OffsetPos     = self.OffsetPos or Vector3.new()
     local Adornee       = self.Adornee
     local MaxDistance   = self.MaxDistance
-    local From          = (Adornee.CFrame * Offset).p
+    local GUI           = Part:FindFirstChild("SurfaceGui") or Part:FindFirstChild("SurfaceGUI")
+
+    if (not GUI) then
+        return
+    end
+
+    local From          = (Adornee.CFrame * Offset).p + OffsetPos
     local To            = Graphics.Camera.CFrame.p
     local RelDistance   = (From - To).magnitude
 
@@ -37,6 +42,7 @@ function SurfaceBillboard:Update()
         return
     end
 
+    GUI.Enabled =  true
     Part.CFrame = CFrame.new(From, To)
 end
 

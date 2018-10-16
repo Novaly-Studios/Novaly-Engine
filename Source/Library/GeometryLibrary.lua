@@ -56,9 +56,6 @@ end
 
 function Geometry:StripAxis(Point, ClassRef, ...)
 
-    assert(typeof(Point) == "Vector2")
-    assert(typeof(ClassRef):find("Vector"))
-
     local Args = {...}
 
     for Key, Index in pairs(Args) do

@@ -393,7 +393,7 @@ end
 ]]
 
 function Core.Sub(Func, ...)
-    return coroutine.resume(coroutine.create(Func), ...)
+    return coroutine.wrap(Func)(...)
 end
 
 --[[
@@ -426,6 +426,8 @@ Core.Svc = setmetatable({}, {
         return self[Key]
     end;
 })
+
+Core.workspace = game:GetService("Workspace") -- Failsafe if workspace ever gets deprecated
 
 return {
     Client = Core;

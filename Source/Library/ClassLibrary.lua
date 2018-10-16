@@ -54,7 +54,7 @@ function Class:New(Name, ClassTable)
 
         local Result = setmetatable({Class = ClassTable}, ClassTable)
         local Func = ClassTable[Name]
-        GetFunctionEnv(Func).self = Result
+        getfenv(Func).self = Result
 
         local Object = Func(Result, ...)
 
@@ -67,7 +67,7 @@ function Class:New(Name, ClassTable)
 
         for _, Value in pairs(Result) do
             if (type(Value) == "function") then
-                GetFunctionEnv(Value).self = Result
+                getfenv(Value).self = Result
             end
         end
 
@@ -113,7 +113,7 @@ function Class:FromExtension(Name, Other)
     local Result = self:FromName(Name)
 
     Result["__index"] = function(self, Key)
-        return (rawget(self, Key) or rawget(self, self.ClassRefKey)[Key] or Other[Key])
+        return (rawget(self, Key) or rawget(self, "Class")[Key] or Other[Key])
     end
     Result[self.SuperclassRefKey] = Other
 
