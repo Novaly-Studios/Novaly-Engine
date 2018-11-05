@@ -3,10 +3,11 @@ shared()
 local SetAssociation = Class:FromName(script.Name)
 
 function SetAssociation.New(InitialValue)
-    return setmetatable({
-        Unordered = {};
-        InitialValue = InitialValue;
-    }, SetAssociation)
+    return {
+        Unordered       = {};
+        Collection      = {};
+        InitialValue    = InitialValue;
+    }
 end
 
 function SetAssociation:Relate(Set, Value)
@@ -21,8 +22,20 @@ function SetAssociation:Relate(Set, Value)
     local Permutations = Product(Rep)
 
     for _, Combination in pairs(Permutations) do
-        Association:InternalRelate(Combination, Unordered, Value)
+        Association.InternalRelate(self, Combination, Unordered, Value)
     end
+
+    if (type(Value) == "table") then
+        table.insert(self.Collection, Value)
+    end
+end
+
+function SetAssociation:Compare(...)
+    Association.Compare(self, ...)
+end
+
+function SetAssociation:Filter(...)
+    Association.Filter(self, ...)
 end
 
 function SetAssociation:Get(Set)
