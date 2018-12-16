@@ -167,7 +167,6 @@ function Client.Init()
         Client.PlayerDataManagement.PlayerData = PlayerData
         Client.PlayerDataManagement.WaitForPlayerData(LocalPlayer)
         Client.PlayerDataManagement.MyData = PlayerData[tostring(LocalPlayer.UserId)]
-        Table.PrintTable(Replication.StripReplicatedData(Client.PlayerDataManagement.MyData))
     end)
 end
 
