@@ -102,7 +102,6 @@ function Server.Init()
         end
 
         Data = Data or {}
-
         Server.PlayerDataManagement.RecursiveBuild(Data)
 
         repeat wait() until TransmissionReady[Player.Name]
@@ -119,13 +118,24 @@ function Server.Init()
     Sub(function()
 
         local function TryGet()
-            Server.PlayerDataStore = Svc("DataStoreService"):GetDataStore(CONFIG.pDataStoreName .. CONFIG.pDataStoreVersion)
+            if (game.PlaceId <= 0) then
+                -- Player data manager running in test mode.
+                print("Badddd")
+                Server.PlayerDataStore = {
+                    GetAsync = function(Self, Key)
+                        return Self[Key]
+                    end;
+                    SetAsync = function(Self, Key, Value)
+                        Self[Key] = Value
+                    end;
+                }
+            else
+                print("Gooooddd")
+                Server.PlayerDataStore = Svc("DataStoreService"):GetDataStore(CONFIG.pDataStoreName .. CONFIG.pDataStoreVersion)
+            end
         end
 
-        TryGet()
-
-        while (Server.PlayerDataStore == nil) do
-            TryGet()
+        while (pcall(TryGet) == false) do
             wait(CONFIG.pDataStoreGetRetrywait)
         end
     end)
@@ -157,6 +167,7 @@ function Client.Init()
         Client.PlayerDataManagement.PlayerData = PlayerData
         Client.PlayerDataManagement.WaitForPlayerData(LocalPlayer)
         Client.PlayerDataManagement.MyData = PlayerData[tostring(LocalPlayer.UserId)]
+        Table.PrintTable(Replication.StripReplicatedData(Client.PlayerDataManagement.MyData))
     end)
 end
 
