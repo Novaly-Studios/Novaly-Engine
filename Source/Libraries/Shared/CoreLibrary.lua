@@ -419,7 +419,6 @@ end
 
 for Index = 1, #SvcLoad do
     local Value = SvcLoad[Index]
-    print("UHHHHH", Value)
     Core[Value] = game:GetService(Value)
 end
 

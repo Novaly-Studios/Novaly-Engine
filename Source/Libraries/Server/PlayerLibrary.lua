@@ -116,7 +116,6 @@ function Server.Init()
         local function TryGet()
             if (game.PlaceId <= 0) then
                 -- Player data manager running in test mode.
-                print("Badddd")
                 Server.PlayerDataStore = {
                     GetAsync = function(Self, Key)
                         return Self[Key]
@@ -126,7 +125,6 @@ function Server.Init()
                     end;
                 }
             else
-                print("Gooooddd")
                 Server.PlayerDataStore = Svc("DataStoreService"):GetDataStore(CONFIG.pDataStoreName .. CONFIG.pDataStoreVersion)
             end
         end

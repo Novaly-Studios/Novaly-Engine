@@ -24,6 +24,8 @@ local Environment           = {}
 local ClassCount            = 1
 local LibraryCount          = 1
 
+local RunTests              = false
+
 if Server then
     Environment["Assets"] = ReplicatedStorage:FindFirstChild("Assets") or Instance.new("Folder", ReplicatedStorage)
 else
@@ -87,13 +89,20 @@ local function LoadUtil(Object, PathString)
     return {Object}
 end
 
+local function Count(Arr)
+    local Result = 0
+    for _ in pairs(Arr) do
+        Result = Result + 1
+    end
+    return Result
+end
+
 setmetatable(shared, {
     __call = function(_, Value)
 
         if Value then
             local ValueType = type(Value)
             if (ValueType == "table") then
-                print(">>>>> Adding", Value)
                 AddPlugin(Value)
                 return
             end
@@ -125,10 +134,12 @@ for _, Value in pairs(LoadOrder.Classes) do
         end
     end
 
-    if Test then
-        for Index, Func in pairs(require(Test)) do
+    if (Test and RunTests) then
+        local Tests = require(Test[1])
+        for Index, Func in pairs(Tests) do
             assert(Func(), string.format("Test %s(%s) failed.", Value, Index))
         end
+        print(string.format("Engine tests %s(1 -> %d) passed.", Value, Count(Tests)))
     end
 end
 
@@ -149,10 +160,12 @@ for _, Value in pairs(LoadOrder.Utility) do
         end
     end
 
-    if Test then
-        for Index, Func in pairs(require(Test)) do
+    if (Test and RunTests) then
+        local Tests = require(Test[1])
+        for Index, Func in pairs(Tests) do
             assert(Func(), string.format("Test %s(%s) failed.", Value, Index))
         end
+        print(string.format("Engine tests %s(1 -> %d) passed.", Value, Count(Tests)))
     end
 end
 
