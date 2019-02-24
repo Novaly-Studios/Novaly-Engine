@@ -1,10 +1,6 @@
 shared()
 
 local PlayerData                = {}
-local Client                    = {
-    PlayerDataManagement        = {};
-    PlayerData                  = {};
-}
 local Server                    = {
     PlayerDataManagement        = {};
     PlayerData                  = {};
@@ -102,7 +98,6 @@ function Server.Init()
         end
 
         Data = Data or {}
-
         Server.PlayerDataManagement.RecursiveBuild(Data)
 
         repeat wait() until TransmissionReady[Player.Name]
@@ -119,44 +114,26 @@ function Server.Init()
     Sub(function()
 
         local function TryGet()
-            Server.PlayerDataStore = Svc("DataStoreService"):GetDataStore(CONFIG.pDataStoreName .. CONFIG.pDataStoreVersion)
+            if (game.PlaceId <= 0) then
+                -- Player data manager running in test mode.
+                print("Badddd")
+                Server.PlayerDataStore = {
+                    GetAsync = function(Self, Key)
+                        return Self[Key]
+                    end;
+                    SetAsync = function(Self, Key, Value)
+                        Self[Key] = Value
+                    end;
+                }
+            else
+                print("Gooooddd")
+                Server.PlayerDataStore = Svc("DataStoreService"):GetDataStore(CONFIG.pDataStoreName .. CONFIG.pDataStoreVersion)
+            end
         end
 
-        TryGet()
-
-        while (Server.PlayerDataStore == nil) do
-            TryGet()
+        while (pcall(TryGet) == false) do
             wait(CONFIG.pDataStoreGetRetrywait)
         end
-    end)
-end
-
-function Client.PlayerDataManagement.WaitForPlayerData(Player)
-    return Table.WaitFor(wait, PlayerData, tostring(Player.UserId))
-end
-
-function Client.PlayerDataManagement.WaitForMyData()
-    return Table.WaitFor(wait, Client.PlayerDataManagement, "MyData")
-end
-
-function Client.Init()
-
-    while (Players.LocalPlayer == nil) do
-        wait()
-    end
-
-    local LocalPlayer = Players.LocalPlayer
-    Client.Player = LocalPlayer
-
-    repeat wait() until LocalPlayer.Character ~= nil
-    Client.Character = LocalPlayer.Character
-
-    Sub(function()
-        Replication.Wait("PlayerData")
-        PlayerData = ReplicatedData.PlayerData
-        Client.PlayerDataManagement.PlayerData = PlayerData
-        Client.PlayerDataManagement.WaitForPlayerData(LocalPlayer)
-        Client.PlayerDataManagement.MyData = PlayerData[tostring(LocalPlayer.UserId)]
     end)
 end
 
@@ -173,10 +150,6 @@ local function WaitForItem(Player, Key)
     return Result
 end
 
-Client.PlayerDataManagement.WaitForItem = WaitForItem
 Server.PlayerDataManagement.WaitForItem = WaitForItem
 
-return {
-    Client = Client;
-    Server = Server;
-}
+return Server

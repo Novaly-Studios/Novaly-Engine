@@ -10,18 +10,12 @@
 
 shared()
 
-local Client = {}
 local Server = {
     TransmissionReady = {};
 }
 local Binds = {
     Events = {};
     Functions = {}
-}
-local CommunicationLibrary = {
-    Client = Client;
-    Server = Server;
-    Binds = Binds;
 }
 
 local function BindRemoteEvent(Name, Handler)
@@ -35,57 +29,8 @@ local function BindRemoteFunction(Name, Handler)
     Binds.Functions[Name] = Handler
 end
 
-Client.BindRemoteEvent      = BindRemoteEvent
-Client.BindRemoteFunction   = BindRemoteFunction
 Server.BindRemoteEvent      = BindRemoteEvent
 Server.BindRemoteFunction   = BindRemoteFunction
-
-function Client.FireRemoteEvent(...)
-    Client.RemoteEvent:FireServer(...)
-end
-
-function Client.InvokeRemoteFunction(...)
-    return Client.RemoteFunction:InvokeServer(...)
-end
-
-function Client.Init()
-
-    local RemoteEvent       = ReplicatedStorage:WaitForChild("RemoteEvent")
-    local RemoteFunction    = ReplicatedStorage:WaitForChild("RemoteFunction")
-    Client.RemoteEvent      = RemoteEvent
-    Client.RemoteFunction   = RemoteFunction
-
-    RemoteEvent.OnClientEvent:Connect(function(Name, ...)
-
-        local Event = Binds.Events[Name]
-
-        if (type(Name) ~= "string") then
-            Log(0, "Warning, server has sent an empty or non-string request name.")
-        elseif (Event == nil) then
-            Log(0, "Warning, no event '" .. Name .. "' found in event collection.")
-        else
-            Event:Fire(...)
-        end
-    end)
-
-    RemoteFunction.OnClientInvoke = function(Name, ...)
-
-        local Function = Binds.Functions[Name]
-
-        if (type(Name) ~= "string") then
-            Log(0, "Warning, servers has sent an empty or non-string request name.")
-            return false
-        elseif (Function == nil) then
-            Log(0, "Warning, no function '" .. Name .. "' found in function collection.")
-        else
-            return Function(...)
-        end
-    end
-
-    Client.BindRemoteFunction("Ready", function()
-        return true
-    end)
-end
 
 function Server.WaitForTransmissionReady(Player)
 
@@ -161,4 +106,4 @@ function Server.Init()
     end)
 end
 
-return CommunicationLibrary
+return Server

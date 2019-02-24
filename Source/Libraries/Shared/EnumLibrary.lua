@@ -52,6 +52,5 @@ function Enums:NewCollection(Name, Values)
 end
 
 return {
-    Client = {Enum = Enums};
-    Server = {Enum = Enums};
+    Enum = Enums;
 }

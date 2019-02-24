@@ -59,6 +59,5 @@ Weld.WeldModel = Weld.Model
 Weld.WeldPart = Weld.Part
 
 return {
-    Client = {Weld = Weld};
-    Server = {Weld = Weld};
+    Weld = Weld;
 }

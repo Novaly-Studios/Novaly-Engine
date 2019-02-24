@@ -157,6 +157,5 @@ function GUI:GetMouseOverIndicator(Button, MouseEnterFunc, MouseLeaveFunc)
 end
 
 return {
-    Client = {GUI = GUI};
-    Server = {};
+    GUI = GUI;
 }

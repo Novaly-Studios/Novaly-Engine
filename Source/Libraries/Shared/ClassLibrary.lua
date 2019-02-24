@@ -157,6 +157,5 @@ end
 Class.FromName = Class.New
 
 return {
-    Client = {Class = Class};
-    Server = {Class = Class};
+    Class = Class;
 }

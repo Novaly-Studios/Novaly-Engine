@@ -5,16 +5,24 @@ local StarterPlayer         = game:GetService("StarterPlayer")
 local StarterGui            = game:GetService("StarterGui")
 local RunService            = game:GetService("RunService")
 
-local Parent                = script.Parent
 local Server                = RunService:IsServer()
-local ConfigFolder          = Parent.Configuration
-local LoadOrder             = require(ConfigFolder.LoadOrder)
-
 local Indicator             = Server and "Server" or "Client"
+
+local Parent                = script.Parent
+local Libraries             = Parent:FindFirstChild("Libraries")
+local ClassTests            = Parent:FindFirstChild("ClassTests")
+local LibraryTests          = Parent:FindFirstChild("LibraryTests")
+local Classes               = Parent:FindFirstChild("Classes")
+
+local ConfigFolder          = Parent.Configuration
+local LoadOrder             = require(ConfigFolder.LoadOrder)[Indicator]
 local TargetName            = string.format("%sGameLoader", Indicator)
 
 local CachedEnvironments    = {}
 local Environment           = {}
+
+local ClassCount            = 1
+local LibraryCount          = 1
 
 if Server then
     Environment["Assets"] = ReplicatedStorage:FindFirstChild("Assets") or Instance.new("Folder", ReplicatedStorage)
@@ -35,9 +43,7 @@ local function MapEnv(Target)
     end
 end
 
-local function AddPlugin(Plugin)
-
-    local Object = (Server and Plugin.Server or Plugin.Client)
+local function AddPlugin(Object)
 
     if (Object["Init"]) then
         Object["Init"]()
@@ -46,7 +52,7 @@ local function AddPlugin(Plugin)
     for Key, Value in pairs(Object) do
         if (Key ~= "Init") then
             if (Environment[Key]) then
-                print("\tWarning: Library item '" .. Key .. "' being overwritten.")
+                print(string.format("\tWarning: Library item '%s' was overwritten.", Key))
             end
             Environment[Key] = Value
         end
@@ -57,12 +63,37 @@ local function AddPlugin(Plugin)
     end
 end
 
+local function LoadUtil(Object, PathString)
+    local REGEX = "[^%.]+"
+
+    for Node in string.gmatch(PathString, REGEX) do
+        if (Node == "*") then
+            local Items = {}
+
+            for _, Value in pairs(Object:GetChildren()) do
+                table.insert(Items, Value)
+            end
+
+            return Items
+        end
+
+        Object = Object:FindFirstChild(Node)
+
+        if (not Object) then
+            return false
+        end
+    end
+
+    return {Object}
+end
+
 setmetatable(shared, {
-    __call = function(self, Value)
+    __call = function(_, Value)
 
         if Value then
             local ValueType = type(Value)
             if (ValueType == "table") then
+                print(">>>>> Adding", Value)
                 AddPlugin(Value)
                 return
             end
@@ -75,16 +106,25 @@ setmetatable(shared, {
 })
 
 Environment["CONFIG"] = require(ConfigFolder.Config)
+AddPlugin(require(Libraries.Shared.ClassLibrary))
 
-for Key, Value in pairs(LoadOrder) do
-    local Library = Parent.Library:FindFirstChild(Value)
-    local Test = Parent.Tests:FindFirstChild(Value)
-    if Library then
-        local Now = tick()
-        AddPlugin(require(Library))
-        print("[Load Order " .. Key .. "] Library: " .. Library.Name .. " Loaded on " .. Indicator ..
-            " (" .. ("%.2f"):format((tick() - Now) * 1000) .. "ms)")
+local ClassAdditions = {}
+
+for _, Value in pairs(LoadOrder.Classes) do
+
+    local Class = LoadUtil(Classes, Value)
+    local Test = LoadUtil(ClassTests, Value)
+
+    if Class then
+        for _, Item in pairs(Class) do
+            local Now = tick()
+            ClassAdditions[Item.Name] = require(Item)
+            print(string.format("[Load Order %d] Class: %s Loaded on %s (%.2fms)",
+                ClassCount, Item.Name, Indicator, (tick() - Now) * 1000))
+            ClassCount = ClassCount + 1
+        end
     end
+
     if Test then
         for Index, Func in pairs(require(Test)) do
             assert(Func(), string.format("Test %s(%s) failed.", Value, Index))
@@ -92,6 +132,31 @@ for Key, Value in pairs(LoadOrder) do
     end
 end
 
+AddPlugin(ClassAdditions)
+
+for _, Value in pairs(LoadOrder.Utility) do
+
+    local Library = LoadUtil(Libraries, Value)
+    local Test = LoadUtil(LibraryTests, Value) --[[Tests:FindFirstChild(Value, true)]]
+
+    if Library then
+        for _, Item in pairs(Library) do
+            local Now = tick()
+            AddPlugin(require(Item))
+            print(string.format("[Load Order %d] Library: %s Loaded on %s (%.2fms)",
+            LibraryCount, Item.Name, Indicator, (tick() - Now) * 1000))
+            LibraryCount = LibraryCount + 1
+        end
+    end
+
+    if Test then
+        for Index, Func in pairs(require(Test)) do
+            assert(Func(), string.format("Test %s(%s) failed.", Value, Index))
+        end
+    end
+end
+
+-- Find game entry points
 require(ReplicatedStorage:FindFirstChild(TargetName, true) or
         ServerScriptService:FindFirstChild(TargetName, true) or
         ReplicatedFirst:FindFirstChild(TargetName, true) or

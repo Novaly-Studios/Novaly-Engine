@@ -125,6 +125,5 @@ end
 Table.ApplyKeyMapping(String, Mappings, string)
 
 return {
-    Client = {String = String};
-    Server = {String = String};
+    String = String;
 }

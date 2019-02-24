@@ -352,7 +352,4 @@ Maths["Tau"]            = 2 * math.pi
 
 local Final = {Math = Maths, Curve = Curve}
 
-return {
-    Client = Final;
-    Server = Final;
-}
+return Final

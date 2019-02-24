@@ -275,7 +275,27 @@ function Table.ProtectedGet(Array, Key)
     return Success, Result
 end
 
+function Table.GetPath(Object, FetchItemsMethod, PathString)
+
+    for Node in string.gmatch(PathString, "[^%.]+") do
+
+        if (Node == "*") then
+            local Items = {}
+            local Method = Object[FetchItemsMethod]
+            for _, Value in pairs(Method and Method(Object) or Object) do
+                table.insert(Items, Value)
+            end
+            return Items
+        end
+
+        Object = Object[Node]
+        assert(Object, string.format("Path item '%s' not found!", Node))
+
+    end
+
+    return Object
+end
+
 return {
-    Client = {Table = Table};
-    Server = {Table = Table};
+    Table = Table;
 }

@@ -413,8 +413,13 @@ function Core.SteppedWait()
     RunService.Stepped:Wait()
 end
 
+function Core.printf(Str, ...)
+    print(string.format(Str, ...))
+end
+
 for Index = 1, #SvcLoad do
     local Value = SvcLoad[Index]
+    print("UHHHHH", Value)
     Core[Value] = game:GetService(Value)
 end
 
@@ -429,7 +434,4 @@ Core.Svc = setmetatable({}, {
 
 Core.workspace = game:GetService("Workspace") -- Failsafe if workspace ever gets deprecated
 
-return {
-    Client = Core;
-    Server = Core;
-}
+return Core

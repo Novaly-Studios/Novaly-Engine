@@ -4,7 +4,6 @@
     @module Graphics Library
     @alias GraphicsLibrary
     @author TPC9000
-    @todo
 ]]
 
 shared()
@@ -185,6 +184,32 @@ function Graphics:HandlePartTransparency(Item)
     end
 end
 
+function Graphics:IsVisible(Subject, Target, Tolerance)
+    return (math.acos(Subject.lookVector:Dot((Target - Subject.p).unit)) <= Tolerance)
+end
+
+function Graphics:AccurateIsVisible(Target)
+
+    local Camera = Graphics.Camera
+    local Position = Camera:WorldToScreenPoint(Target)
+    local ScreenDimensions = Camera.ViewportSize
+
+    if (Position.Z > 0) then
+        return (Position.X <= ScreenDimensions.X and Position.X >= 0) and (Position.Y <= ScreenDimensions.Y and Position.Y >= 0), Position
+    end
+
+    return false, Position
+end
+
+function Graphics:RegisterFlare(Collection)
+
+    for _, FlareObject in pairs(Collection.LensFlares) do
+        FlareObject[2].Parent = Table.WaitForItem(Graphics, "GraphicsGui"):WaitForChild("LensFlareFrame")
+    end
+
+    Graphics.LensFlareItems[#Graphics.LensFlareItems + 1] = Collection
+end
+
 local function ClientInit()
 
     if (CONFIG.gEnableGraphics == false) then
@@ -302,47 +327,7 @@ local function ClientInit()
     end)
 end
 
-local function ServerInit()
-    coroutine.wrap(function()
-        for Index, Part in pairs(CollectionService:GetTagged(Graphics.Tags.TransparentPart)) do
-            local Settings = Part:FindFirstChild("Settings")
-            if Settings then
-                Settings.InitialTransparency.Value = Part.Transparency
-            end
-            if (Index % 50 == 0) then
-                wait()
-            end
-        end
-    end)()
-end
-
-function Graphics:IsVisible(Subject, Target, Tolerance)
-    return (math.acos(Subject.lookVector:Dot((Target - Subject.p).unit)) <= Tolerance)
-end
-
-function Graphics:AccurateIsVisible(Target)
-
-    local Camera = Graphics.Camera
-    local Position = Camera:WorldToScreenPoint(Target)
-    local ScreenDimensions = Camera.ViewportSize
-
-    if (Position.Z > 0) then
-        return (Position.X <= ScreenDimensions.X and Position.X >= 0) and (Position.Y <= ScreenDimensions.Y and Position.Y >= 0), Position
-    end
-
-    return false, Position
-end
-
-function Graphics:RegisterFlare(Collection)
-
-    for _, FlareObject in pairs(Collection.LensFlares) do
-        FlareObject[2].Parent = Table.WaitForItem(Graphics, "GraphicsGui"):WaitForChild("LensFlareFrame")
-    end
-
-    Graphics.LensFlareItems[#Graphics.LensFlareItems + 1] = Collection
-end
-
 return {
-    Client = {Graphics = Graphics, Init = ClientInit};
-    Server = {Init = ServerInit};
+    Graphics = Graphics;
+    Init = ClientInit;
 }

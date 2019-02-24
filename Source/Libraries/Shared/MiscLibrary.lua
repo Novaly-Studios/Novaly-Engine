@@ -18,6 +18,5 @@ function Misc:TableFromTreeValues(Root)
 end
 
 return {
-    Client = {Misc = Misc};
-    Server = {Misc = Misc};
+    Misc = Misc;
 }

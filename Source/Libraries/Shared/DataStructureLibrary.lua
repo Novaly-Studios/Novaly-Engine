@@ -252,6 +252,5 @@ function DataStructures:CanBuild(TypeName)
 end
 
 return {
-    Client = {DataStructures = DataStructures};
-    Server = {DataStructures = DataStructures};
+    DataStructures = DataStructures;
 }

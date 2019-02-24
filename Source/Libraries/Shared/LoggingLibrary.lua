@@ -8,7 +8,4 @@ function Log.Log(Level, Str)
     print(("\t"):rep(Level) .. Str)
 end
 
-return {
-    Client = Log;
-    Server = Log;
-}
+return Log
