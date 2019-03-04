@@ -42,6 +42,7 @@ return
             "Shared.MiscLibrary";
             "Shared.WeldLibrary";
             "Shared.CollectionHelperLibrary";
+            "Client.InternalEvents";
             "Client.CommunicationLibrary";
             "Client.ReplicationLibrary";
             "Client.InputLibrary";
