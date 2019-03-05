@@ -44,12 +44,19 @@ function InternalEvents:Invoke(Name, Pass, Arguments)
                 end)()
             end;
             ["At"] = function()
-                local Accum = Target.State.EndTime
-                local EndTime = (Accum and Accum or tick()) + Arguments.Duration
+                local EndTime
+
+                if (Arguments.Reset) then
+                    EndTime = tick() + Arguments.Duration
+                else
+                    local Accum = Target.State.EndTime
+                    EndTime = (Accum and Accum or tick()) + Arguments.Duration
+                end
+
                 Target.State.EndTime = EndTime
                 Target.State.Pass = Pass
                 self.Scheduled[Target] = true
-            end
+            end;
         }
         return
     end
