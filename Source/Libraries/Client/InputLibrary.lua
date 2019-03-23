@@ -144,8 +144,9 @@ function InputLibrary:BindOnKeyDown(Key, AssociateFunction)
 
     local DownBinds = self.DownBinds
     local Target = DownBinds[Key] or Event.New()
-    Target:Connect(AssociateFunction)
     DownBinds[Key] = Target
+
+    return Target:Connect(AssociateFunction)
 end
 
 --[[
@@ -168,8 +169,9 @@ function InputLibrary:BindOnKeyUp(Key, AssociateFunction)
 
     local UpBinds = self.UpBinds
     local Target = UpBinds[Key] or Event.New()
-    Target:Connect(AssociateFunction)
     UpBinds[Key] = Target
+
+    return Target:Connect(AssociateFunction)
 end
 
 --[[
