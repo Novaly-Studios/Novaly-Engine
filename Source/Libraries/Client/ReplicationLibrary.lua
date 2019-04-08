@@ -209,8 +209,6 @@ local function ClientInit()
 
     BindRemoteEvent("ReplicateData", function(Keys, Value)
 
-        Replication.Wait()
-
         if type(Keys) == "table" then
 
             local FinalKey = Keys[#Keys]

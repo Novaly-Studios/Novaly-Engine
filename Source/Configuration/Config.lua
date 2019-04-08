@@ -24,7 +24,7 @@ local Config = {
     sConditionalTimeTolerance = 1 / 60;
 
     pSaveInterval = 30;
-    pDataStoreVersion = "1.0.0.2";
+    pDataStoreVersion = "1.0.1.0";
     pDataStoreName = "PlayerData";
     pBackupSuffix = "_Backup";
     pDataStoreGetRetryWait = 5;
