@@ -125,7 +125,7 @@ function Server.Init()
                     end;
                 }
             else
-                Server.PlayerDataStore = Svc("DataStoreService"):GetDataStore(CONFIG.pDataStoreName .. CONFIG.pDataStoreVersion)
+                Server.PlayerDataStore = Svc("DataStoreService"):GetDataStore(ReplicatedStorage:FindFirstChild("DataStoreVersion") and ReplicatedStorage.DataStoreVersion or CONFIG.pDataStoreVersion)
             end
         end
 
