@@ -433,7 +433,4 @@ Core.Svc = setmetatable({}, {
 
 Core.workspace = game:GetService("Workspace") -- Failsafe if workspace ever gets deprecated
 
-return {
-    Client = Core;
-    Server = Core;
-}
+return Core

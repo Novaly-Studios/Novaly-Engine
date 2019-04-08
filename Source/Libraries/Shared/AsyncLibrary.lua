@@ -51,6 +51,5 @@ function Async.WaitForChild(Parent, Name, Timeout)
 end
 
 return {
-    Client = { Async = Async };
-    Server = { Async = Async };
+    Async = Async;
 }

@@ -23,7 +23,4 @@ for Item = 1, #ClassItems do
     Structures.ImportClass(Item, Name)
 end
 
-return {
-    Client = Structures;
-    Server = Structures;
-}
+return Structures

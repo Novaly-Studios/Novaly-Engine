@@ -66,6 +66,5 @@ function Geometry:StripAxis(Point, ClassRef, ...)
 end
 
 return {
-    Client = {Geometry = Geometry};
-    Server = {Geometry = Geometry};
+    Geometry = Geometry;
 }

@@ -246,6 +246,8 @@ function SharedData.Append(Elements)
 end
 
 return {
-    Client = {ReplicatedData = ReplicatedData, SharedData = SharedData, Replication = Replication, Init = ClientInit};
-    Server = {ReplicatedData = ReplicatedData, SharedData = SharedData, Replication = Replication, Init = ServerInit};
+    ReplicatedData = ReplicatedData;
+    SharedData = SharedData;
+    Replication = Replication;
+    Init = ClientInit;
 }

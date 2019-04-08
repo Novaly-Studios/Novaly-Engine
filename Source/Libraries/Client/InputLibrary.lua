@@ -236,6 +236,6 @@ function InputLibrary:UnblockInput(Name)
 end
 
 return {
-    Client = {InputLibrary = InputLibrary, Init = ClientInit};
-    Server = {};
+    InputLibrary = InputLibrary;
+    Init = ClientInit;
 }

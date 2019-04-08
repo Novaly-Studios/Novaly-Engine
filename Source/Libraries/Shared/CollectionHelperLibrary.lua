@@ -208,6 +208,5 @@ function CollectionHelper:GetFirstTagged(Tag)
 end
 
 return {
-    Client = {CollectionHelper = CollectionHelper};
-    Server = {CollectionHelper = CollectionHelper};
+    CollectionHelper = CollectionHelper;
 }

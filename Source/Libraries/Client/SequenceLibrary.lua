@@ -60,6 +60,6 @@ local function ClientInit()
 end
 
 return {
-    Client = {Sequencer = Sequencer, Init = ClientInit};
-    Server = {};
+    Sequencer = Sequencer;
+    Init = ClientInit;
 }

@@ -14,6 +14,5 @@ local Mappings = {
 Table.ApplyKeyMapping(Coroutine, Mappings, coroutine)
 
 return {
-    Client = {Coroutine = Coroutine};
-    Server = {Coroutine = Coroutine};
+    Coroutine = Coroutine;
 }
