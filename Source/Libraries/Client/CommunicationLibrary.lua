@@ -19,9 +19,9 @@ local Binds = {
 local function BindRemoteEvent(Name, Handler)
     local Events = Binds.Events
     local Found = Events[Name] or Event.New()
-    Found:Connect(Handler)
+    local Connection = Found:Connect(Handler)
     Events[Name] = Found
-    return Found
+    return Connection
 end
 
 local function BindRemoteFunction(Name, Handler)
