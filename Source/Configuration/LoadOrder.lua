@@ -51,14 +51,6 @@ return
             "Client.GraphicsLibrary";
             "Client.PlayerLibrary";
         };
-        Classes = {
-            "Animation.*";
-            "DataType.*";
-            "Geometry.*";
-            "Graphics.*";
-            "Process.*";
-            "Storage.*";
-        };
     };
     Server = {
         Utility = {
@@ -78,12 +70,6 @@ return
             "Server.ReplicationLibrary";
             "Server.GraphicsLibrary";
             "Server.PlayerLibrary";
-        };
-        Classes = {
-            "DataType.*";
-            "Geometry.*";
-            "Process.*";
-            "Storage.*";
         };
     };
 };

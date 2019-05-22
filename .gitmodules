@@ -1,0 +1,6 @@
+[submodule "Source/Classes/DataStructures"]
+	path = Source/Classes/DataStructures
+	url = https://github.com/TPC9000/LuaDataStructures.git
+[submodule "Source/Classes/Event"]
+	path = Source/Classes/Event
+	url = https://github.com/TPC9000/Event.git
