@@ -112,12 +112,51 @@ function Class:FromExtension(Name, Other)
 
     local Result = self:FromName(Name)
 
-    Result["__index"] = function(self, Key)
-        return (rawget(self, Key) or rawget(self, "Class")[Key] or Other[Key])
-    end
-    Result[self.SuperclassRefKey] = Other
+    if (Other.Abstract) then
+        Result.Abstract = true
 
+        function Result:Verify()
+            for Key, Item in pairs(Other) do
+                if (type(Item) == "function") then
+                    if (Result[Key] == nil) then
+                        error(string.format("'%s' in class '%s' is not present.", Key, Name))
+                    elseif (type(Result[Key]) ~= "function") then
+                        error(string.format("'%s' in class '%s' is an attribute, not a method.", Key, Name))
+                    end
+                else
+                    if (Result[Key] == nil) then
+                        error(string.format("'%s' in class '%s' is not present.", Key, Name))
+                    elseif (type(Result[Key]) ~= "function") then
+                        error(string.format("'%s' in class '%s' is a method, not an attribute.", Key, Name))
+                    end
+                end
+            end
+        end
+    else
+        Result["__index"] = function(self, Key)
+            return (rawget(self, Key) or rawget(self, "Class")[Key] or Other[Key])
+        end
+    end
+
+    Result[self.SuperclassRefKey] = Other
     return Result
+end
+
+--[[
+    @function Class.Abstract
+
+    Creates an abstract class.
+
+    @usage
+        local Class1 = Class:Abstract("Class1")
+        function Class1:Test() end
+        function Class1:Ahh() end
+]]
+
+function Class:Abstract(Name)
+    return Class:FromName(Name) {
+        Abstract = true;
+    }
 end
 
 --[[
