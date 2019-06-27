@@ -42,6 +42,7 @@ return
             "Shared.MiscLibrary";
             "Shared.WeldLibrary";
             "Shared.CollectionHelperLibrary";
+            "Shared.TaskManager";
             "Client.InternalEvents";
             "Client.CommunicationLibrary";
             "Client.ReplicationLibrary";
@@ -66,6 +67,7 @@ return
             "Shared.MiscLibrary";
             "Shared.WeldLibrary";
             "Shared.CollectionHelperLibrary";
+            "Shared.TaskManager";
             "Server.CommunicationLibrary";
             "Server.ReplicationLibrary";
             "Server.GraphicsLibrary";
