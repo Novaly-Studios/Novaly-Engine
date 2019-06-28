@@ -2,14 +2,9 @@ shared()
 
 local TaskManager = {
     Queue = PriorityQueue:Create();
-    RunPerUpdate = 1;
 }
 
-function TaskManager:Init()
-    RunService.Stepped:Connect(function()
-        self:Run(self.RunPerUpdate)
-    end)
-end
+function TaskManager:Init() end
 
 function TaskManager:Add(VDP)
     assert(type(VDP.Data) == "function", "Data type is not function in supplied ValueDataPair!")
@@ -23,6 +18,13 @@ function TaskManager:Run(Times)
             Item.Data()
         end
     end
+end
+
+function TaskManager:AddOnStep(VDP)
+    assert(type(VDP.Data) == "function", "Data type is not function in supplied ValueDataPair!")
+    return RunService.Stepped:Connect(function()
+        self:Add(VDP)
+    end)
 end
 
 return {
