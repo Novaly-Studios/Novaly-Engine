@@ -30,4 +30,6 @@ function Timer:On(Interval, Execute)
     end
 end
 
-return Timer
+return {
+    Timer = Timer;
+}
