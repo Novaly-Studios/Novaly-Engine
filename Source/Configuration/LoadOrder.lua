@@ -43,6 +43,7 @@ return
             "Shared.WeldLibrary";
             "Shared.CollectionHelperLibrary";
             "Shared.TaskManager";
+            "Shared.Timer";
             "Client.InternalEvents";
             "Client.CommunicationLibrary";
             "Client.ReplicationLibrary";
@@ -68,6 +69,7 @@ return
             "Shared.WeldLibrary";
             "Shared.CollectionHelperLibrary";
             "Shared.TaskManager";
+            "Shared.Timer";
             "Server.CommunicationLibrary";
             "Server.ReplicationLibrary";
             "Server.GraphicsLibrary";
