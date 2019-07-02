@@ -1,178 +1,152 @@
+local Loader                = {}
+local Engine                = {}
+local Loaded                = {}
+
+local Services = {
+    "ReplicatedStorage", "ReplicatedFirst", "RunService",
+    "StarterGui", "Players", "CollectionService", "UserInputService"
+}
+
 local ReplicatedStorage     = game:GetService("ReplicatedStorage")
-local ReplicatedFirst       = game:GetService("ReplicatedFirst")
-local ServerScriptService   = game:GetService("ServerScriptService")
-local StarterPlayer         = game:GetService("StarterPlayer")
-local StarterGui            = game:GetService("StarterGui")
 local RunService            = game:GetService("RunService")
 
+local Parent                = script.Parent
 local Server                = RunService:IsServer()
 local Indicator             = Server and "Server" or "Client"
-
-local Parent                = script.Parent
 local Libraries             = Parent:FindFirstChild("Libraries")
 local Classes               = Parent:FindFirstChild("Classes")
 
-local ConfigFolder          = Parent.Configuration
-local LoadOrder             = require(ConfigFolder.LoadOrder)[Indicator]
-local TargetName            = string.format("%sGameLoader", Indicator)
+function Loader:Get(Name)
 
-local CachedEnvironments    = {}
-local Environment           = {}
-
-local ClassCount            = 1
-local LibraryCount          = 1
-
-if Server then
-    Environment["Assets"] = ReplicatedStorage:FindFirstChild("Assets") or Instance.new("Folder", ReplicatedStorage)
-else
-    coroutine.resume(coroutine.create(function()
-        Environment["Assets"] = ReplicatedStorage:WaitForChild("Assets")
-    end))
-end
-
-Environment["Modules"]          = Parent.Modules
-Environment["Classes"]          = Parent.Classes
-Environment["Assets"].Name      = "Assets"
-Environment["OriginalEnv"]      = getfenv()
-
-local function MapEnv(Target)
-    for Key, Value in pairs(Environment) do
-        Target[Key] = Value
-    end
-end
-
-local function AddPlugin(Object)
-
-    if (Object["Init"]) then
-        Object["Init"]()
-    end
-
-    for Key, Value in pairs(Object) do
-        if (Key ~= "Init") then
-            if (Environment[Key]) then
-                print(string.format("\tWarning: Library item '%s' was overwritten.", Key))
-            end
-            Environment[Key] = Value
-        end
-    end
-
-    for _, Env in pairs(CachedEnvironments) do
-        MapEnv(Env)
-    end
-end
-
-local function HasParent(Object, Name)
-    while Object do
-        Object = Object.Parent
-        if (Object.Name == Name) then
-            return true
-        end
-    end
-
-    return false
-end
-
-local function LoadUtil(Object, PathString)
-    local REGEX = "[^%.]+"
-
-    for Node in string.gmatch(PathString, REGEX) do
-        if (Node == "*") then
-            local Items = {}
-
-            for _, Value in pairs(Object:GetChildren()) do
-                table.insert(Items, Value)
-            end
-
-            return Items
-        end
-
-        Object = Object:FindFirstChild(Node)
-
-        if (not Object) then
-            return false
-        end
-    end
-
-    return {Object}
-end
-
-local function Count(Arr)
-    local Result = 0
-    for _ in pairs(Arr) do
-        Result = Result + 1
-    end
-    return Result
-end
-
-setmetatable(shared, {
-    __call = function(_, Value)
-
-        if Value then
-            local ValueType = type(Value)
-            if (ValueType == "table") then
-                AddPlugin(Value)
-                return
+    -- Should only be used for debugging
+    if (Name == "*") then
+        for _, Item in pairs(Classes:GetDescendants()) do
+            if (Item:IsA("ModuleScript") and Item.Parent.Name ~= "Tests") then
+                Loader:Get(Item.Name)
             end
         end
 
-        local Target = getfenv(0)
-        MapEnv(Target)
-        table.insert(CachedEnvironments, Target)
-    end;
-})
-
-Environment["CONFIG"] = require(ConfigFolder.Config)
-AddPlugin(require(Libraries.Shared.ClassLibrary))
-
-local ClassAdditions = {}
-
-for _, Value in pairs(Classes:GetChildren()) do
-    local Outsourced = Value:FindFirstChild("Source")
-
-    if Outsourced then
-        Value = Value.Source
-    end
-
-    for _, Item in pairs(Value:GetChildren()) do
-        local Now = tick()
-        local Required = require(Item)
-        ClassAdditions[Item.Name] = Required
-        print(string.format("[Load Order %d] Class: %s Loaded on %s (%.2fms)",
-            ClassCount, Item.Name, Indicator, (tick() - Now) * 1000))
-        ClassCount = ClassCount + 1
-
-        if Outsourced then
-            local function Constructor(...)
-                return Required:Create(...)
+        for _, Item in pairs(Libraries.Shared:GetDescendants()) do
+            if (Item:IsA("ModuleScript")) then
+                Loader:Get(Item.Name)
             end
-            Required.New = Constructor
-            Required.new = Constructor
         end
+
+        if Server then
+            for _, Item in pairs(Libraries.Server:GetDescendants()) do
+                if (Item:IsA("ModuleScript")) then
+                    Loader:Get(Item.Name)
+                end
+            end
+        else
+            for _, Item in pairs(Libraries.Client:GetDescendants()) do
+                if (Item:IsA("ModuleScript")) then
+                    Loader:Get(Item.Name)
+                end
+            end
+        end
+
+        return
     end
+
+    local Default = Engine[Name]
+
+    if Default then
+        return Default
+    end
+
+    local Module = Server and
+        (Libraries.Shared:FindFirstChild(Name, true) or
+        Classes:FindFirstChild(Name, true) or
+        Libraries.Server:FindFirstChild(Name, true)) or
+    (Libraries.Shared:FindFirstChild(Name, true) or
+    Classes:FindFirstChild(Name, true) or
+    Libraries.Client:FindFirstChild(Name, true))
+
+    assert(Module, string.format("No utility or class found with name '%s'!", Name))
+    assert(Module.ClassName == "ModuleScript", string.format("'%s' is not a ModuleScript!", Name))
+
+    local Got = require(Module)
+    Engine[Name] = Got
+
+    if (not Loaded[Name]) then
+        local Time = tick()
+
+        if (Got.Init) then
+            Got:Init()
+        end
+
+        local Diff = tick() - Time
+        local Nanoseconds = Diff * 1e+9
+        local Milliseconds = Diff * 1e+3
+        local Reported = string.format("Novarine - Load '%s' : %s (%.2f ns / %.8f ms)", Name, Indicator, Nanoseconds, Milliseconds)
+
+        -- Warn for slow modules
+        if (Milliseconds < 16) then
+            print(Reported)
+        else
+            warn(Reported)
+        end
+
+        Loaded[Name] = true
+    end
+
+    return Got
 end
 
-AddPlugin(ClassAdditions)
-
-for _, Value in pairs(LoadOrder.Utility) do
-
-    local Library = LoadUtil(Libraries, Value)
-
-    if Library then
-        for _, Item in pairs(Library) do
-            local Now = tick()
-            AddPlugin(require(Item))
-            print(string.format("[Load Order %d] Library: %s Loaded on %s (%.2fms)",
-                LibraryCount, Item.Name, Indicator, (tick() - Now) * 1000))
-            LibraryCount = LibraryCount + 1
-        end
-    end
+function Loader:Add(Name, Item)
+    print(string.format("Novarine - Add '%s' (%s)", Name, Indicator))
+    Engine[Name] = Item
 end
 
--- Find game entry points
-require(ReplicatedStorage:FindFirstChild(TargetName, true) or
-        ServerScriptService:FindFirstChild(TargetName, true) or
-        ReplicatedFirst:FindFirstChild(TargetName, true) or
-        StarterPlayer:FindFirstChild(TargetName, true) or
-        StarterGui:FindFirstChild(TargetName, true))
+function Loader:Initialise()
+    if Server then
+        local Assets = ReplicatedStorage:FindFirstChild("Assets")
 
-return true
+        if (not Assets) then
+            Assets = Instance.new("Folder")
+            Assets.Name = "Assets"
+            Assets.Parent = ReplicatedStorage
+        end
+
+        Engine["Assets"] = Assets
+
+        local RemoteEvent = ReplicatedStorage:FindFirstChild("RemoteEvent")
+
+        if (not RemoteEvent) then
+            RemoteEvent = Instance.new("RemoteEvent")
+            RemoteEvent.Name = "RemoteEvent"
+            RemoteEvent.Parent = ReplicatedStorage
+        end
+
+        local RemoteFunction = ReplicatedStorage:FindFirstChild("RemoteFunction")
+
+        if (not RemoteFunction) then
+            RemoteFunction = Instance.new("RemoteFunction")
+            RemoteFunction.Name = "RemoteFunction"
+            RemoteFunction.Parent = ReplicatedStorage
+        end
+    else
+        coroutine.wrap(function()
+            Engine["Assets"] = ReplicatedStorage:WaitForChild("Assets")
+        end)()
+    end
+
+    Engine["Modules"] = Parent.Modules
+    Engine["Configuration"] = require(Parent.Configuration.Config)
+
+    for _, Name in pairs(Services) do
+        Engine[Name] = game:GetService(Name)
+    end
+
+    -- Find game entry points
+    --[[ require(ReplicatedStorage:FindFirstChild(TargetName, true) or
+            ServerScriptService:FindFirstChild(TargetName, true) or
+            ReplicatedFirst:FindFirstChild(TargetName, true) or
+            StarterPlayer:FindFirstChild(TargetName, true) or
+            StarterGui:FindFirstChild(TargetName, true)) ]]
+
+    print(string.format("Novarine - Initialised (%s)", Indicator))
+end
+
+return Loader

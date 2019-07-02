@@ -1,4 +1,9 @@
-shared()
+local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
+local Players = Novarine:Get("Players")
+local Replication = Novarine:Get("Replication")
+local Table = Novarine:Get("Table")
+
+local ReplicatedData = Replication.ReplicatedData
 
 local PlayerData                = {}
 local Client                    = {
@@ -15,24 +20,24 @@ function Client.PlayerDataManagement.WaitForMyData()
 end
 
 function Client.Init()
+    coroutine.wrap(function()
+        while (Players.LocalPlayer == nil) do
+            wait()
+        end
 
-    while (Players.LocalPlayer == nil) do
-        wait()
-    end
+        local LocalPlayer = Players.LocalPlayer
+        Client.Player = LocalPlayer
 
-    local LocalPlayer = Players.LocalPlayer
-    Client.Player = LocalPlayer
+        repeat wait() until LocalPlayer.Character ~= nil
+        Client.Character = LocalPlayer.Character
 
-    repeat wait() until LocalPlayer.Character ~= nil
-    Client.Character = LocalPlayer.Character
-
-    Sub(function()
         Replication.Wait("PlayerData")
         PlayerData = ReplicatedData.PlayerData
+
         Client.PlayerDataManagement.PlayerData = PlayerData
         Client.PlayerDataManagement.WaitForPlayerData(LocalPlayer)
         Client.PlayerDataManagement.MyData = PlayerData[tostring(LocalPlayer.UserId)]
-    end)
+    end)()
 end
 
 local function WaitForItem(Player, Key)

@@ -1,4 +1,5 @@
-shared()
+local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
+local PriorityQueue = Novarine:Get("PriorityQueue")
 
 local TaskManager = {
     Queue = PriorityQueue:Create();
@@ -27,6 +28,4 @@ function TaskManager:AddOnStep(VDP)
     end)
 end
 
-return {
-    TaskManager = TaskManager;
-}
+return TaskManager

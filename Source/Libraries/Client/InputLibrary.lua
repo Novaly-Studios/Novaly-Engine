@@ -1,4 +1,8 @@
-shared()
+local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
+local Event = Novarine:Get("Event")
+local UserInputService = Novarine:Get("UserInputService")
+local RunService = Novarine:Get("RunService")
+local Graphics = Novarine:Get("Graphics")
 
 --[[
     Provides extra input-capturing capabilities.

@@ -1,4 +1,5 @@
-shared()
+local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
+local Class = Novarine:Get("Class")
 
 local Hierarchy = Class:FromName("Hierarchy") {
     PropertySet = "H_PropertySet";

@@ -1,4 +1,5 @@
-shared()
+local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
+local RunService = Novarine:Get("RunService")
 
 local InternalEvents = {
     Events = {};

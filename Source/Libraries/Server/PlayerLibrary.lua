@@ -1,4 +1,11 @@
-shared()
+local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
+local Configuration = Novarine:Get("Configuration")
+local Players = Novarine:Get("Players")
+local Communication = Novarine:Get("Communication")
+local Replication = Novarine:Get("Replication")
+local Table = Novarine:Get("Table")
+
+local ReplicatedData = Replication.ReplicatedData
 
 local PlayerData                = {}
 local Server                    = {
@@ -94,16 +101,16 @@ function Server.Init()
             Success, Data = pcall(function()
                 return Server.PlayerDataStore:GetAsync(tostring(Player.UserId))
             end)
-            wait(CONFIG.pPlayerDataRetry)
+            wait(Configuration.pPlayerDataRetry)
         end
 
         Data = Data or {}
         Server.PlayerDataManagement.RecursiveBuild(Data)
 
-        repeat wait() until TransmissionReady[Player.Name]
+        repeat wait() until Communication.TransmissionReady[Player.Name]
         PlayerData[tostring(Player.UserId)] = Data
 
-        while wait(CONFIG.pSaveInterval) do
+        while wait(Configuration.pSaveInterval) do
             if not Player.Parent then break end
             Server.PlayerDataManagement.Save(Player)
         end
@@ -111,7 +118,7 @@ function Server.Init()
 
     Players.PlayerRemoving:Connect(Server.PlayerDataManagement.LeaveSave)
 
-    Sub(function()
+    coroutine.wrap(function()
 
         local function TryGet()
             if (game.PlaceId <= 0) then
@@ -125,14 +132,14 @@ function Server.Init()
                     end;
                 }
             else
-                Server.PlayerDataStore = Svc("DataStoreService"):GetDataStore(ReplicatedStorage:FindFirstChild("DataStoreVersion") and ReplicatedStorage.DataStoreVersion.Value or CONFIG.pDataStoreVersion)
+                Server.PlayerDataStore = Svc("DataStoreService"):GetDataStore(ReplicatedStorage:FindFirstChild("DataStoreVersion") and ReplicatedStorage.DataStoreVersion.Value or Configuration.pDataStoreVersion)
             end
         end
 
         while (pcall(TryGet) == false) do
-            wait(CONFIG.pDataStoreGetRetrywait)
+            wait(Configuration.pDataStoreGetRetrywait)
         end
-    end)
+    end)()
 end
 
 local function WaitForItem(Player, Key)

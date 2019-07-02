@@ -1,5 +1,3 @@
-shared()
-
 local GUI = {
     OverStatusObjects = {};
 };

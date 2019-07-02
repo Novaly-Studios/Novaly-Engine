@@ -1,5 +1,3 @@
-shared()
-
 --[[
     Prefixes:
     co - Communication Library

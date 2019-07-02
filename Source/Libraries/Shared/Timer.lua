@@ -1,4 +1,5 @@
-shared()
+local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
+local RunService = Novarine:Get("RunService")
 
 local Timer = {}
 
@@ -30,6 +31,4 @@ function Timer:On(Interval, Execute)
     end
 end
 
-return {
-    Timer = Timer;
-}
+return Timer

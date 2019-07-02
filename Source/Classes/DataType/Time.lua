@@ -1,4 +1,5 @@
-shared()
+local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
+local Class = Novarine:Get("Class")
 
 local Time = Class:FromName(script.Name)
 
