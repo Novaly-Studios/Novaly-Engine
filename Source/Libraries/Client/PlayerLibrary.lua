@@ -27,9 +27,7 @@ function Client.Init()
 
         local LocalPlayer = Players.LocalPlayer
         Client.Player = LocalPlayer
-
-        repeat wait() until LocalPlayer.Character ~= nil
-        Client.Character = LocalPlayer.Character
+        Novarine:Add("Player", LocalPlayer)
 
         Replication.Wait("PlayerData")
         PlayerData = ReplicatedData.PlayerData
