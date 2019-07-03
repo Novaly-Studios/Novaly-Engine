@@ -50,17 +50,17 @@ function Hierarchy:Apply(Object, Struct)
                 Subordinate.Name = Name
             end
 
-            assert(Subordinate:IsA(ClassType), String.Format("Object '%s' is not of the specified type '%s' in the Hierarchy", Subordinate.Name, ClassType))
+            assert(Subordinate:IsA(ClassType), string.format("Object '%s' is not of the specified type '%s' in the Hierarchy", Subordinate.Name, ClassType))
             self:Apply(Subordinate, Value)
             Subordinate.Parent = Object
 
         elseif (Key == self.PropertySet) then
 
             local Properties = self.PropertySets[Value]
-            assert(Properties, String.Format("No property set '%s' exists", Value))
+            assert(Properties, string.format("No property set '%s' exists", Value))
             self:ApplyProperties(Object, Properties)
 
-        elseif (String.Find(tostring(Object[Key]), "Signal") and type(Value) == "function") then
+        elseif (string.find(tostring(Object[Key]), "Signal") and type(Value) == "function") then
 
             local Func = Value
             local Connection

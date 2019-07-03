@@ -1,5 +1,6 @@
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
 local PriorityQueue = Novarine:Get("PriorityQueue")
+local RunService = Novarine:Get("RunService")
 
 local TaskManager = {
     Queue = PriorityQueue:Create();

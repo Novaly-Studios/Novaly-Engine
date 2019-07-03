@@ -1,5 +1,6 @@
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
 local Class = Novarine:Get("Class")
+local Math = Novarine:Get("Math")
 
 local Line = Class:FromName(script.Name)
 

@@ -1,5 +1,7 @@
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
 local Class = Novarine:Get("Class")
+local Core = Novarine:Get("Core")
+local SteppedWait = Core.SteppedWait
 
 local Event = Class:FromName(script.Name)
 

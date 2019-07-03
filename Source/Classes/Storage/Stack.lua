@@ -1,5 +1,6 @@
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
 local Class = Novarine:Get("Class")
+local Core = Novarine:Get("Core")
 
 --[[
     @classmod Stack
@@ -8,7 +9,7 @@ local Class = Novarine:Get("Class")
 local Stack = Class:FromName(script.Name)
 
 function Stack:Stack()
-    With(self) {
+    Core.With(self) {
         Stack = {};
         Size = 0;
     }

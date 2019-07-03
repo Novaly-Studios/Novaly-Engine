@@ -11,6 +11,7 @@
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
 local ReplicatedStorage = Novarine:Get("ReplicatedStorage")
 local Event = Novarine:Get("Event")
+local Logging = Novarine:Get("Logging")
 
 local Client = {}
 local Binds = {
@@ -53,9 +54,9 @@ function Client.Init()
         local Event = Binds.Events[Name]
 
         if (type(Name) ~= "string") then
-            Log(0, "Warning, server has sent an empty or non-string request name.")
+            Logging.Log(0, "Warning, server has sent an empty or non-string request name.")
         elseif (Event == nil) then
-            Log(0, "Warning, no event '" .. Name .. "' found in event collection.")
+            Logging.Log(0, "Warning, no event '" .. Name .. "' found in event collection.")
         else
             Event:Fire(...)
         end
@@ -66,10 +67,10 @@ function Client.Init()
         local Function = Binds.Functions[Name]
 
         if (type(Name) ~= "string") then
-            Log(0, "Warning, servers has sent an empty or non-string request name.")
+            Logging.Log(0, "Warning, servers has sent an empty or non-string request name.")
             return false
         elseif (Function == nil) then
-            Log(0, "Warning, no function '" .. Name .. "' found in function collection.")
+            Logging.Log(0, "Warning, no function '" .. Name .. "' found in function collection.")
         else
             return Function(...)
         end

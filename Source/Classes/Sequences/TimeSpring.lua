@@ -1,6 +1,6 @@
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
 local Class = Novarine:Get("Class")
-local String = Novarine:Get("String")
+local Math = Novarine:Get("Math")
 
 local TimeSpring = Class:FromName(script.Name)
 local Euler = 2.7182818284590452353602875

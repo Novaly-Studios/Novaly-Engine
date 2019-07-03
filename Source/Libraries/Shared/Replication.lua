@@ -10,6 +10,7 @@
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
 local RunService = Novarine:Get("RunService")
 local Communication = Novarine:Get("Communication")
+local Table = Novarine:Get("Table")
 
 local Replication                   = {Binds = {}, Access = {}}
 local ReplicatedData                = {} -- Data replicated between client and server
@@ -163,7 +164,7 @@ function Replication.CallBinds(...)
         if (Temp ~= nil and TempBind ~= nil) then
 
             if (TempBind.Bind ~= nil) then
-                Sub(TempBind.Bind, Temp)
+                coroutine.wrap(TempBind.Bind)(Temp) -- Check if error :: original, Sub(TempBind.Bind, Temp)
             end
 
             PreviousReplicated = Temp

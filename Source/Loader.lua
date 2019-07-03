@@ -4,7 +4,8 @@ local Loaded                = {}
 
 local Services = {
     "ReplicatedStorage", "ReplicatedFirst", "RunService",
-    "StarterGui", "Players", "CollectionService", "UserInputService"
+    "StarterGui", "Players", "CollectionService", "UserInputService",
+    "DataStoreService", "Lighting", "ContextActionService"
 }
 
 local ReplicatedStorage     = game:GetService("ReplicatedStorage")

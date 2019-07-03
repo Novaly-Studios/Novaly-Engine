@@ -191,7 +191,7 @@ function DataStructures:Serialise(Item)
 
     local ItemType = self:GetType(Item)
     local Handler = self.SerialiseFunctions[ItemType]
-    assert(Handler, String.Format("No serialisation function exists for %s!", ItemType))
+    assert(Handler, string.format("No serialisation function exists for %s!", ItemType))
 
     local Result = Handler(Item)
     Result[self.TypeVar] = ItemType
@@ -213,10 +213,10 @@ function DataStructures:Build(Serialised)
     local ItemType = Serialised[self.TypeVar]
     assert(ItemType, "Data passed to this function must be serialised!")
 
-    assert(getfenv()[ItemType], String.Format("No class exists under the name %s!", ItemType))
+    assert(getfenv()[ItemType], string.format("No class exists under the name %s!", ItemType))
 
     local BuildFunction = self.BuildFunctions[ItemType]
-    assert(BuildFunction, String.Format("No build function exists for %s!", ItemType))
+    assert(BuildFunction, string.format("No build function exists for %s!", ItemType))
 
     return BuildFunction(Serialised)
 end

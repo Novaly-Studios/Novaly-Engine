@@ -1,16 +1,17 @@
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
 local Class = Novarine:Get("Class")
+local Graphics = Novarine:Get("Graphics")
 
 local SurfaceBillboard = Class:FromName(script.Name)
 
 function SurfaceBillboard:SurfaceBillboard(Part, Adornee, MaxDistance, Offset)
 
     if (Part.CanCollide) then
-        warn(String.Format("Warning: Surface billboard '%s' is CanCollide.", Part.Name))
+        warn(string.format("Warning: Surface billboard '%s' is CanCollide.", Part.Name))
     end
 
     if (not Part.Anchored) then
-        warn(String.Format("Warning: Surface billboard '%s' is not anchored.", Part.Name))
+        warn(string.format("Warning: Surface billboard '%s' is not anchored.", Part.Name))
     end
 
     return {

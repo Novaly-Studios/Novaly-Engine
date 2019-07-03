@@ -1,5 +1,6 @@
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
 local Class = Novarine:Get("Class")
+local Math = Novarine:Get("Math")
 
 local Curve = Class:FromName("Curve")
 
@@ -59,7 +60,7 @@ function Curve:InterpolateBezier(Mul, LerpFunc)
         Super[Point] = Points[Point]
     end
 
-    LerpFunc = LerpFunc or Maths.Lerp
+    LerpFunc = LerpFunc or Math.Lerp
 
     while (#Super > 1) do
         local New = {}

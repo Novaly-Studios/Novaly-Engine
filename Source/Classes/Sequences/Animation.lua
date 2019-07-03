@@ -14,7 +14,7 @@ function Animation:Animation(Properties, Transitions)
 
     for Key, Value in pairs(Properties) do
         local DefaultValue = Object[Key]
-        assert(DefaultValue ~= nil, String.Format("Invalid animation property '%s'", Key))
+        assert(DefaultValue ~= nil, string.format("Invalid animation property '%s'", Key))
         Object[Key] = Value
     end
 

@@ -1,5 +1,7 @@
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
 local RunService = Novarine:Get("RunService")
+local Event = Novarine:Get("Event")
+local Core = Novarine:Get("Core")
 
 local InternalEvents = {
     Events = {};
@@ -23,7 +25,7 @@ function InternalEvents:Invoke(Name, Pass, Arguments)
 
     if Arguments then
         assert(Arguments.Action, "No action specified on event!")
-        Switch(Arguments.Action) {
+        Core.Switch(Arguments.Action) {
             ["Delay"] = function()
                 delay(Arguments.Duration, function()
                     Target:Fire(unpack(Pass))

@@ -7,6 +7,9 @@
     @author TPC9000
 ]]
 
+local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
+local RunService = Novarine:Get("RunService")
+
 local Core = {}
 
 --[[

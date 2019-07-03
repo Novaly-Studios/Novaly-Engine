@@ -1,5 +1,7 @@
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
 local Class = Novarine:Get("Class")
+local Association = Novarine:Get("Association")
+local Core = Novarine:Get("Core")
 
 local SetAssociation = Class:FromName(script.Name)
 
@@ -19,7 +21,7 @@ function SetAssociation:Relate(Set, Value)
         table.insert(Rep, Set)
     end
 
-    local Permutations = Product(Rep)
+    local Permutations = Core.Product(Rep)
 
     for _, Combination in pairs(Permutations) do
         Association:InternalRelate(Combination, Unordered, Value)

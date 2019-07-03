@@ -1,5 +1,7 @@
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
 local Class = Novarine:Get("Class")
+local Sequencer = Novarine:Get("Sequencer")
+local RunService = Novarine:Get("RunService")
 
 local CHECK_ANIMATION_TYPE = "Animation"
 local Sequence = Class:FromName(script.Name)
@@ -19,8 +21,8 @@ function Sequence:Sequence(Properties)
     for Key, Value in pairs(Properties) do
         local ValueType = type(Value)
         local DefaultValue = Object[Key]
-        assert(DefaultValue ~= nil, String.Format("Invalid sequence property '%s'", Key))
-        assert(ValueType == type(DefaultValue), String.Format("Invalid type for property '%s'", Key))
+        assert(DefaultValue ~= nil, string.format("Invalid sequence property '%s'", Key))
+        assert(ValueType == type(DefaultValue), string.format("Invalid type for property '%s'", Key))
         Object[Key] = Value
     end
 
@@ -30,7 +32,7 @@ end
 -- Adds an animation object to the current sequence
 function Sequence:AddAnimation(AnimationObject)
     assert(AnimationObject[Class.NameKey] == CHECK_ANIMATION_TYPE,
-        String.Format("Animation object is an incorrect type (%s)", CHECK_ANIMATION_TYPE))
+        string.format("Animation object is an incorrect type (%s)", CHECK_ANIMATION_TYPE))
     self.Animations[AnimationObject] = AnimationObject
     return self
 end

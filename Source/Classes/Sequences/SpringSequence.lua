@@ -1,5 +1,7 @@
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
 local Class = Novarine:Get("Class")
+local Sequencer = Novarine:Get("Sequencer")
+local RunService = Novarine:Get("RunService")
 
 local CHECK_ANIMATION_TYPE = "SpringAnimation"
 local SpringSequence = Class:FromName(script.Name)
@@ -17,7 +19,7 @@ end
 -- Adds an animation object to the current sequence
 function SpringSequence:AddAnimation(AnimationObject)
     assert(AnimationObject[Class.NameKey] == CHECK_ANIMATION_TYPE,
-        String.Format("Animation object is an incorrect type (%s)", CHECK_ANIMATION_TYPE))
+        string.format("Animation object is an incorrect type (%s)", CHECK_ANIMATION_TYPE))
     self.Animations[AnimationObject] = AnimationObject
     return self
 end

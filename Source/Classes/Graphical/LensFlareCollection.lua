@@ -1,6 +1,10 @@
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
 local Class = Novarine:Get("Class")
 local Sequence = Novarine:Get("Sequence")
+local TweenValue = Novarine:Get("TweenValue")
+local GUI = Novarine:Get("GUI")
+local Animation = Novarine:Get("Animation")
+local Configuration = Novarine:Get("Configuration")
 
 local LensFlareCollection = Class:FromName(script.Name)
 
@@ -40,7 +44,7 @@ function LensFlareCollection:AddLensFlares(...)
 
         table.insert(self.LensFlares, {Value, ImageLabel})
 
-        local FlareTransparency = TweenValue.New("PiecewiseTransition", "Linear", CONFIG._TargetFramerate, {}, Value.TransparencyValues)
+        local FlareTransparency = TweenValue.New("PiecewiseTransition", "Linear", Configuration._TargetFramerate, {}, Value.TransparencyValues)
         self.FlareSequence:AddAnimation(Animation.New({
             Target              = ImageLabel;
             Duration            = self.FadeTime;
@@ -50,7 +54,7 @@ function LensFlareCollection:AddLensFlares(...)
         }))
     end
 
-    local Transparency = TweenValue.New("PiecewiseTransition", "Linear", CONFIG._TargetFramerate, {}, {0, 1})
+    local Transparency = TweenValue.New("PiecewiseTransition", "Linear", Configuration._TargetFramerate, {}, {0, 1})
     self.FlareSequence:AddAnimation(Animation.New({
         Target              = self;
         Duration            = self.FadeTime;

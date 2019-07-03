@@ -22,7 +22,7 @@ local Table = {}
 
 function Table.IndexOf(Items, Find)
     for Index = 1, #Items do
-        if (Items[x] == Find) then
+        if (Items[Index] == Find) then
             return Index
         end
     end
@@ -51,7 +51,7 @@ end
 
 --[[
     @function Table.ShallowClone
-    
+
     Clones the top-level values of each table.
     Sub-objects will still be referenced, not
     cloned.
@@ -187,24 +187,6 @@ function Table.CopyAndMergeNumerical(Arr1, Arr2)
     return Result
 end
 
-function Table.ProtectedForeach(Arr, Func)
-    for Key, Value in pairs(Arr) do
-        local Success, Result = Sub(Func, Key, Value)
-        if not Success then
-            print(Result)
-        end
-    end
-end
-
-function Table.ProtectedForeachI(Arr, Func)
-    for Index, Value in ipairs(Arr) do
-        local Success, Result = Sub(Func, Index, Value)
-        if not Success then
-            print(Result)
-        end
-    end
-end
-
 function Table.ApplyKeyMapping(Array, Append, From)
     for Key, Value in pairs(Append) do
         Array[Value] = From[Key]
@@ -242,7 +224,7 @@ function Table.WaitFor(YieldFunction, Array, ...)
             YieldFunction()
             Iter = Iter + 1
             if (Iter == 150) then
-                warn(String.Format("Possible endless wait on '%s' for property '%s'.", (Array.Name or tostring(Array)), tostring(Value)))
+                warn(string.format("Possible endless wait on '%s' for property '%s'.", (Array.Name or tostring(Array)), tostring(Value)))
                 warn(debug.traceback())
             end
             Next = Array[Value]

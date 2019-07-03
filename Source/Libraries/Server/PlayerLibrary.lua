@@ -4,6 +4,9 @@ local Players = Novarine:Get("Players")
 local Communication = Novarine:Get("Communication")
 local Replication = Novarine:Get("Replication")
 local Table = Novarine:Get("Table")
+local DataStructures = Novarine:Get("DataStructures")
+local DataStoreService = Novarine:Get("DataStoreService")
+local ReplicatedStorage = Novarine:Get("ReplicatedStorage")
 
 local ReplicatedData = Replication.ReplicatedData
 
@@ -132,7 +135,7 @@ function Server.Init()
                     end;
                 }
             else
-                Server.PlayerDataStore = Svc("DataStoreService"):GetDataStore(ReplicatedStorage:FindFirstChild("DataStoreVersion") and ReplicatedStorage.DataStoreVersion.Value or Configuration.pDataStoreVersion)
+                Server.PlayerDataStore = DataStoreService:GetDataStore(ReplicatedStorage:FindFirstChild("DataStoreVersion") and ReplicatedStorage.DataStoreVersion.Value or Configuration.pDataStoreVersion)
             end
         end
 

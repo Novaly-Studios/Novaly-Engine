@@ -1,6 +1,8 @@
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
 local Class = Novarine:Get("Class")
 local Modules = Novarine:Get("Modules")
+local Math = Novarine:Get("Math")
+local DataStructures = Novarine:Get("DataStructures")
 
 local TweenValue = Class:FromName(script.Name) {
     SingleTransition        = {}; -- Transitions over a defined table of control points
@@ -155,10 +157,10 @@ end
 function TweenValue:TweenValue(TransitionClassificationName, TransitionerName, TargetFramerate, TransitionerData, Points)
 
     local TransitionClass = TweenValue[TransitionClassificationName]
-    assert(TransitionClass, String.Format("No transition class '%s' exists!", TransitionClassificationName))
+    assert(TransitionClass, string.format("No transition class '%s' exists!", TransitionClassificationName))
 
     local Transitioner = TransitionClass[TransitionerName]
-    assert(Transitioner, String.Format("No transitioner '%s' found under transition classification '%s'!", TransitionerName, TransitionClassificationName))
+    assert(Transitioner, string.format("No transitioner '%s' found under transition classification '%s'!", TransitionerName, TransitionClassificationName))
 
     local ControlPointsDynamic = false
     local FirstPoint = Points[1]

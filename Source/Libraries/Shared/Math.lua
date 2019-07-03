@@ -1,3 +1,6 @@
+local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
+local Quaternion = Novarine:Get("Quaternion")
+
 local Maths = {}
 
 function Maths.Lerp(P0, P1, Mul)

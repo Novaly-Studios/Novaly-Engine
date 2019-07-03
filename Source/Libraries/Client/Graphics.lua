@@ -13,6 +13,15 @@ local Async = Novarine:Get("Async")
 local OperationTable = Novarine:Get("OperationTable")
 local RunService = Novarine:Get("RunService")
 local CollectionService = Novarine:Get("CollectionService")
+local Sequence = Novarine:Get("Sequence")
+local TweenValue = Novarine:Get("TweenValue")
+local Animation = Novarine:Get("Animation")
+local GUI = Novarine:Get("GUI")
+local Misc = Novarine:Get("Misc")
+local Math = Novarine:Get("Math")
+local Table = Novarine:Get("Table")
+local SurfaceBillboard = Novarine:Get("SurfaceBillboard")
+local Lighting = Novarine:Get("Lighting")
 
 local Graphics                  = {
     Tags = {
