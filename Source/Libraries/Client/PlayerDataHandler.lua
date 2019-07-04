@@ -1,24 +1,22 @@
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
 local Players = Novarine:Get("Players")
 local Replication = Novarine:Get("Replication")
-local Table = Novarine:Get("Table")
 local ReplicatedData = Replication.ReplicatedData
 
 if (Novarine:Get("RunService"):IsServer()) then
     return false
 end
 
-local PlayerData                = {}
 local Client                    = {
     PlayerDataManagement        = {};
     PlayerData                  = {};
 }
 
 function Client.PlayerDataManagement.WaitForPlayerData(Player)
-    local Data = Client.PlayerData[tostring(Player.UserId)]
+    local Data = Replication.PlayerData[tostring(Player.UserId)]
 
     while (not Data) do
-        Data = Client.PlayerData[tostring(Player.UserId)]
+        Data = Replication.PlayerData[tostring(Player.UserId)]
         wait(0.05)
     end
 
@@ -26,11 +24,11 @@ function Client.PlayerDataManagement.WaitForPlayerData(Player)
 end
 
 function Client.PlayerDataManagement.WaitForMyData()
-    while (not Client.MyData) do
+    while (not Client.PlayerDataManagement.MyData) do
         wait(0.05)
     end
 
-    return Client.MyData
+    return Client.PlayerDataManagement.MyData
 end
 
 function Client.Init()
@@ -46,22 +44,22 @@ function Client.Init()
             wait(0.05)
         end
 
-        PlayerData = ReplicatedData.PlayerData
+        Replication.PlayerData = ReplicatedData.PlayerData
 
-        Client.PlayerDataManagement.PlayerData = PlayerData
+        Client.PlayerDataManagement.PlayerData = Replication.PlayerData
         Client.PlayerDataManagement.WaitForPlayerData(LocalPlayer)
-        Client.PlayerDataManagement.MyData = PlayerData[tostring(LocalPlayer.UserId)]
+        Client.PlayerDataManagement.MyData = Replication.PlayerData[tostring(LocalPlayer.UserId)]
     end)()
 end
 
 local function WaitForItem(Player, Key)
 
     local UserId = tostring(Player.UserId)
-    local Result = PlayerData[UserId][Key]
+    local Result = Replication.PlayerData[UserId][Key]
 
     while (Result == nil) do
         wait()
-        Result = PlayerData[UserId][Key]
+        Result = Replication.PlayerData[UserId][Key]
     end
 
     return Result

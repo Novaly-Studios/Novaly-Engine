@@ -116,8 +116,10 @@ function Server.Init()
         Data = Data or {}
         Server.PlayerDataManagement.RecursiveBuild(Data)
 
-        repeat wait() print("Waiting") until Communication.TransmissionReady[Player.Name]
-        print("Setup Data", tostring(Player.UserId))
+        while (not Communication.TransmissionReady[Player.Name]) do
+            wait(0.05)
+        end
+
         ReplicatedData.PlayerData[tostring(Player.UserId)] = Data
 
 --[[         coroutine.wrap(function()

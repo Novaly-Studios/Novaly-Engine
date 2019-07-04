@@ -15,8 +15,6 @@ local Replication = {
 function Replication:Init()
     if (RunService:IsClient()) then
         Communication.BindRemoteEvent("OnReplicate", function(Path, Value)
-            print("Got some data")
-            Table.PrintTable(Value)
             local Last = self.ReplicatedData
 
             for Index = 1, #Path - 1 do
@@ -57,14 +55,11 @@ function Replication:Init()
     local Handler = self.Handler
 
     local function SendUpdate(_, Path)
-        Logging.Log(0, "---------")
-        Logging.Log(0, "Replicated Data Update Path:")
+        Logging.Log(1, "Replicated Data Update Path:")
 
         for _, Key in pairs(Path) do
-            Logging.Log(1, Key)
+            Logging.Log(2, Key)
         end
-
-        Logging.Log(0, "---------")
 
         Communication.Broadcast("OnReplicate", Path, Table.GetValueSequence(self.ReplicatedData, Path))
     end
