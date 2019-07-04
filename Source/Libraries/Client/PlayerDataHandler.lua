@@ -31,7 +31,6 @@ function Client.Init()
         local LocalPlayer = Players.LocalPlayer
         Client.Player = LocalPlayer
 
-        Replication.Wait("PlayerData")
         PlayerData = ReplicatedData.PlayerData
 
         Client.PlayerDataManagement.PlayerData = PlayerData

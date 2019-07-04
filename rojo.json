@@ -7,6 +7,16 @@
         {
             "path": "Source",
             "target": "ReplicatedFirst.Novarine"
+        },
+        "sss":
+        {
+            "path": "ServerScriptService",
+            "target": "ServerScriptService.NovarineServerTest"
+        },
+        "sps":
+        {
+            "path": "StarterPlayer",
+            "target": "StarterPlayer.StarterPlayerScripts"
         }
     }
 }

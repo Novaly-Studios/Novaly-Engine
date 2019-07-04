@@ -132,7 +132,7 @@ end
 
 function Table.GetValueSequence(Arr, Keys)
     for Key = 1, #Keys do
-        Arr = Arr[Key]
+        Arr = Arr[Keys[Key]]
     end
     return Arr
 end
@@ -140,7 +140,7 @@ end
 function Table.SetValueSequence(Arr, Keys, Val)
     local Len = #Keys
     for Key = 1, Len - 1 do
-        Arr = Arr[Key]
+        Arr = Arr[Keys[Key]]
     end
     Arr[Keys[Len]] = Val
 end
