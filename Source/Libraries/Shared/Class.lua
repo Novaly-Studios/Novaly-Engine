@@ -55,7 +55,7 @@ function Class:New(Name, ClassTable)
 
         local Result = setmetatable({Class = ClassTable}, ClassTable)
         local Func = ClassTable[Name]
-        getfenv(Func).self = Result
+        --getfenv(Func).self = Result
 
         local Object = Func(Result, ...)
 
@@ -66,11 +66,11 @@ function Class:New(Name, ClassTable)
         Result[self.ClassRefKey] = ClassTable
         setmetatable(Result, ClassTable)
 
-        for _, Value in pairs(Result) do
+--[[         for _, Value in pairs(Result) do
             if (type(Value) == "function") then
                 getfenv(Value).self = Result
             end
-        end
+        end ]]
 
         return Result
     end
