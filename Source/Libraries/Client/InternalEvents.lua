@@ -3,6 +3,10 @@ local RunService = Novarine:Get("RunService")
 local Event = Novarine:Get("Event")
 local Core = Novarine:Get("Core")
 
+if (Novarine:Get("RunService"):IsServer()) then
+    return false
+end
+
 local InternalEvents = {
     Events = {};
     Scheduled = {};
@@ -89,7 +93,4 @@ function InternalEvents:Init()
     end)
 end
 
-return {
-    InternalEvents = InternalEvents;
-    Init = InternalEvents.Init;
-}
+return InternalEvents

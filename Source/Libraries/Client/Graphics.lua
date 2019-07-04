@@ -23,6 +23,10 @@ local Table = Novarine:Get("Table")
 local SurfaceBillboard = Novarine:Get("SurfaceBillboard")
 local Lighting = Novarine:Get("Lighting")
 
+if (Novarine:Get("RunService"):IsServer()) then
+    return false
+end
+
 local Graphics                  = {
     Tags = {
         TransparentPart         = "Graphics:TransparentPart";

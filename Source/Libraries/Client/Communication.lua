@@ -13,6 +13,10 @@ local ReplicatedStorage = Novarine:Get("ReplicatedStorage")
 local Event = Novarine:Get("Event")
 local Logging = Novarine:Get("Logging")
 
+if (Novarine:Get("RunService"):IsServer()) then
+    return false
+end
+
 local Client = {}
 local Binds = {
     Events = {};

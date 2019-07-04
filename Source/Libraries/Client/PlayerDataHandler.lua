@@ -2,8 +2,11 @@ local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
 local Players = Novarine:Get("Players")
 local Replication = Novarine:Get("Replication")
 local Table = Novarine:Get("Table")
-
 local ReplicatedData = Replication.ReplicatedData
+
+if (Novarine:Get("RunService"):IsServer()) then
+    return false
+end
 
 local PlayerData                = {}
 local Client                    = {
@@ -27,7 +30,6 @@ function Client.Init()
 
         local LocalPlayer = Players.LocalPlayer
         Client.Player = LocalPlayer
-        Novarine:Add("Player", LocalPlayer)
 
         Replication.Wait("PlayerData")
         PlayerData = ReplicatedData.PlayerData

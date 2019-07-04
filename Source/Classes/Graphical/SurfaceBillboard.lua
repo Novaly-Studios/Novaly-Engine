@@ -1,6 +1,5 @@
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
 local Class = Novarine:Get("Class")
-local Graphics = Novarine:Get("Graphics")
 
 local SurfaceBillboard = Class:FromName(script.Name)
 
@@ -36,7 +35,7 @@ function SurfaceBillboard:Update()
     end
 
     local From          = (Adornee.CFrame * Offset).p + OffsetPos
-    local To            = Graphics.Camera.CFrame.p
+    local To            = Novarine:Get("Graphics").Camera.CFrame.p
     local RelDistance   = (From - To).magnitude
 
     if (RelDistance > MaxDistance) then

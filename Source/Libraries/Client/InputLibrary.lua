@@ -2,9 +2,12 @@ local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
 local Event = Novarine:Get("Event")
 local UserInputService = Novarine:Get("UserInputService")
 local RunService = Novarine:Get("RunService")
-local Graphics = Novarine:Get("Graphics")
 local CollectionService = Novarine:Get("CollectionService")
 local ContextActionService = Novarine:Get("ContextActionService")
+
+if (Novarine:Get("RunService"):IsServer()) then
+    return false
+end
 
 --[[
     Provides extra input-capturing capabilities.
@@ -28,7 +31,7 @@ local InputLibrary = {
     };
 };
 
-local function ClientInit()
+function InputLibrary.Init()
 
     local Mouse = InputLibrary.Mouse
 
@@ -98,7 +101,7 @@ end
 function InputLibrary:UpdateMouse()
     local Mouse = self.Mouse
     local XY = Mouse.XY
-    local MouseRay = Graphics.Camera:ScreenPointToRay(XY.X + 0.5, XY.Y + 0.5)
+    local MouseRay = Novarine:Get("Graphics").Camera:ScreenPointToRay(XY.X + 0.5, XY.Y + 0.5)
     local Hit, Pos = workspace:FindPartOnRayWithIgnoreList(Ray.new(MouseRay.Origin, MouseRay.Direction * Mouse.Dist), Mouse.Ignore)
     Mouse.Target = Hit
     Mouse.Pos = Pos
@@ -243,7 +246,4 @@ function InputLibrary:UnblockInput(Name)
     ContextActionService:UnbindAction(Name)
 end
 
-return {
-    InputLibrary = InputLibrary;
-    Init = ClientInit;
-}
+return InputLibrary

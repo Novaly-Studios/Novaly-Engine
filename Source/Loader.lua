@@ -5,10 +5,12 @@ local Loaded                = {}
 local Services = {
     "ReplicatedStorage", "ReplicatedFirst", "RunService",
     "StarterGui", "Players", "CollectionService", "UserInputService",
-    "DataStoreService", "Lighting", "ContextActionService"
+    "DataStoreService", "Lighting", "ContextActionService",
+    "PhysicsService", "Workspace"
 }
 
 local ReplicatedStorage     = game:GetService("ReplicatedStorage")
+local ReplicatedFirst       = game:GetService("ReplicatedFirst")
 local RunService            = game:GetService("RunService")
 
 local Parent                = script.Parent
@@ -17,38 +19,12 @@ local Indicator             = Server and "Server" or "Client"
 local Libraries             = Parent:FindFirstChild("Libraries")
 local Classes               = Parent:FindFirstChild("Classes")
 
+local GameFolder            = ReplicatedFirst:FindFirstChild("GAME_INDICATOR", true).Parent
+local GameClient            = GameFolder:FindFirstChild("Client")
+local GameServer            = GameFolder:FindFirstChild("Server")
+local GameShared            = GameFolder:FindFirstChild("Shared")
+
 function Loader:Get(Name)
-
-    -- Should only be used for debugging
-    if (Name == "*") then
-        for _, Item in pairs(Classes:GetDescendants()) do
-            if (Item:IsA("ModuleScript") and Item.Parent.Name ~= "Tests") then
-                Loader:Get(Item.Name)
-            end
-        end
-
-        for _, Item in pairs(Libraries.Shared:GetDescendants()) do
-            if (Item:IsA("ModuleScript")) then
-                Loader:Get(Item.Name)
-            end
-        end
-
-        if Server then
-            for _, Item in pairs(Libraries.Server:GetDescendants()) do
-                if (Item:IsA("ModuleScript")) then
-                    Loader:Get(Item.Name)
-                end
-            end
-        else
-            for _, Item in pairs(Libraries.Client:GetDescendants()) do
-                if (Item:IsA("ModuleScript")) then
-                    Loader:Get(Item.Name)
-                end
-            end
-        end
-
-        return
-    end
 
     local Default = Engine[Name]
 
@@ -56,13 +32,19 @@ function Loader:Get(Name)
         return Default
     end
 
-    local Module = Server and
-        (Libraries.Shared:FindFirstChild(Name, true) or
+    local Module = Server and (
+        Libraries.Shared:FindFirstChild(Name, true) or
         Classes:FindFirstChild(Name, true) or
-        Libraries.Server:FindFirstChild(Name, true)) or
-    (Libraries.Shared:FindFirstChild(Name, true) or
-    Classes:FindFirstChild(Name, true) or
-    Libraries.Client:FindFirstChild(Name, true))
+        Libraries.Server:FindFirstChild(Name, true) or
+        GameServer:FindFirstChild(Name, true) or
+        GameShared:FindFirstChild(Name, true)
+    ) or (
+        Libraries.Shared:FindFirstChild(Name, true) or
+        Classes:FindFirstChild(Name, true) or
+        Libraries.Client:FindFirstChild(Name, true) or
+        GameClient:FindFirstChild(Name, true) or
+        GameShared:FindFirstChild(Name, true)
+    )
 
     assert(Module, string.format("No utility or class found with name '%s'!", Name))
     assert(Module.ClassName == "ModuleScript", string.format("'%s' is not a ModuleScript!", Name))
@@ -70,7 +52,7 @@ function Loader:Get(Name)
     local Got = require(Module)
     Engine[Name] = Got
 
-    if (not Loaded[Name]) then
+    if (not Loaded[Name] and type(Got) == "table") then
         local Time = tick()
 
         if (Got.Init) then

@@ -231,4 +231,6 @@ function Replication.Wait(Item)
     return Result
 end
 
+Novarine:Add("ReplicatedData", ReplicatedData)
+
 return Replication

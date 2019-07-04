@@ -4,6 +4,10 @@ local Sequence = Novarine:Get("Sequence")
 local Animation = Novarine:Get("Animation")
 local Configuration = Novarine:Get("Configuration")
 
+if (Novarine:Get("RunService"):IsServer()) then
+    return false
+end
+
 local GUI = {
     OverStatusObjects = {};
 };
@@ -160,6 +164,4 @@ function GUI:GetMouseOverIndicator(Button, MouseEnterFunc, MouseLeaveFunc)
     end
 end
 
-return {
-    GUI = GUI;
-}
+return GUI

@@ -3,6 +3,10 @@ local Modules = Novarine:Get("Modules")
 local RunService = Novarine:Get("RunService")
 local TimeSpring = Novarine:Get("TimeSpring")
 
+if (Novarine:Get("RunService"):IsServer()) then
+    return false
+end
+
 local Sequencer = {
     Sequences       = {};
     EasingStyles    = require(Modules.TweeningStyles);
@@ -46,7 +50,7 @@ function Sequencer:AddEasingStyle(Name, Spring)
     end
 end
 
-local function ClientInit()
+function Sequencer.Init()
 
     -- Main update event
     RunService.Stepped:Connect(function(_, Step)
@@ -62,7 +66,4 @@ local function ClientInit()
     end
 end
 
-return {
-    Sequencer = Sequencer;
-    Init = ClientInit;
-}
+return Sequencer
