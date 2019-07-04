@@ -10,7 +10,7 @@ local ReplicatedStorage = Novarine:Get("ReplicatedStorage")
 
 local ReplicatedData = Replication.ReplicatedData
 
-local PlayerData                = {}
+--local PlayerData                = {}
 local Server                    = {
     PlayerDataManagement        = {};
     PlayerData                  = {};
@@ -22,7 +22,14 @@ end
 
 function Server.PlayerDataManagement.WaitForPlayerData(Player)
     Server.PlayerDataManagement.WaitForDataStore()
-    return Table.WaitFor(wait, PlayerData, tostring(Player.UserId))
+    local TargetData = ReplicatedData.PlayerData[tostring(Player.UserId)]
+
+    while (not TargetData) do
+        wait(0.05)
+        TargetData = ReplicatedData.PlayerData[tostring(Player.UserId)]
+    end
+
+    return TargetData
 end
 
 function Server.PlayerDataManagement.RecursiveSerialise(Data)
@@ -60,7 +67,7 @@ function Server.PlayerDataManagement.Save(Player)
     Server.PlayerDataManagement.WaitForPlayerData(Player)
 
     local UserId = tostring(Player.UserId)
-    local Stripped = Replication.StripReplicatedData(PlayerData[UserId])
+    local Stripped = Table.Clone(ReplicatedData.PlayerData[UserId]) --Replication.StripReplicatedData(PlayerData[UserId]) -- No longer necessary
     local Serial = Server.PlayerDataManagement.RecursiveSerialise(Stripped)
 
     --[[Server.PlayerDataStore:UpdateAsync(UserId, function()
@@ -74,7 +81,7 @@ function Server.PlayerDataManagement.LeaveSave(Player)
 
     local UserId = tostring(Player.UserId)
     Server.PlayerDataManagement.WaitForPlayerData(Player)
-    local Stripped = Replication.StripReplicatedData(PlayerData[UserId])
+    local Stripped = Table.Clone(ReplicatedData.PlayerData[UserId]) --Replication.StripReplicatedData(PlayerData[UserId])
     local Serial = Server.PlayerDataManagement.RecursiveSerialise(Stripped)
 
     wait(6.5)
@@ -89,10 +96,9 @@ function Server.Init()
 
     -- Metamethods are necessary to convert player ID to string when ID < 0
 
-    ReplicatedData.PlayerData = PlayerData
-    Server.PlayerData = PlayerData
+    ReplicatedData.PlayerData = Server.PlayerData
 
-    Players.PlayerAdded:Connect(function(Player)
+    local function Handle(Player)
 
         Server.PlayerDataManagement.WaitForDataStore()
 
@@ -110,14 +116,26 @@ function Server.Init()
         Data = Data or {}
         Server.PlayerDataManagement.RecursiveBuild(Data)
 
-        repeat wait() until Communication.TransmissionReady[Player.Name]
-        PlayerData[tostring(Player.UserId)] = Data
+        repeat wait() print("Waiting") until Communication.TransmissionReady[Player.Name]
+        print("Setup Data", tostring(Player.UserId))
+        ReplicatedData.PlayerData[tostring(Player.UserId)] = Data
+
+--[[         coroutine.wrap(function()
+            wait(5)
+            Table.PrintTable(ReplicatedData.PlayerData[tostring(Player.UserId)])
+        end)() ]]
 
         while wait(Configuration.pSaveInterval) do
             if not Player.Parent then break end
             Server.PlayerDataManagement.Save(Player)
         end
-    end)
+    end
+
+    Players.PlayerAdded:Connect(Handle)
+
+    for _, Item in pairs(Players:GetChildren()) do
+        Handle(Item)
+    end
 
     Players.PlayerRemoving:Connect(Server.PlayerDataManagement.LeaveSave)
 
@@ -148,11 +166,11 @@ end
 local function WaitForItem(Player, Key)
 
     local UserId = tostring(Player.UserId)
-    local Result = PlayerData[UserId][Key]
+    local Result = Server.PlayerData[UserId][Key]
 
     while (Result == nil) do
         wait()
-        Result = PlayerData[UserId][Key]
+        Result = Server.PlayerData[UserId][Key]
     end
 
     return Result

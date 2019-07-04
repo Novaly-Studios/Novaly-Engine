@@ -15,11 +15,22 @@ local Client                    = {
 }
 
 function Client.PlayerDataManagement.WaitForPlayerData(Player)
-    return Table.WaitFor(wait, PlayerData, tostring(Player.UserId))
+    local Data = Client.PlayerData[tostring(Player.UserId)]
+
+    while (not Data) do
+        Data = Client.PlayerData[tostring(Player.UserId)]
+        wait(0.05)
+    end
+
+    return Data
 end
 
 function Client.PlayerDataManagement.WaitForMyData()
-    return Table.WaitFor(wait, Client.PlayerDataManagement, "MyData")
+    while (not Client.MyData) do
+        wait(0.05)
+    end
+
+    return Client.MyData
 end
 
 function Client.Init()
@@ -30,6 +41,10 @@ function Client.Init()
 
         local LocalPlayer = Players.LocalPlayer
         Client.Player = LocalPlayer
+
+        while (not ReplicatedData.PlayerData) do
+            wait(0.05)
+        end
 
         PlayerData = ReplicatedData.PlayerData
 

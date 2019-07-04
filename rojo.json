@@ -16,7 +16,7 @@
         "sps":
         {
             "path": "StarterPlayer",
-            "target": "StarterPlayer.StarterPlayerScripts"
+            "target": "StarterPlayer.StarterPlayerScripts.NovarineClientTest"
         }
     }
 }
