@@ -4,17 +4,19 @@ local RunService = Novarine:Get("RunService")
 local Communication = Novarine:Get("Communication")
 local Table = Novarine:Get("Table")
 local Logging = Novarine:Get("Logging")
+local Players = Novarine:Get("Players")
 
 local Replication = {
     Last = {};
     ReplicatedData = {};
     MonitorInterval = 1/5;
     Handler = ObjectEngineRaw.New();
+    Loaded = false;
 }
 
 function Replication:Init()
     if (RunService:IsClient()) then
-        Communication.BindRemoteEvent("OnReplicate", function(Path, Value)
+        Communication.BindRemoteFunction("OnReplicate", function(Path, Value)
             local Last = self.ReplicatedData
 
             for Index = 1, #Path - 1 do
@@ -30,6 +32,8 @@ function Replication:Init()
             end
 
             Last[Path[#Path]] = Value
+
+            return true
         end)
 
         Communication.BindRemoteEvent("GetReplicatedData", function(Data)
@@ -38,6 +42,8 @@ function Replication:Init()
             end
         end)
         Communication.FireRemoteEvent("GetReplicatedData")
+
+        self.Loaded = true
 
         return
     end
@@ -61,12 +67,21 @@ function Replication:Init()
             Logging.Log(2, Key)
         end
 
-        Communication.Broadcast("OnReplicate", Path, Table.GetValueSequence(self.ReplicatedData, Path))
+        for _, Player in pairs(Players:GetChildren()) do
+            coroutine.wrap(function()
+                while (not Communication.InvokeRemoteFunction("OnReplicate", Player, Path, Table.GetValueSequence(self.ReplicatedData, Path))) do
+                    wait(1)
+                    Logging.Log(string.format("Player '%s' did not accept data. Retrying...", Player.Name))
+                end
+            end)()
+        end
     end
 
     Handler:SetOnCreate(SendUpdate)
     Handler:SetOnDestroy(SendUpdate)
     Handler:SetOnDifferent(SendUpdate)
+
+    self.Loaded = true
 end
 
 function Replication:Diff()

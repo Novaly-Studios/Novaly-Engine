@@ -2,6 +2,9 @@ local Loader                = {}
 local Engine                = {}
 local Loaded                = {}
 
+local PreLoad = { -- Modules which must load before others are required e.g. to subscribe to events
+    "Replication";
+}
 local Services = {
     "ReplicatedStorage", "ReplicatedFirst", "RunService",
     "StarterGui", "Players", "CollectionService", "UserInputService",
@@ -24,7 +27,7 @@ local GameClient            = GameFolder:FindFirstChild("Client")
 local GameServer            = GameFolder:FindFirstChild("Server")
 local GameShared            = GameFolder:FindFirstChild("Shared")
 
-function Loader:Get(Name)
+function Loader:Get(Name, Tabs)
 
     local Default = Engine[Name]
 
@@ -62,7 +65,7 @@ function Loader:Get(Name)
         local Diff = tick() - Time
         local Nanoseconds = Diff * 1e+9
         local Milliseconds = Diff * 1e+3
-        local Reported = string.format("Novarine - Load '%s' : %s (%.2f ns / %.8f ms)", Name, Indicator, Nanoseconds, Milliseconds)
+        local Reported = string.format(("\t"):rep(Tabs or 0) .. "Novarine - Load '%s' : %s (%.2f ns / %.8f ms)", Name, Indicator, Nanoseconds, Milliseconds)
 
         -- Warn for slow modules
         if (Milliseconds < 16) then
@@ -124,12 +127,17 @@ function Loader:Initialise()
 
     -- Find game entry points
     --[[ require(ReplicatedStorage:FindFirstChild(TargetName, true) or
-            ServerScriptService:FindFirstChild(TargetName, true) or
-            ReplicatedFirst:FindFirstChild(TargetName, true) or
-            StarterPlayer:FindFirstChild(TargetName, true) or
-            StarterGui:FindFirstChild(TargetName, true)) ]]
+    ServerScriptService:FindFirstChild(TargetName, true) or
+    ReplicatedFirst:FindFirstChild(TargetName, true) or
+    StarterPlayer:FindFirstChild(TargetName, true) or
+    StarterGui:FindFirstChild(TargetName, true)) ]]
 
     print(string.format("Novarine - Initialised (%s)", Indicator))
+
+    for _, Item in pairs(PreLoad) do
+        print("Novarine - Preload Tree")
+        Loader:Get(Item, 1)
+    end
 end
 
 return Loader
