@@ -31,6 +31,8 @@ function TweenValue.SingleTransition:Linear(Points, CurrentTime, Duration)
         To = To()
     end
 
+    assert(From and To, string.format("Point is nil!\n%s", self.Traceback))
+
     if (DataType == "CFrame") then
 
         --[[local FromQuaternion = Quaternion.FromCFrame(From)
@@ -85,6 +87,8 @@ function TweenValue.SingleTransition:HermiteSpline(Points, CurrentTime, Duration
     if EasingStyle then
         TimeRatio = self.EasingStyles[EasingStyle](TimeRatio, 0.0, 1.0, 1.0)
     end
+
+    assert(Points[1] and Points[2] and Points[3] and Points[4], string.format("Point is nil!\n%s", self.Traceback))
 
     if (DataType == "CFrame") then -- Todo: put these handlers in a table
         return Math.HermiteInterpolateCFrame(
@@ -187,6 +191,7 @@ function TweenValue:TweenValue(TransitionClassificationName, TransitionerName, T
         TransitionerData        = TransitionerData;
         TargetFramerateTime     = 1 / TargetFramerate;
         ControlPointsDynamic    = ControlPointsDynamic;
+        Traceback               = debug.traceback(); -- Used for error reporting so we can trace back to where sequences were constructed
     }
 end
 
