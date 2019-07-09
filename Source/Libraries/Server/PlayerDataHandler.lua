@@ -7,6 +7,7 @@ local Table = Novarine:Get("Table")
 local DataStructures = Novarine:Get("DataStructures")
 local DataStoreService = Novarine:Get("DataStoreService")
 local ReplicatedStorage = Novarine:Get("ReplicatedStorage")
+local Logging = Novarine:Get("Logging")
 
 local ReplicatedData = Replication.ReplicatedData
 
@@ -70,10 +71,6 @@ function Server.PlayerDataManagement.Save(Player)
     local Stripped = Table.Clone(ReplicatedData.PlayerData[UserId]) --Replication.StripReplicatedData(PlayerData[UserId]) -- No longer necessary
     local Serial = Server.PlayerDataManagement.RecursiveSerialise(Stripped)
 
-    --[[Server.PlayerDataStore:UpdateAsync(UserId, function()
-        Table.printTable(Serial)
-        return Serial
-    end)]]
     Server.PlayerDataStore:SetAsync(UserId, Serial)
 end
 
@@ -93,13 +90,11 @@ function Server.PlayerDataManagement.LeaveSave(Player)
 end
 
 function Server.Init()
-
     -- Metamethods are necessary to convert player ID to string when ID < 0
 
     ReplicatedData.PlayerData = Server.PlayerData
 
     local function Handle(Player)
-
         Server.PlayerDataManagement.WaitForDataStore()
 
         local Success, Data = pcall(function()
@@ -122,24 +117,11 @@ function Server.Init()
 
         ReplicatedData.PlayerData[tostring(Player.UserId)] = Data
 
---[[         coroutine.wrap(function()
-            wait(5)
-            Table.PrintTable(ReplicatedData.PlayerData[tostring(Player.UserId)])
-        end)() ]]
-
         while wait(Configuration.pSaveInterval) do
             if not Player.Parent then break end
             Server.PlayerDataManagement.Save(Player)
         end
     end
-
-    Players.PlayerAdded:Connect(Handle)
-
-    for _, Item in pairs(Players:GetChildren()) do
-        Handle(Item)
-    end
-
-    Players.PlayerRemoving:Connect(Server.PlayerDataManagement.LeaveSave)
 
     coroutine.wrap(function()
 
@@ -154,15 +136,27 @@ function Server.Init()
                         Self[Key] = Value
                     end;
                 }
+                Logging.Log(1, "Set data store as table")
             else
+                Logging.Log(1, "Set data store as live.")
                 Server.PlayerDataStore = DataStoreService:GetDataStore(ReplicatedStorage:FindFirstChild("DataStoreVersion") and ReplicatedStorage.DataStoreVersion.Value or Configuration.pDataStoreVersion)
             end
         end
 
-        while (pcall(TryGet) == false) do
+        while true do
+            if pcall(TryGet) then
+                break
+            end
             wait(Configuration.pDataStoreGetRetrywait)
         end
     end)()
+
+    Players.PlayerAdded:Connect(Handle)
+    Players.PlayerRemoving:Connect(Server.PlayerDataManagement.LeaveSave)
+
+    for _, Item in pairs(Players:GetChildren()) do
+        coroutine.wrap(Handle)(Item)
+    end
 end
 
 local function WaitForItem(Player, Key)

@@ -17,6 +17,12 @@ local Replication = {
 function Replication:Init()
     if (RunService:IsClient()) then
         Communication.BindRemoteFunction("OnReplicate", function(Path, Value)
+            Logging.Log(1, "Replicated Data Update Path:")
+
+            for _, Key in pairs(Path) do
+                Logging.Log(2, Key)
+            end
+
             local Last = self.ReplicatedData
 
             for Index = 1, #Path - 1 do
@@ -32,12 +38,12 @@ function Replication:Init()
             end
 
             Last[Path[#Path]] = Value
-
             return true
         end)
 
         Communication.BindRemoteEvent("GetReplicatedData", function(Data)
             for Key, Value in pairs(Data) do
+                Logging.Log(1, "Initial Data Replication Key: " .. Key)
                 self.ReplicatedData[Key] = Value
             end
         end)
@@ -48,6 +54,7 @@ function Replication:Init()
         return
     end
 
+    -- On Server
     coroutine.wrap(function()
         while wait(self.MonitorInterval) do
             self:Diff()

@@ -13,10 +13,10 @@ local Client                    = {
 }
 
 function Client.PlayerDataManagement.WaitForPlayerData(Player)
-    local Data = Replication.PlayerData[tostring(Player.UserId)]
+    local Data = ReplicatedData.PlayerData[tostring(Player.UserId)]
 
     while (not Data) do
-        Data = Replication.PlayerData[tostring(Player.UserId)]
+        Data = ReplicatedData.PlayerData[tostring(Player.UserId)]
         wait(0.05)
     end
 
@@ -44,22 +44,26 @@ function Client.Init()
             wait(0.05)
         end
 
-        Replication.PlayerData = ReplicatedData.PlayerData
+        coroutine.wrap(function()
+            while wait(0.1) do
+                Client.PlayerDataManagement.PlayerData = ReplicatedData.PlayerData
+                Client.PlayerData = ReplicatedData.PlayerData
+            end
+        end)()
 
-        Client.PlayerDataManagement.PlayerData = Replication.PlayerData
         Client.PlayerDataManagement.WaitForPlayerData(LocalPlayer)
-        Client.PlayerDataManagement.MyData = Replication.PlayerData[tostring(LocalPlayer.UserId)]
+        Client.PlayerDataManagement.MyData = ReplicatedData.PlayerData[tostring(LocalPlayer.UserId)]
     end)()
 end
 
 local function WaitForItem(Player, Key)
 
     local UserId = tostring(Player.UserId)
-    local Result = Replication.PlayerData[UserId][Key]
+    local Result = ReplicatedData.PlayerData[UserId][Key]
 
     while (Result == nil) do
         wait()
-        Result = Replication.PlayerData[UserId][Key]
+        Result = ReplicatedData.PlayerData[UserId][Key]
     end
 
     return Result
