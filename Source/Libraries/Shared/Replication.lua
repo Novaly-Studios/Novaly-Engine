@@ -17,11 +17,6 @@ local Replication = {
 function Replication:Init()
     if (RunService:IsClient()) then
         Communication.BindRemoteFunction("OnReplicate", function(Path, Value)
-            Logging.Log(1, "Replicated Data Update Path:")
-
-            for _, Key in pairs(Path) do
-                Logging.Log(2, Key)
-            end
 
             local Last = self.ReplicatedData
 
@@ -76,6 +71,7 @@ function Replication:Init()
 
         for _, Player in pairs(Players:GetChildren()) do
             coroutine.wrap(function()
+                Table.WaitFor(wait, Communication.TransmissionReady, Player.Name)
                 while (not Communication.InvokeRemoteFunction("OnReplicate", Player, Path, Table.GetValueSequence(self.ReplicatedData, Path))) do
                     wait(1)
                     Logging.Log(string.format("Player '%s' did not accept data. Retrying...", Player.Name))
