@@ -4,6 +4,7 @@ local UserInputService = Novarine:Get("UserInputService")
 local RunService = Novarine:Get("RunService")
 local CollectionService = Novarine:Get("CollectionService")
 local ContextActionService = Novarine:Get("ContextActionService")
+local Graphics = Novarine:Get("Graphics")
 
 if (Novarine:Get("RunService"):IsServer()) then
     return false
@@ -21,7 +22,7 @@ local InputLibrary = {
     Keys        = {};
     DownBinds   = {};
     UpBinds     = {};
-    Mouse       = {
+    InputData   = {
         IgnoreTag   = {};
         Ignore      = {};
         Pos         = Vector3.new(0, 0, 0);
@@ -33,19 +34,19 @@ local InputLibrary = {
 
 function InputLibrary.Init()
 
-    local Mouse = InputLibrary.Mouse
+    local InputData = InputLibrary.InputData
 
-    local Button1Up = Event.New()
-    Mouse.Button1Up = Button1Up
+    local Up = Event.New()
+    InputData.Up = Up
 
-    local Button1Down = Event.New()
-    Mouse.Button1Down = Button1Down
+    local Down = Event.New()
+    InputData.Down = Down
 
-    local NGPButton1Up = Event.New()
-    Mouse.NGPButton1Up = NGPButton1Up
+    local NGPUp = Event.New()
+    InputData.NGPUp = NGPUp
 
-    local NGPButton1Down = Event.New()
-    Mouse.NGPButton1Down = NGPButton1Down
+    local NGPDown = Event.New()
+    InputData.NGPDown = NGPDown
 
     UserInputService.InputBegan:Connect(function(Input, GameProcessed)
         local InputType = Input.UserInputType
@@ -56,17 +57,17 @@ function InputLibrary.Init()
             if Bind then
                 Bind:Fire()
             end
-        elseif (InputType == Enum.UserInputType.MouseButton1) then
+        elseif (InputType == Enum.UserInputType.MouseButton1 or InputType == Enum.UserInputType.Touch) then
             if (not GameProcessed) then
-                NGPButton1Down:Fire()
+                NGPDown:Fire()
             end
-            Button1Down:Fire()
+            Down:Fire()
         end
     end)
 
     UserInputService.InputChanged:Connect(function(Input)
-        if (Input.UserInputType == Enum.UserInputType.MouseMovement) then
-            Mouse.XY = Input.Position
+        if (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) then
+            InputData.XY = Input.Position
         end
     end)
 
@@ -79,11 +80,11 @@ function InputLibrary.Init()
             if Bind then
                 Bind:Fire()
             end
-        elseif (InputType == Enum.UserInputType.MouseButton1) then
+        elseif (InputType == Enum.UserInputType.MouseButton1 or InputType == Enum.UserInputType.Touch) then
             if (not GameProcessed) then
-                NGPButton1Up:Fire()
+                NGPUp:Fire()
             end
-            Button1Up:Fire()
+            Up:Fire()
         end
     end)
 
@@ -99,12 +100,12 @@ end
 ]]
 
 function InputLibrary:UpdateMouse()
-    local Mouse = self.Mouse
-    local XY = Mouse.XY
+    local InputData = self.InputData
+    local XY = InputData.XY
     local MouseRay = Novarine:Get("Graphics").Camera:ScreenPointToRay(XY.X + 0.5, XY.Y + 0.5)
-    local Hit, Pos = workspace:FindPartOnRayWithIgnoreList(Ray.new(MouseRay.Origin, MouseRay.Direction * Mouse.Dist), Mouse.Ignore)
-    Mouse.Target = Hit
-    Mouse.Pos = Pos
+    local Hit, Pos = workspace:FindPartOnRayWithIgnoreList(Ray.new(MouseRay.Origin, MouseRay.Direction * InputData.Dist), InputData.Ignore)
+    InputData.Target = Hit
+    InputData.Pos = Pos
 end
 
 --[[
@@ -122,14 +123,14 @@ function InputLibrary:AddMouseIgnoreTag(Tag)
 
     assert(typeof(Tag) == "string")
 
-    local Mouse = self.Mouse
+    local InputData = self.InputData
 
     CollectionService:GetInstanceAddedSignal(Tag):Connect(function(Object)
-        table.insert(Mouse.Ignore, Object)
+        table.insert(InputData.Ignore, Object)
     end)
 
     for _, Object in pairs(CollectionService:GetTagged(Tag)) do
-        table.insert(Mouse.Ignore, Object)
+        table.insert(InputData.Ignore, Object)
     end
 end
 
