@@ -25,7 +25,7 @@ local InputLibrary = {
         IgnoreTag   = {};
         Ignore      = {};
         Pos         = Vector3.new(0, 0, 0);
-        XY          = Vector2.new(0, 0);
+        XY          = Vector3.new(0, 0, 0);
         Target      = nil;
         Dist        = 300;
     };
