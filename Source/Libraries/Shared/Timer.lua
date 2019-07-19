@@ -3,6 +3,20 @@ local RunService = Novarine:Get("RunService")
 
 local Timer = {}
 
+--[[
+    Runs a function on some interval.
+
+    @param Interval The interval, in seconds
+    @param Execute The function to run
+
+    @note If interval is less than 1/30, it will become 1/60
+    @note Runs the timer in another coroutine
+
+    @usage
+        Timer:On(1/5, function() print("AHHH") end)
+        Timer:On(0, function() print("EEEEE") end)
+]]
+
 function Timer:On(Interval, Execute)
     local Running = true
 

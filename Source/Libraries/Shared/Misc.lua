@@ -1,5 +1,20 @@
 local Misc = {}
 
+--[[
+    Recursively constructs a Lua hierarchy from
+    a Roblox Instance. Useful for settings within
+    Instances. Only obtains Value Instances like
+    StringValue, CFrameValue, etc..
+
+    @param Root The Instance to read.
+
+    @usage
+        local Settings = Misc:TableFromTreeValues(TestInstance.Settings)
+        print(Settings.Count)
+        print(Settings.Greetings)
+        print(Settings.Dialogue.Page1.Text)
+]]
+
 function Misc:TableFromTreeValues(Root)
 
     local Result = {}

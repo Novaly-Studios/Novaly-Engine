@@ -119,16 +119,34 @@ function Table.PrintTable(Item, Tabs)
     end
 end
 
+--[[
+    Deep (recursively) clones a table.
+
+    @param Array The table to clone
+    @return The cloned table
+]]
+
 function Table.Clone(Array)
     local Result = {}
+
     for Key, Value in pairs(Array) do
-        if type(Value) == "table" then
+        if (type(Value) == "table") then
             Value = Table.Clone(Value)
         end
         Result[Key] = Value
     end
+
     return Result
 end
+
+--[[
+    Indexes a table with another table of keys.
+
+    @param Arr The table to index
+    @param Keys The path
+
+    @return The value which has been indexed
+]]
 
 function Table.GetValueSequence(Arr, Keys)
     for Key = 1, #Keys do
@@ -136,6 +154,15 @@ function Table.GetValueSequence(Arr, Keys)
     end
     return Arr
 end
+
+--[[
+    Indexes a table with another table of keys
+    and sets some value.
+
+    @param Arr The array to insert into
+    @param Keys The path
+    @param Val The value to set
+]]
 
 function Table.SetValueSequence(Arr, Keys, Val)
     local Len = #Keys

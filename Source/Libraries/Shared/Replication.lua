@@ -7,15 +7,19 @@ local Logging = Novarine:Get("Logging")
 local Players = Novarine:Get("Players")
 
 local Replication = {
+    -- Public
+    ReplicatedData = {}; -- The replicated data table
+    MonitorInterval = 1/5; -- How frequently to run a diff on the structure
+    -- Private
     Last = {};
-    ReplicatedData = {};
-    MonitorInterval = 1/5;
     Handler = ObjectEngineRaw.New();
     Loaded = false;
 }
 
 function Replication:Init()
     if (RunService:IsClient()) then
+
+        -- A value changes, server sends to client both the tree path and the corresponding value
         Communication.BindRemoteFunction("OnReplicate", function(Path, Value)
 
             local Last = self.ReplicatedData
@@ -36,6 +40,7 @@ function Replication:Init()
             return true
         end)
 
+        -- Client must initially synchronise data with server
         Communication.BindRemoteEvent("GetReplicatedData", function(Data)
             for Key, Value in pairs(Data) do
                 Logging.Log(1, "Initial Data Replication Key: " .. Key)
@@ -80,12 +85,20 @@ function Replication:Init()
         end
     end
 
+    -- Handle the following events
     Handler:SetOnCreate(SendUpdate)
     Handler:SetOnDestroy(SendUpdate)
     Handler:SetOnDifferent(SendUpdate)
 
     self.Loaded = true
 end
+
+--[[
+    Using the ObjectEngine, check which values have changed
+    within the tree structure, which have been created, which
+    have been destroyed and which are the same. We don't
+    need to know which are the same.
+]]
 
 function Replication:Diff()
     self.Handler:Diff(self.Last, self.ReplicatedData)
