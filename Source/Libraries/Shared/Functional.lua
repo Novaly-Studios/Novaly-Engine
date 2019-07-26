@@ -80,7 +80,17 @@ function Functional.FlattenNumeric(Input)
     return Functional.Immutable(Result)
 end
 
-function Functional.Satisfies(Table, Assessment)
+function Functional.SatisfiesAll(Table, Assessment)
+    for _, Value in pairs(Table) do
+        if (not Assessment(Value)) then
+            return false
+        end
+    end
+
+    return true
+end
+
+function Functional.SatisfiesOnce(Table, Assessment)
     for _, Value in pairs(Table) do
         if (Assessment(Value)) then
             return true
