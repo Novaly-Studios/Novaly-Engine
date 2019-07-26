@@ -12,6 +12,7 @@ local Services = {
     "PhysicsService", "Workspace"
 }
 
+local ServerScriptService   = game:GetService("ServerScriptService")
 local ReplicatedStorage     = game:GetService("ReplicatedStorage")
 local ReplicatedFirst       = game:GetService("ReplicatedFirst")
 local RunService            = game:GetService("RunService")
@@ -22,10 +23,17 @@ local Indicator             = Server and "Server" or "Client"
 local Libraries             = Parent:FindFirstChild("Libraries")
 local Classes               = Parent:FindFirstChild("Classes")
 
-local GameFolder            = ReplicatedFirst:FindFirstChild("GAME_INDICATOR", true).Parent
-local GameClient            = GameFolder:FindFirstChild("Client")
-local GameServer            = GameFolder:FindFirstChild("Server")
-local GameShared            = GameFolder:FindFirstChild("Shared")
+local GameClient            = ReplicatedFirst:FindFirstChild("GAME_INDICATOR_CLIENT", true).Parent
+local GameShared            = ReplicatedFirst:FindFirstChild("GAME_INDICATOR_SHARED", true).Parent
+local GameServer            = ServerScriptService:FindFirstChild("GAME_INDICATOR_SERVER", true)
+
+if GameServer then
+    GameServer = GameServer.Parent
+end
+
+Engine["ClientFolder"] = GameClient
+Engine["SharedFolder"] = GameShared
+Engine["ServerFolder"] = GameServer
 
 function Loader:Get(Name, Tabs)
 
@@ -85,7 +93,11 @@ function Loader:Add(Name, Item)
     Engine[Name] = Item
 end
 
-function Loader:Initialise()
+function Loader:Init()
+    if (self.Initialised) then
+        error("Novarine already initialised!")
+    end
+
     if Server then
         local Assets = ReplicatedStorage:FindFirstChild("Assets")
 
@@ -138,6 +150,8 @@ function Loader:Initialise()
         print("Novarine - Preload Tree")
         Loader:Get(Item, 1)
     end
+
+    self.Initialised = true
 end
 
 return Loader
