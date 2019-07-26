@@ -13,7 +13,7 @@ function Functional.Map(Input, Operator)
         Result[Key] = Operator(Value)
     end
 
-    return Result
+    return Functional.Immutable(Result)
 end
 
 function Functional.Filter(Input, Assessment)
@@ -27,7 +27,7 @@ function Functional.Filter(Input, Assessment)
         end
     end
 
-    return Result
+    return Functional.Immutable(Result)
 end
 
 function Functional.Reduce(Input, Operator, InitialValue)
@@ -47,11 +47,27 @@ end
 
 function Functional.Flatten(Input)
     local Result = {}
+
+    for Key, Value in pairs(Input) do
+        if (type(Value) == "table") then
+            for Key, Value in pairs(Functional.Flatten(Value)) do
+                Result[Key] = Value
+            end
+        else
+            Result[Key] = Value
+        end
+    end
+
+    return Functional.Immutable(Result)
+end
+
+function Functional.FlattenNumeric(Input)
+    local Result = {}
     local Index = 1
 
     for _, Value in pairs(Input) do
         if (type(Value) == "table") then
-            for _, Value in pairs(Functional.Flatten(Value)) do
+            for _, Value in pairs(Functional.FlattenNumeric(Value)) do
                 Result[Index] = Value
                 Index = Index + 1
             end
@@ -61,7 +77,7 @@ function Functional.Flatten(Input)
         end
     end
 
-    return Result
+    return Functional.Immutable(Result)
 end
 
 function Functional.Satisfies(Table, Assessment)
@@ -85,7 +101,22 @@ function Functional.Fuse(Initial, Other)
         Result[Key] = Value
     end
 
-    return Result
+    return Functional.Immutable(Result)
+end
+
+function Functional.FuseNumeric(Initial, Other)
+    local Result = {}
+    local Offset = #Initial
+
+    for Index = 1, Offset do
+        Result[Index] = Initial[Index]
+    end
+
+    for Index = 1, #Other do
+        Result[Offset + Index] = Other[Index]
+    end
+
+    return Functional.Immutable(Result)
 end
 
 function Functional.Immutable(Table)
