@@ -11,4 +11,10 @@ function Log.Log(Level, Str)
     print("[" .. Indicator .. " | " .. Time.FromSeconds(tick()):TimeString() .. "]" .. ("\t"):rep(Level) .. Str)
 end
 
+function Log.Debug(...)
+    if (Novarine:Get("DebugMode")) then
+        Log.Log(...)
+    end
+end
+
 return Log

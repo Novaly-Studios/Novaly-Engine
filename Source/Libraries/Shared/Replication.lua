@@ -38,7 +38,7 @@ function Replication:Init()
 
         Communication.BindRemoteEvent("GetReplicatedData", function(Data)
             for Key, Value in pairs(Data) do
-                Logging.Log(1, "Initial Data Replication Key: " .. Key)
+                Logging.Debug(1, "Initial Data Replication Key: " .. Key)
                 self.ReplicatedData[Key] = Value
             end
         end)
@@ -63,10 +63,10 @@ function Replication:Init()
     local Handler = self.Handler
 
     local function SendUpdate(_, Path)
-        Logging.Log(1, "Replicated Data Update Path:")
+        Logging.Debug(1, "Replicated Data Update Path:")
 
         for _, Key in pairs(Path) do
-            Logging.Log(2, Key)
+            Logging.Debug(2, Key)
         end
 
         for _, Player in pairs(Players:GetChildren()) do
@@ -74,7 +74,7 @@ function Replication:Init()
                 Table.WaitFor(wait, Communication.TransmissionReady, Player.Name)
                 while (not Communication.InvokeRemoteFunction("OnReplicate", Player, Path, Table.GetValueSequence(self.ReplicatedData, Path))) do
                     wait(1)
-                    Logging.Log(string.format("Player '%s' did not accept data. Retrying...", Player.Name))
+                    Logging.Debug(string.format("Player '%s' did not accept data. Retrying...", Player.Name))
                 end
             end)()
         end

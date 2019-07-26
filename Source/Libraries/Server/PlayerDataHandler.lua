@@ -136,9 +136,9 @@ function Server.Init()
                         Self[Key] = Value
                     end;
                 }
-                Logging.Log(1, "Set data store as table")
+                Logging.Debug(1, "Set data store as table")
             else
-                Logging.Log(1, "Set data store as live.")
+                Logging.Debug(1, "Set data store as live.")
                 Server.PlayerDataStore = DataStoreService:GetDataStore(ReplicatedStorage:FindFirstChild("DataStoreVersion") and ReplicatedStorage.DataStoreVersion.Value or Configuration.pDataStoreVersion)
             end
         end
