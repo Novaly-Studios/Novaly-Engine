@@ -1,3 +1,9 @@
+--[[
+    Adds some traditional functional programming concepts.
+    Use where possible as this will likely support
+    multithreading in future.
+]]
+
 local Functional = {}
 
 Functional.ImmutableMT = {
@@ -5,6 +11,28 @@ Functional.ImmutableMT = {
         error("Attempt to mutate static table.")
     end;
 }
+
+--[[
+    Operates on an input table and produces
+    and output table.
+
+    @param Input The target table.
+    @param Operator A function to which will operate on each value.
+
+    @usage
+        local Items = {
+            {Name = "Hat1", Price = 300};
+            {Name = "Hat2", Price = 100};
+            ...
+        }
+
+        local NewItems = Functional.Map(Items, function(Item)
+            return {
+                Name = Item.Name;
+                Price = Items.Price * 2;
+            }
+        end)
+]]
 
 function Functional.Map(Input, Operator)
     local Result = {}
@@ -15,6 +43,24 @@ function Functional.Map(Input, Operator)
 
     return Functional.Immutable(Result)
 end
+
+--[[
+    Collects some items from an array which satisfy
+    a condition.
+
+    @param Input The target table.
+    @param Assessment The function to determine whether an item meets a criteria.
+
+    @usage
+        local Items = {
+            {X = 10, Y = 15};
+            {X = 7, Y = 12};
+            {X = 90, Y = 14};
+        }
+        local Filtered = Functional.Filter(Items, function(Object)
+            return Object.Y >= 14
+        end)
+]]
 
 function Functional.Filter(Input, Assessment)
     local Result = {}
@@ -127,6 +173,12 @@ function Functional.FuseNumeric(Initial, Other)
     end
 
     return Functional.Immutable(Result)
+end
+
+function Functional.Iterate(Table, Operate)
+    for Key, Value in pairs(Table) do
+        Operate(Key, Value)
+    end
 end
 
 function Functional.Immutable(Table)
