@@ -81,9 +81,9 @@ function Server.Init()
         local Event = Binds.Events[Name]
 
         if (type(Name) ~= "string") then
-            Logging.Log(0, "Warning, client " .. Player.Name .. " has sent an empty or non-string request name.")
+            warn("Warning, client " .. Player.Name .. " has sent an empty or non-string request name.")
         elseif (Event == nil) then
-            Logging.Log(0, "Warning, no event '" .. Name .. "' found in event collection.")
+            warn("Warning, no event '" .. Name .. "' found in event collection.")
         else
             Event:Fire(Player, ...)
         end
@@ -95,10 +95,10 @@ function Server.Init()
         local Function = Binds.Functions[Name]
 
         if (type(Name) ~= "string") then
-            Logging.Log(0, "Warning, client " .. Player.Name .. " has sent an empty or non-string request name.")
+            warn("Warning, client " .. Player.Name .. " has sent an empty or non-string request name.")
             return false
         elseif (Function == nil) then
-            Logging.Log(0, "Warning, no function '" .. Name .. "' found in function collection.")
+            warn("Warning, no function '" .. Name .. "' found in function collection.")
         else
             return Function(Player, ...)
         end

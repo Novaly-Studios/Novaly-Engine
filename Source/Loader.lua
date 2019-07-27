@@ -12,6 +12,7 @@ local Services = {
     "PhysicsService", "Workspace"
 }
 
+local ServerScriptService   = game:GetService("ServerScriptService")
 local ReplicatedStorage     = game:GetService("ReplicatedStorage")
 local ReplicatedFirst       = game:GetService("ReplicatedFirst")
 local RunService            = game:GetService("RunService")
@@ -22,16 +23,26 @@ local Indicator             = Server and "Server" or "Client"
 local Libraries             = Parent:FindFirstChild("Libraries")
 local Classes               = Parent:FindFirstChild("Classes")
 
-local GameFolder            = ReplicatedFirst:FindFirstChild("GAME_INDICATOR", true).Parent
-local GameClient            = GameFolder:FindFirstChild("Client")
-local GameServer            = GameFolder:FindFirstChild("Server")
-local GameShared            = GameFolder:FindFirstChild("Shared")
+local GameClient            = ReplicatedFirst:FindFirstChild("GAME_INDICATOR_CLIENT", true).Parent
+local GameShared            = ReplicatedFirst:FindFirstChild("GAME_INDICATOR_SHARED", true).Parent
+local GameServer            = ServerScriptService:FindFirstChild("GAME_INDICATOR_SERVER", true)
+
+local DebugMode             = (ReplicatedFirst:FindFirstChild("DEBUG_MODE") and ReplicatedFirst.DEBUG_MODE.Value or false)
+
+if GameServer then
+    GameServer = GameServer.Parent
+end
+
+Engine["ClientFolder"] = GameClient
+Engine["SharedFolder"] = GameShared
+Engine["ServerFolder"] = GameServer
+Engine["DebugMode"] = DebugMode
 
 function Loader:Get(Name, Tabs)
 
     local Default = Engine[Name]
 
-    if Default then
+    if (Default ~= nil) then
         return Default
     end
 
@@ -62,16 +73,18 @@ function Loader:Get(Name, Tabs)
             Got:Init()
         end
 
-        local Diff = tick() - Time
-        local Nanoseconds = Diff * 1e+9
-        local Milliseconds = Diff * 1e+3
-        local Reported = string.format(("\t"):rep(Tabs or 0) .. "Novarine - Load '%s' : %s (%.2f ns / %.8f ms)", Name, Indicator, Nanoseconds, Milliseconds)
+        if DebugMode then
+            local Diff = tick() - Time
+            local Nanoseconds = Diff * 1e+9
+            local Milliseconds = Diff * 1e+3
+            local Reported = string.format(("\t"):rep(Tabs or 0) .. "Novarine - Load '%s' : %s (%.2f ns / %.8f ms)", Name, Indicator, Nanoseconds, Milliseconds)
 
-        -- Warn for slow modules
-        if (Milliseconds < 16) then
-            print(Reported)
-        else
-            warn(Reported)
+            -- Warn for slow modules
+            if (Milliseconds < 16) then
+                print(Reported)
+            else
+                warn(Reported)
+            end
         end
 
         Loaded[Name] = true
@@ -81,11 +94,17 @@ function Loader:Get(Name, Tabs)
 end
 
 function Loader:Add(Name, Item)
-    print(string.format("Novarine - Add '%s' (%s)", Name, Indicator))
+    if DebugMode then
+        print(string.format("Novarine - Add '%s' (%s)", Name, Indicator))
+    end
     Engine[Name] = Item
 end
 
-function Loader:Initialise()
+function Loader:Init()
+    if (self.Initialised) then
+        error("Novarine already initialised!")
+    end
+
     if Server then
         local Assets = ReplicatedStorage:FindFirstChild("Assets")
 
@@ -125,19 +144,18 @@ function Loader:Initialise()
         Engine[Name] = game:GetService(Name)
     end
 
-    -- Find game entry points
-    --[[ require(ReplicatedStorage:FindFirstChild(TargetName, true) or
-    ServerScriptService:FindFirstChild(TargetName, true) or
-    ReplicatedFirst:FindFirstChild(TargetName, true) or
-    StarterPlayer:FindFirstChild(TargetName, true) or
-    StarterGui:FindFirstChild(TargetName, true)) ]]
-
-    print(string.format("Novarine - Initialised (%s)", Indicator))
+    if DebugMode then
+        print(string.format("Novarine - Initialised (%s)", Indicator))
+    end
 
     for _, Item in pairs(PreLoad) do
-        print("Novarine - Preload Tree")
+        if DebugMode then
+            print("Novarine - Preload Tree")
+        end
         Loader:Get(Item, 1)
     end
+
+    self.Initialised = true
 end
 
 return Loader
