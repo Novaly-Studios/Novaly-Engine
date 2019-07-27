@@ -45,6 +45,39 @@ function Functional.Map(Input, Operator)
 end
 
 --[[
+    Operates on an input table and produces
+    and output table *with custom keys*.
+
+    @param Input The target table.
+    @param Operator A function to which will operate on each value. Must return Key, Value tuple
+
+    @usage
+        local Items = {
+            {Name = "Hat1", Price = 300};
+            {Name = "Hat2", Price = 100};
+            ...
+        }
+
+        local NewItems = Functional.Map(Items, function(Item)
+            return Item.Name .. "|", {
+                Name = Item.Name;
+                Price = Items.Price * 2;
+            }
+        end)
+]]
+
+function Functional.KMap(Input, Operator)
+    local Result = {}
+
+    for _, Value in pairs(Input) do
+        local Key, ResultValue = Operator(Value)
+        Result[Key] = ResultValue
+    end
+
+    return Functional.Immutable(Result)
+end
+
+--[[
     Collects some items from an array which satisfy
     a condition.
 
