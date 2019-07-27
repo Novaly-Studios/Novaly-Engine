@@ -304,8 +304,8 @@ function Graphics:Init()
     coroutine.wrap(function()
         while wait(1/15) do
             Graphics:DetectPlayer()
-            for Part, Object in pairs(Graphics.SurfaceBillboards) do
-                local Settings = Part:FindFirstChild("Settings")
+            for _, Object in pairs(Graphics.SurfaceBillboards) do
+                local Settings = Object.Part:FindFirstChild("Settings")
                 if Settings then
                     local SettingsTable = Misc:TableFromTreeValues(Settings)
                     local MaxDistance = SettingsTable.MaxDistance
