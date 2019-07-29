@@ -38,19 +38,14 @@ end
 Server.BindRemoteEvent      = BindRemoteEvent
 Server.BindRemoteFunction   = BindRemoteFunction
 
-function Server.WaitForTransmissionReady(Player)
+function Server.WaitForTransmissionReady(Player, Callback)
 
-    local Tries = 0
-
-    while (Server.TransmissionReady[Player.Name] == nil) do
-
+    while (Player.Parent and Server.TransmissionReady[Player.Name] == nil) do
         wait(Configuration.coPollInterval)
-        Tries = Tries + 1
+    end
 
-        if (Tries == Configuration.coMaxTries) then
-            error("Max transmission attempts reached for player " .. Player.Name .. "!")
-            return
-        end
+    if Player then
+        Callback()
     end
 end
 
