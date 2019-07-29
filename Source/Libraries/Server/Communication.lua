@@ -40,13 +40,15 @@ Server.BindRemoteFunction   = BindRemoteFunction
 
 function Server.WaitForTransmissionReady(Player, Callback)
 
-    while (Player.Parent and Server.TransmissionReady[Player.Name] == nil) do
-        wait(Configuration.coPollInterval)
-    end
+    coroutine.wrap(function()
+        while (Player.Parent and Server.TransmissionReady[Player.Name] == nil) do
+            wait(Configuration.coPollInterval)
+        end
 
-    if Player then
-        Callback()
-    end
+        if Player then
+            Callback()
+        end
+    end)()
 end
 
 function Server.FireRemoteEvent(Name, Player, ...)
