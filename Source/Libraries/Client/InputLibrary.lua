@@ -48,6 +48,15 @@ function InputLibrary.Init()
     local NGPDown = Event.New()
     InputData.NGPDown = NGPDown
 
+    local UpRightClick = Event.New()
+    InputData.UpRightClick = UpRightClick
+
+    local DownRightClick = Event.New()
+    InputData.DownRightClick = DownRightClick
+
+    local Move = Event.New()
+    InputData.Move = Move
+
     UserInputService.InputBegan:Connect(function(Input, GameProcessed)
         local InputType = Input.UserInputType
         if (InputType == Enum.UserInputType.Keyboard or InputType == Enum.UserInputType.Gamepad1) then
@@ -62,11 +71,16 @@ function InputLibrary.Init()
                 NGPDown:Fire()
             end
             Down:Fire()
+        elseif (InputType == Enum.UserInputType.MouseButton2) then
+            DownRightClick:Fire()
         end
     end)
 
     UserInputService.InputChanged:Connect(function(Input)
         if (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) then
+            if (InputData.XY ~= Vector3.new(0, 0, 0)) then
+                InputData.Move:Fire(Input.Position - InputData.XY)
+            end
             InputData.XY = Input.Position
         end
     end)
@@ -85,6 +99,8 @@ function InputLibrary.Init()
                 NGPUp:Fire()
             end
             Up:Fire()
+        elseif (InputType == Enum.MouseButton2) then
+            UpRightClick:Fire()
         end
     end)
 
