@@ -54,6 +54,12 @@ function InputLibrary.Init()
     local DownRightClick = Event.New()
     InputData.DownRightClick = DownRightClick
 
+    local NGPDownRightClick = Event.New()
+    InputData.NGPDownRightClick = NGPDownRightClick
+
+    local NGPUpRightClick = Event.New()
+    InputData.NGPUpRightClick = NGPUpRightClick
+
     local Move = Event.New()
     InputData.Move = Move
 
@@ -72,7 +78,10 @@ function InputLibrary.Init()
             end
             Down:Fire()
         elseif (InputType == Enum.UserInputType.MouseButton2) then
-            DownRightClick:Fire()
+            if (not GameProcessed) then
+                DownRightClick:Fire()
+            end
+            NGPDownRightClick:Fire()
         end
     end)
 
@@ -100,7 +109,10 @@ function InputLibrary.Init()
             end
             Up:Fire()
         elseif (InputType == Enum.MouseButton2) then
-            UpRightClick:Fire()
+            if (not GameProcessed) then
+                UpRightClick:Fire()
+            end
+            NGPUpRightClick:Fire()
         end
     end)
 
