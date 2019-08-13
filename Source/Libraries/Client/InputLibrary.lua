@@ -70,7 +70,7 @@ function InputLibrary.Init()
             local Bind = InputLibrary.DownBinds[KeyCode]
             InputLibrary.Keys[KeyCode] = true
             if Bind then
-                Bind:Fire()
+                Bind:Fire(GameProcessed)
             end
         elseif (InputType == Enum.UserInputType.MouseButton1 or InputType == Enum.UserInputType.Touch) then
             if (not GameProcessed) then
@@ -101,14 +101,14 @@ function InputLibrary.Init()
             local Bind = InputLibrary.UpBinds[KeyCode]
             InputLibrary.Keys[KeyCode] = false
             if Bind then
-                Bind:Fire()
+                Bind:Fire(GameProcessed)
             end
         elseif (InputType == Enum.UserInputType.MouseButton1 or InputType == Enum.UserInputType.Touch) then
             if (not GameProcessed) then
                 NGPUp:Fire()
             end
             Up:Fire()
-        elseif (InputType == Enum.MouseButton2) then
+        elseif (InputType == Enum.UserInputType.MouseButton2) then
             if (not GameProcessed) then
                 UpRightClick:Fire()
             end
