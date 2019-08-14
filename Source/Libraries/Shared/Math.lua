@@ -223,13 +223,13 @@ function Maths.PiecewiseInterpolate(Points, InterpolateFunction, DefaultArgs, Cu
     local Lines = #Points - 1
     local Ratio = CurrentTime / Duration
     local CorrectedRatio = (Ratio * Lines) % 1
-    local Segment = Maths.Floor(Lines / Duration * CurrentTime) + 1 + Offset
+    local Segment = math.floor(Lines / Duration * CurrentTime) + 1 + Offset
     local Result = {}
 
     local Iter = 1
 
     for Index = PullRange.Min, PullRange.Max do
-        Result[Iter] = Points[Maths.Clamp(Segment + Index, 1, Lines + 1)]
+        Result[Iter] = Points[math.clamp(Segment + Index, 1, Lines + 1)]
         Iter = Iter + 1
     end
 
