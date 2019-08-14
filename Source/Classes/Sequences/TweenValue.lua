@@ -102,10 +102,10 @@ function TweenValue.SingleTransition:HermiteSpline(Points, CurrentTime, Duration
         )
     elseif (DataType == "UDim2") then
         return UDim2.new(
-            Math.HermiteInterpolateCFrame(Points[1].X.Scale, Points[2].X.Scale, Points[3].X.Scale, Points[4].X.Scale, TimeRatio, Tension, Bias),
-            Math.HermiteInterpolateCFrame(Points[1].X.Offset, Points[2].X.Offset, Points[3].X.Offset, Points[4].X.Offset, TimeRatio, Tension, Bias),
-            Math.HermiteInterpolateCFrame(Points[1].Y.Scale, Points[2].Y.Scale, Points[3].Y.Scale, Points[4].Y.Scale, TimeRatio, Tension, Bias),
-            Math.HermiteInterpolateCFrame(Points[1].Y.Offset, Points[2].Y.Offset, Points[3].Y.Offset, Points[4].Y.Offset, TimeRatio, Tension, Bias)
+            Math.HermiteInterpolate(Points[1].X.Scale, Points[2].X.Scale, Points[3].X.Scale, Points[4].X.Scale, TimeRatio, Tension, Bias),
+            Math.HermiteInterpolate(Points[1].X.Offset, Points[2].X.Offset, Points[3].X.Offset, Points[4].X.Offset, TimeRatio, Tension, Bias),
+            Math.HermiteInterpolate(Points[1].Y.Scale, Points[2].Y.Scale, Points[3].Y.Scale, Points[4].Y.Scale, TimeRatio, Tension, Bias),
+            Math.HermiteInterpolate(Points[1].Y.Offset, Points[2].Y.Offset, Points[3].Y.Offset, Points[4].Y.Offset, TimeRatio, Tension, Bias)
         )
     end
 
