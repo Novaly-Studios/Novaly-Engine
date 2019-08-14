@@ -46,7 +46,7 @@ end
 
 function Event:Fire(...)
     for _, Handler in pairs(self.Handlers) do
-        Handler(...)
+        coroutine.wrap(Handler)(...)
     end
 end
 
