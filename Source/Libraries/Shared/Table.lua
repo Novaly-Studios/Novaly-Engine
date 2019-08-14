@@ -217,20 +217,31 @@ function Table.Capitalise(Array)
 end
 
 function Table.WaitFor(YieldFunction, Array, ...)
-    local Iter = 1
     for _, Value in pairs({...}) do
         local Next = Array[Value]
+        local Warned = false
+        local Iter = 1
+
         while (not Next) do
             YieldFunction()
             Iter = Iter + 1
+
             if (Iter == 150) then
+                Warned = true
                 warn(string.format("Possible endless wait on '%s' for property '%s'.", (Array.Name or tostring(Array)), tostring(Value)))
                 warn(debug.traceback())
             end
+
             Next = Array[Value]
         end
+
+        if Warned then
+            warn(string.format("Warned wait for '%s' property '%s' completed.", (Array.Name or tostring(Array)), tostring(Value)))
+        end
+
         Array = Next
     end
+
     return Array
 end
 
