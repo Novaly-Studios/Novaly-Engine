@@ -335,6 +335,10 @@ function Graphics:Init()
         end
     end)
 
+    for _, Part in pairs(CollectionService:GetTagged(Graphics.Tags.SurfaceBillboard)) do
+        Graphics.SurfaceBillboards[Part] = SurfaceBillboard.New(Part, Part.Parent, 0, CFrame.new())
+    end
+
     for _, Part in pairs(CollectionService:GetTagged(Graphics.Tags.TransparentPart)) do
         TransparentPartHandler:Add(Part)
     end
