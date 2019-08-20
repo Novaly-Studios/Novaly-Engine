@@ -324,7 +324,9 @@ function Graphics:Init()
     end)
 
     CollectionService:GetInstanceAddedSignal(Graphics.Tags.SurfaceBillboard):Connect(function(Part)
-        Graphics.SurfaceBillboards[Part] = SurfaceBillboard.New(Part, Part.Parent, 0, CFrame.new())
+        if (not Graphics.SurfaceBillboards[Part]) then
+            Graphics.SurfaceBillboards[Part] = SurfaceBillboard.New(Part, Part.Parent, 0, CFrame.new())
+        end
     end)
 
     CollectionService:GetInstanceRemovedSignal(Graphics.Tags.SurfaceBillboard):Connect(function(Part)
