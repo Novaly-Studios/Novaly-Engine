@@ -177,9 +177,7 @@ function Quaternion.FromCFrame(CFObject)
             return Quaternion.new((M10 - M01) * s, (M02 + M20) * s, (M12 + M21) * s, 0.5 * r)
 
         end
-
     end
-
 end
 
 return Quaternion

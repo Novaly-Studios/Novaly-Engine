@@ -28,7 +28,7 @@ local InputLibrary = {
         Pos         = Vector3.new(0, 0, 0);
         XY          = Vector3.new(0, 0, 0);
         Target      = nil;
-        Dist        = 50;
+        Dist        = 80;
     };
 };
 
@@ -116,7 +116,11 @@ function InputLibrary.Init()
         end
     end)
 
-    RunService:BindToRenderStep("MouseInput", Enum.RenderPriority.Input.Value + 1, function()
+--[[     RunService:BindToRenderStep("MouseInput", Enum.RenderPriority.Input.Value + 1, function()
+        InputLibrary:UpdateMouse()
+    end) ]]
+
+    RunService.Stepped:Connect(function()
         InputLibrary:UpdateMouse()
     end)
 end
@@ -130,7 +134,7 @@ end
 function InputLibrary:UpdateMouse()
     local InputData = self.InputData
     local XY = InputData.XY
-    local MouseRay = Novarine:Get("Graphics").Camera:ViewportPointToRay(XY.X + 0.5, XY.Y + 0.5) --ScreenPointToRay
+    local MouseRay = Novarine:Get("Graphics").Camera:ScreenPointToRay(XY.X + 0.5, XY.Y + 0.5)
     local Hit, Pos = workspace:FindPartOnRayWithIgnoreList(Ray.new(MouseRay.Origin, MouseRay.Direction * InputData.Dist), InputData.Ignore)
     InputData.Target = Hit
     InputData.Pos = Pos

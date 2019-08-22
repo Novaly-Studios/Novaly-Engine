@@ -35,23 +35,6 @@ function TweenValue.SingleTransition:Linear(Points, CurrentTime, Duration)
 
     if (DataType == "CFrame") then
 
-        --[[local FromQuaternion = Quaternion.FromCFrame(From)
-        local ToQuaternion = Quaternion.FromCFrame(To)
-        local FromPosition = From.p
-        local ToPosition = To.p
-
-        local InterpolatedQuaternion = Math.Lerp(FromQuaternion, ToQuaternion, TimeRatio)
-        local InterpolatedPosition = From:Lerp(To, TimeRatio)
-
-        local M00, M01, M02,
-              M10, M11, M12,
-              M20, M21, M22 = InterpolatedQuaternion:ToRotationMatrix()
-
-        return CFrame.new(InterpolatedPosition.X, InterpolatedPosition.Y, InterpolatedPosition.Z,
-                          M00, M01, M02,
-                          M10, M11, M12,
-                          M20, M21, M22)]]
-
         return From:Lerp(To, TimeRatio)
 
     elseif (DataType == "UDim2") then

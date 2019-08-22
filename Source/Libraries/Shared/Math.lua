@@ -212,8 +212,6 @@ function Maths.IsInf(Number)
     return (Number == math.huge or Number == -math.huge)
 end
 
-
-
 --[[
     @function Maths.InterpolatePiecewise
 ]]

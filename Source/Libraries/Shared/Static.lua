@@ -18,7 +18,9 @@ local Static = {}
     - IterateNested
     - Copy1D
     - CopyNested
-    - Sort
+    - Sort1D
+    - Keys1D
+    - Values1D
 ]]
 
 --[[
@@ -297,7 +299,6 @@ end
     @usage
         local Items1 = {}
         local Items2 = {}
-
 ]]
 
 function Static.FuseNumeric1D(Initial, Other)
@@ -466,6 +467,54 @@ function Static.Sort1D(Table, Assessment)
     local Result = Static.Copy1D(Table)
     table.sort(Result, Assessment)
     return Result
+end
+
+--[[
+    Obtains the (numeric or otherwise) keys of a table.
+
+    @param Table The target table.
+
+    @usage
+        local Target = {
+            A = true;
+            B = true;
+            C = true;
+        }
+        local Keys = Static.Keys1D(Target)
+]]
+
+function Static.Keys1D(Table)
+    local Keys = {}
+    local Index = 1
+
+    for Key in pairs(Table) do
+        Keys[Index] = Key
+        Index = Index + 1
+    end
+
+    return Keys
+end
+
+--[[
+    Obtains the values of a table.
+
+    @param Table The target table.
+
+    @usage
+        local Target = {"A", "B", C = "C"}
+        local Values = Static.Values1D(Target)
+]]
+
+function Static.Values1D(Table)
+    local Values = {}
+    local Index = 1
+
+    for _, Value in pairs(Table) do
+        Values[Index] = Value
+        Index = Index + 1
+    end
+
+    return Values
 end
 
 return Static
