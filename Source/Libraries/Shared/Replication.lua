@@ -63,11 +63,11 @@ function Replication:Init()
     local Handler = self.Handler
 
     local function SendUpdate(_, Path)
-        Logging.Debug(1, "Replicated Data Update Path:")
+--[[         Logging.Debug(1, "Replicated Data Update Path:")
 
         for _, Key in pairs(Path) do
             Logging.Debug(2, Key)
-        end
+        end ]]
 
         for _, Player in pairs(Players:GetChildren()) do
             coroutine.wrap(function()

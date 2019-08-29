@@ -6,7 +6,7 @@ local Animation = Class:FromName(script.Name)
 function Animation:Animation(Properties, Transitions)
 
     local Object = {
-        ["Target"]              = workspace;  -- Target instance to animate
+        ["Target"]              = game;  -- Target instance to animate
         ["Duration"]            = 0.0;  -- The duration of the animation
         ["StartTime"]           = 0.0;  -- Time in the sequence at which this animation will begin
         ["CurrentTime"]         = 0.0;  -- Current time of the animation
@@ -19,6 +19,7 @@ function Animation:Animation(Properties, Transitions)
     end
 
     assert(Transitions, "No TweenValue transitions provided!")
+    assert(Object.Target ~= game, "No target found!\n %s")
     Object["EndTime"] = Object.StartTime + Object.Duration
     Object["Transitions"] = Transitions
 
