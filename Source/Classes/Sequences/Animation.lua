@@ -19,7 +19,7 @@ function Animation:Animation(Properties, Transitions)
     end
 
     assert(Transitions, "No TweenValue transitions provided!")
-    assert(Object.Target ~= game, "No target found!\n %s")
+    assert(Object.Target ~= game, "No target found!")
     Object["EndTime"] = Object.StartTime + Object.Duration
     Object["Transitions"] = Transitions
 
