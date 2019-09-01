@@ -4,7 +4,7 @@ local UserInputService = Novarine:Get("UserInputService")
 local RunService = Novarine:Get("RunService")
 local CollectionService = Novarine:Get("CollectionService")
 local ContextActionService = Novarine:Get("ContextActionService")
-local Graphics = Novarine:Get("Graphics")
+local Player = Novarine:Get("Player")
 
 if (Novarine:Get("RunService"):IsServer()) then
     return false
@@ -30,6 +30,7 @@ local InputLibrary = {
         Target      = nil;
         Dist        = 80;
     };
+    MouseRaycast = 0;
 };
 
 function InputLibrary.Init()
@@ -120,9 +121,41 @@ function InputLibrary.Init()
         InputLibrary:UpdateMouse()
     end) ]]
 
-    RunService.Stepped:Connect(function()
+    RunService.RenderStepped:Connect(function()
         InputLibrary:UpdateMouse()
     end)
+end
+
+--[[
+    @function AddIgnoreInstance
+
+    Adds an ignore part, assuming InputLibrary is using inbuilt mouse raycast.
+]]
+
+function InputLibrary:AddIgnoreInstance(Item)
+    local Ignore = workspace:FindFirstChild("Ignore")
+
+    if (not Ignore) then
+        Ignore = Instance.new("Folder", workspace)
+    end
+
+    Ignore.Name = "Ignore"
+    Item.Parent = Ignore
+
+    self.IgnoreFolder = Ignore
+end
+
+--[[
+    @function SetMouseRaycastActive
+
+    Enables or disables the custom mouse raycasts,
+    useful since they're expensive. Assumes scripts
+    will call enable once and by extension disable once.
+    Accounts for multiple scripts.
+]]
+
+function InputLibrary:SetMouseRaycastActive(Enabled)
+    self.MouseRaycast = self.MouseRaycast + (Enabled and 1 or -1)
 end
 
 --[[
@@ -133,11 +166,25 @@ end
 
 function InputLibrary:UpdateMouse()
     local InputData = self.InputData
-    local XY = InputData.XY
-    local MouseRay = Novarine:Get("Graphics").Camera:ScreenPointToRay(XY.X + 0.5, XY.Y + 0.5)
-    local Hit, Pos = workspace:FindPartOnRayWithIgnoreList(Ray.new(MouseRay.Origin, MouseRay.Direction * InputData.Dist), InputData.Ignore)
-    InputData.Target = Hit
-    InputData.Pos = Pos
+
+    if (self.UseInbuiltMouse) then
+        local Mouse = Player:GetMouse()
+        InputData.Target = Mouse.Target
+        InputData.Pos = Mouse.Hit.Position
+
+        if (not Mouse.TargetFilter and self.IgnoreFolder) then
+            Mouse.TargetFilter = self.IgnoreFolder
+        end
+    else
+        local XY = InputData.XY
+        local MouseRay = Novarine:Get("Graphics").Camera:ScreenPointToRay(XY.X + 0.5, XY.Y + 0.5)
+
+        if (self.MouseRaycast > 0) then
+            local Hit, Pos = workspace:FindPartOnRayWithIgnoreList(Ray.new(MouseRay.Origin, MouseRay.Direction * InputData.Dist), InputData.Ignore)
+            InputData.Target = Hit
+            InputData.Pos = Pos
+        end
+    end
 end
 
 --[[
