@@ -5,17 +5,16 @@ local ObjectRegistry = {
 };
 
 --[[
-    Constructs an object over tagged
-    objects which can be obtained later.
+    Operates on a tag object and associates the
+    result (hopefully an object) with the Instance.
 ]]
-function ObjectRegistry:Register(Tag, Class, Operator)
+function ObjectRegistry:Register(Tag, Operator)
     assert(Tag)
-    assert(Class)
 
     local Mappings = self.Mappings
 
     local function Handle(Item)
-        Mappings[Item] = Operator(Class.New(Item))
+        Mappings[Item] = Operator(Item)
     end
 
     CollectionService:GetInstanceAddedSignal(Tag):Connect(Handle)
