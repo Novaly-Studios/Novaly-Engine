@@ -210,12 +210,6 @@ function Table.ApplyTemplate(Previous, Template)
     end
 end
 
-function Table.Capitalise(Array)
-    for Key, Value in pairs(Array) do
-        Array[Key:sub(1, 1):upper() .. Key:sub(2)] = Value
-    end
-end
-
 function Table.WaitFor(YieldFunction, Array, ...)
     for _, Value in pairs({...}) do
         local Next = Array[Value]
@@ -275,6 +269,34 @@ function Table.GetPath(Object, FetchItemsMethod, PathString)
     end
 
     return Object
+end
+
+function Table.Equals(Initial, Other)
+    if (Initial == nil or Other == nil) then
+        return false
+    end
+
+    for Key, Value in pairs(Initial) do
+        local OtherValue = Other[Key]
+
+        if (OtherValue == nil) then
+            return false
+        end
+
+        if (type(Value) ~= type(OtherValue)) then
+            return false
+        end
+
+        if (type(Value) == "table") then
+            if (not Table.Equals(Value, OtherValue)) then
+                return false
+            end
+        elseif (Value ~= OtherValue) then
+            return false
+        end
+    end
+
+    return true
 end
 
 return Table
