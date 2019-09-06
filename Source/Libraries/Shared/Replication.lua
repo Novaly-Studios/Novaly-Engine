@@ -3,8 +3,10 @@ local ObjectEngineRaw = Novarine:Get("ObjectEngineRaw")
 local RunService = Novarine:Get("RunService")
 local Communication = Novarine:Get("Communication")
 local Table = Novarine:Get("Table")
+local Event= Novarine:Get("Event")
 local Logging = Novarine:Get("Logging")
 local Players = Novarine:Get("Players")
+local CustomEnum = Novarine:Get("CustomEnum")
 
 local Replication = {
     Last = {};
@@ -15,8 +17,18 @@ local Replication = {
 }
 
 function Replication:Init()
+    CustomEnum:NewCollection("ReplicationState", {
+        "Change";
+        "Create";
+        "Destroy";
+    })
+
     if (RunService:IsClient()) then
-        Communication.BindRemoteFunction("OnReplicate", function(Path, Value)
+
+        -- Bound function specification: (Path, NewValue, OldValue, ReplicationStateEnum)
+        self.OnUpdate = Event.New()
+
+        Communication.BindRemoteFunction("OnReplicate", function(Path, Value, State)
 
             local Last = self.ReplicatedData
 
@@ -31,6 +43,8 @@ function Replication:Init()
 
                 Last = Next
             end
+
+            self.OnUpdate:Fire(Path, Last[Path[#Path]], Value, State)
 
             Last[Path[#Path]] = Value
             return true
@@ -53,6 +67,7 @@ function Replication:Init()
     coroutine.wrap(function()
         while wait(self.MonitorInterval) do
             self:Diff()
+            Communication.Broadcast("GetDataWhole", Replication.ReplicatedData.PlayerData or {})
         end
     end)()
 
@@ -62,17 +77,17 @@ function Replication:Init()
 
     local Handler = self.Handler
 
-    local function SendUpdate(_, Path)
---[[         Logging.Debug(1, "Replicated Data Update Path:")
-
-        for _, Key in pairs(Path) do
-            Logging.Debug(2, Key)
-        end ]]
-
+    -- TODO: record paths we've sent the player and assume the client has cached them so we don't resend the whole path repetitively
+    -- Maybe have client receive path ID, then send request to server for path if they don't know of that path
+    local function SendUpdate(Path, State)
+        -- Send modified path and new value to player
         for _, Player in pairs(Players:GetChildren()) do
             coroutine.wrap(function()
+                -- Wait until player has established that they will accept data
                 Table.WaitFor(wait, Communication.TransmissionReady, Player.Name)
-                while (not Communication.InvokeRemoteFunction("OnReplicate", Player, Path, Table.GetValueSequence(self.ReplicatedData, Path))) do
+
+                -- Keep trying to resend so long as player exists
+                while (Player and Player.Parent and not Communication.InvokeRemoteFunction("OnReplicate", Player, Path, Table.GetValueSequence(self.ReplicatedData, Path), State)) do
                     wait(1)
                     Logging.Debug(string.format("Player '%s' did not accept data. Retrying...", Player.Name))
                 end
@@ -80,9 +95,18 @@ function Replication:Init()
         end
     end
 
-    Handler:SetOnCreate(SendUpdate)
-    Handler:SetOnDestroy(SendUpdate)
-    Handler:SetOnDifferent(SendUpdate)
+    -- When changes are detected, call SendUpate
+    Handler:SetOnCreate(function(_, Path)
+        SendUpdate(Path, CustomEnum.ReplicationState.Create)
+    end)
+
+    Handler:SetOnDestroy(function(_, Path)
+        SendUpdate(Path, CustomEnum.ReplicationState.Destroy)
+    end)
+
+    Handler:SetOnDifferent(function(_, Path)
+        SendUpdate(Path, CustomEnum.ReplicationState.Change)
+    end)
 
     self.Loaded = true
 end

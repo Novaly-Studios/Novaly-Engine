@@ -78,6 +78,7 @@ function Server.PlayerDataManagement.LeaveSave(Player)
 
     local UserId = tostring(Player.UserId)
     Server.PlayerDataManagement.WaitForPlayerData(Player)
+    -- TODO: check if table
     local Stripped = Table.Clone(ReplicatedData.PlayerData[UserId]) --Replication.StripReplicatedData(PlayerData[UserId])
     local Serial = Server.PlayerDataManagement.RecursiveSerialise(Stripped)
 

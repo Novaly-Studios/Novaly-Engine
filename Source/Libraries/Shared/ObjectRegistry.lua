@@ -1,4 +1,6 @@
-local CollectionService = game:GetService("CollectionService")
+local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
+local CollectionService = Novarine:Get("CollectionService")
+local Logging = Novarine:Get("Logging")
 
 local ObjectRegistry = {
     Mappings = {};
@@ -13,14 +15,35 @@ function ObjectRegistry:Register(Tag, Operator)
 
     local Mappings = self.Mappings
 
-    local function Handle(Item)
-        Mappings[Item] = Operator(Item)
+    local function HandleRemoving(Item)
+        local Target = Mappings[Item]
+        assert(Target)
+
+        local DestroyMethod = Target.Destroy
+
+        if DestroyMethod then
+            Target:Destroy()
+            Logging.Debug(0, string.format("Instance '%s' and associated object successfully destroyed.", Item:GetFullName()))
+        else
+            warn(string.format("The object '%s' has no Destroy method!", Item:GetFullName()))
+        end
     end
 
-    CollectionService:GetInstanceAddedSignal(Tag):Connect(Handle)
+    local function HandleAdded(Item)
+        Mappings[Item] = Operator(Item)
+
+        Item.Parent.DescendantRemoving:Connect(function(Removing)
+            if (Removing == Item) then
+                HandleRemoving(Item)
+            end
+        end)
+    end
+
+    CollectionService:GetInstanceAddedSignal(Tag):Connect(HandleAdded)
+    --CollectionService:GetInstanceRemovedSignal(Tag):Connect(HandleRemoving)
 
     for _, Item in pairs(CollectionService:GetTagged(Tag)) do
-        Handle(Item)
+        HandleAdded(Item)
     end
 end
 
