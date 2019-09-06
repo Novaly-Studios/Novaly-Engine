@@ -21,6 +21,7 @@ local Static = {}
     - Sort1D
     - Keys1D
     - Values1D
+    - Range
 ]]
 
 --[[
@@ -515,6 +516,30 @@ function Static.Values1D(Table)
     end
 
     return Values
+end
+
+--[[
+    Gets a range of values from a numeric table.
+
+    @param Table The table to operate on.
+    @param From The beginning of the range.
+    @param To The end of the range.
+
+    @usage
+        local Items = {"One", "Two", "Three", "Four", "Five"}
+        local TwoToFour = Static.Range(Items, 2, 4)
+]]
+
+function Static.Range(Table, Start, End)
+    assert(Start <= End)
+
+    local Result = {}
+
+    for Index = Start, End do
+        Result[Index - Start] = Table[Index]
+    end
+
+    return Result
 end
 
 return Static
