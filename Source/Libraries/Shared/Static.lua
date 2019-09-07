@@ -2,9 +2,11 @@ local Static = {}
 
 --[[
     Directory:
-    - Map
-    - KMap
-    - Filter
+    - FilterNested
+    - MapNested
+    - Map1D
+    - KMap1D
+    - Filter1D
     - Reduce
     - Flatten
     - FlattenNumeric
@@ -13,7 +15,6 @@ local Static = {}
     - Fuse1D
     - FuseNumeric1D
     - FuseNested
-    - FuseNumericNested
     - Iterate1D
     - IterateNested
     - Copy1D
@@ -22,7 +23,94 @@ local Static = {}
     - Keys1D
     - Values1D
     - Range
+
+    Todo:
+    - NumericInsert
+    - NumericRemove
+    - Differential1D
+    - DifferentialNested
 ]]
+
+--[[
+    Operates on a nested structure and maps
+    it into another nested structure.
+
+    @param Target The nested structure to map.
+    @param Operator The function which operates on each endpoint (non-table value) in the nested structure.
+
+    @usage
+        local Items = {
+            Money = {
+                100, 200, 300
+            };
+            Stuff = 15;
+        }
+
+        local New = Static.MapNested(Items, function(Item)
+            return Item ^ 2
+        end)
+]]
+
+function Static.MapNested(Target, Operator)
+    local Result = {}
+
+    for Key, Value in pairs(Target) do
+        if (type(Value) == "table") then
+            Result[Key] = Static.MapNested(Value, Operator)
+        else
+            Result[Key] = Operator(Value)
+        end
+    end
+
+    return Result
+end
+
+--[[
+    Filters each end-point of a nested structure
+    and puts it into a resultant table.
+
+    @param Target The table to traverse.
+    @param Operator A function which determines whether the value should be inserted.
+    @param Descends Internal purposes only, don't pass anything for this
+
+    @usage
+        local Numbers = {
+            {1, 6, 7, 2};
+            Sub = {
+                80, 1098;
+                Another = {20, 109, 28}
+            };
+        }
+
+        local New = Static.FilterNested(Numbers, function(Number)
+            return (Number >= 20)
+        end)
+]]
+
+function Static.FilterNested(Target, Operator, Descends)
+    local Result = {}
+    local Count = 0 -- Should be better than O(log n) table size check
+
+    for _, Value in pairs(Target) do
+        if (type(Value) == "table") then
+            local Items, ItemCount = Static.FilterNested(Value, Operator, true)
+
+            for Index = 1, ItemCount do
+                Result[Count + Index] = Items[Index]
+            end
+
+            Count = Count + ItemCount
+        else
+            Count = Count + 1
+
+            if (Operator(Value)) then
+                Result[Count] = Value
+            end
+        end
+    end
+
+    return Result, Descends and Count or nil
+end
 
 --[[
     Operates on an input table and produces
@@ -38,7 +126,7 @@ local Static = {}
             ...
         }
 
-        local NewItems = Static.Map(Items, function(Item)
+        local NewItems = Static.Map1D(Items, function(Item)
             return {
                 Name = Item.Name;
                 Price = Items.Price * 2;
@@ -46,7 +134,7 @@ local Static = {}
         end)
 ]]
 
-function Static.Map(Input, Operator)
+function Static.Map1D(Input, Operator)
     local Result = {}
 
     for Key, Value in pairs(Input) do
@@ -70,7 +158,7 @@ end
             ...
         }
 
-        local NewItems = Static.Map(Items, function(Item)
+        local NewItems = Static.KMap1D(Items, function(Item)
             return Item.Name .. "|", {
                 Name = Item.Name;
                 Price = Items.Price * 2;
@@ -78,7 +166,7 @@ end
         end)
 ]]
 
-function Static.KMap(Input, Operator)
+function Static.KMap1D(Input, Operator)
     local Result = {}
 
     for _, Value in pairs(Input) do
@@ -102,12 +190,12 @@ end
             {X = 7, Y = 12};
             {X = 90, Y = 14};
         }
-        local Filtered = Static.Filter(Items, function(Object)
+        local Filtered = Static.Filter1D(Items, function(Object)
             return Object.Y >= 14
         end)
 ]]
 
-function Static.Filter(Input, Assessment)
+function Static.Filter1D(Input, Assessment)
     local Result = {}
     local Index = 1
 
@@ -131,12 +219,12 @@ end
 
     @usage
         local Numbers = {3, 4, 1, 9, 2}
-        local Result = Static.Reduce(Numbers, function(Current, Item)
+        local Result = Static.Reduce1D(Numbers, function(Current, Item)
             return Current + Item
         end, 0)
 ]]
 
-function Static.Reduce(Input, Operator, RunningValue)
+function Static.Reduce1D(Input, Operator, RunningValue)
     for Key, Value in pairs(Input) do
         RunningValue = Operator(RunningValue, Value, Key, Input)
     end
@@ -541,5 +629,10 @@ function Static.Range(Table, Start, End)
 
     return Result
 end
+
+-- Intuitive references
+Static.Map = Static.Map1D
+Static.KMap = Static.KMap1D
+Static.Filter = Static.Filter1D
 
 return Static
