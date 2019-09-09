@@ -20,6 +20,7 @@ local GUI = Novarine:Get("GUI")
 local Misc = Novarine:Get("Misc")
 local Math = Novarine:Get("Math")
 local Table = Novarine:Get("Table")
+local ObjectRegistry = Novarine:Get("ObjectRegistry")
 local SurfaceBillboard = Novarine:Get("SurfaceBillboard")
 local Lighting = Novarine:Get("Lighting")
 
@@ -323,6 +324,7 @@ function Graphics:Init()
         TransparentPartHandler:Add(Part)
     end)
 
+--[[
     CollectionService:GetInstanceAddedSignal(Graphics.Tags.SurfaceBillboard):Connect(function(Part)
         if (not Graphics.SurfaceBillboards[Part]) then
             Graphics.SurfaceBillboards[Part] = SurfaceBillboard.New(Part, Part.Parent, 0, CFrame.new())
@@ -339,7 +341,17 @@ function Graphics:Init()
 
     for _, Part in pairs(CollectionService:GetTagged(Graphics.Tags.SurfaceBillboard)) do
         Graphics.SurfaceBillboards[Part] = SurfaceBillboard.New(Part, Part.Parent, 0, CFrame.new())
-    end
+    end ]]
+
+    ObjectRegistry:Register("Alternate:SurfaceBillboard", function(Item)
+        local Object = SurfaceBillboard.New(Item, Item.Parent, 150, CFrame.new(0, 5.5, 0))
+        Graphics:RegisterSurfaceBillboard(Object)
+        Graphics.SurfaceBillboards[Item] = Object
+        return Object
+    end, function(Item, Object)
+        Object:Destroy()
+        Graphics.SurfaceBillboards[Item] = nil
+    end)
 
     for _, Part in pairs(CollectionService:GetTagged(Graphics.Tags.TransparentPart)) do
         TransparentPartHandler:Add(Part)

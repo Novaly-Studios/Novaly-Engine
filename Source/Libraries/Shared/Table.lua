@@ -137,6 +137,32 @@ function Table.GetValueSequence(Arr, Keys)
     return Arr
 end
 
+function Table.IsMixed(Table) -- Determines if a table has both numerical and (hash or ref) keys
+    local Types = {}
+    local Count = 0
+
+    for Key, Value in pairs(Table) do
+        local KeyType = type(Key)
+
+        if (not Types[KeyType]) then
+            Count = Count + 1
+            Types[KeyType] = true
+        end
+
+        if (Types["number"] and Count > 1) then
+            return true
+        end
+
+        if (type(Value) == "table") then
+            if (Table.IsMixed(Value)) then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
 function Table.SetValueSequence(Arr, Keys, Val)
     local Len = #Keys
     for Key = 1, Len - 1 do
@@ -210,7 +236,49 @@ function Table.ApplyTemplate(Previous, Template)
     end
 end
 
-function Table.WaitFor(YieldFunction, Array, ...)
+function Table.TryIndex(Target, ...)
+    assert(Target)
+
+    local Value = Target
+    local Args = {...}
+
+    for _, Key in pairs(Args) do
+        Value = Value[Key]
+
+        if (Value == nil) then
+            return nil, Key
+        end
+    end
+
+    return Value, Args[#Args]
+end
+
+function Table.WaitFor(YieldFunction, Target, ...)
+
+    if (YieldFunction == wait) then
+        YieldFunction = function()
+            wait(0.05)
+        end
+    end
+
+    local Value, LastKey = Table.TryIndex(Target, ...)
+    local MissCount = 0
+
+    while (not Value) do
+        MissCount = MissCount + 1
+
+        if (MissCount == 60) then
+            warn(string.format("Possible endless wait on '%s' for property '%s'.", tostring(Target), tostring(LastKey)))
+        end
+
+        YieldFunction()
+        Value, LastKey = Table.TryIndex(Target, ...)
+    end
+
+    return Value
+end
+
+function Table.WaitForNoReIndex(YieldFunction, Array, ...)
     for _, Value in pairs({...}) do
         local Next = Array[Value]
         local Warned = false

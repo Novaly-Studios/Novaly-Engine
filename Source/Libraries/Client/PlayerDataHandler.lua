@@ -1,7 +1,6 @@
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
 local Players = Novarine:Get("Players")
 local Replication = Novarine:Get("Replication")
-local ReplicatedData = Replication.ReplicatedData
 
 if (Novarine:Get("RunService"):IsServer()) then
     return false
@@ -12,23 +11,46 @@ local Client                    = {
     PlayerData                  = {};
 }
 
+function Client.PlayerDataManagement.WaitForPlayerDataCallback(Player, Callback)
+    assert(type(Callback) == "function")
+    Replication:WaitFor("PlayerData", tostring(Player.UserId), Callback)
+end
+
+function Client.PlayerDataManagement.WaitForMyDataCallback(Callback)
+    assert(type(Callback) == "function")
+    Replication:WaitFor("PlayerData", tostring(Players.LocalPlayer.UserId), Callback)
+end
+
+function Client.PlayerDataManagement.WaitForPlayerDataAttribute(Player, ...)
+    Replication:WaitFor("PlayerData", tostring(Player.UserId), ...)
+end
+
+function Client.PlayerDataManagement.WaitForMyDataAttribute(...)
+    Replication:WaitFor("PlayerData", tostring(Players.LocalPlayer.UserId), ...)
+end
+
+function Client.PlayerDataManagement.GetAttribute(Player, ...)
+    return Replication:Get("PlayerData", tostring(Player.UserId), ...)
+end
+
+function Client.PlayerDataManagement.GetMyAttribute(...)
+    return Replication:Get("PlayerData", tostring(Players.LocalPlayer.UserId), ...)
+end
+
 function Client.PlayerDataManagement.WaitForPlayerData(Player)
-    local Data = ReplicatedData.PlayerData[tostring(Player.UserId)]
-
-    while (not Data) do
-        Data = ReplicatedData.PlayerData[tostring(Player.UserId)]
-        wait(0.05)
-    end
-
-    return Data
+    return Replication:WaitForYield("PlayerData", tostring(Player.UserId))
 end
 
 function Client.PlayerDataManagement.WaitForMyData()
-    while (not Client.PlayerDataManagement.MyData) do
-        wait(0.05)
-    end
+    return Replication:WaitForYield("PlayerData", tostring(Players.LocalPlayer.UserId))
+end
 
-    return Client.PlayerDataManagement.MyData
+function Client.PlayerDataManagement.WaitForPlayerDataAttribute(Player, ...)
+    return Replication:WaitForYield("PlayerData", tostring(Player.UserId), ...)
+end
+
+function Client.PlayerDataManagement.WaitForMyDataAttribute(...)
+    return Replication:WaitForYield("PlayerData", tostring(Players.LocalPlayer.UserId), ...)
 end
 
 function Client.Init()
@@ -40,35 +62,20 @@ function Client.Init()
         local LocalPlayer = Players.LocalPlayer
         Client.Player = LocalPlayer
 
-        while (not ReplicatedData.PlayerData) do
+        while (not Replication.ReplicatedData.PlayerData) do
             wait(0.05)
         end
 
         coroutine.wrap(function()
             while wait(0.1) do
-                Client.PlayerDataManagement.PlayerData = ReplicatedData.PlayerData
-                Client.PlayerData = ReplicatedData.PlayerData
+                Client.PlayerDataManagement.PlayerData = Replication.ReplicatedData.PlayerData
+                Client.PlayerData = Replication.ReplicatedData.PlayerData
             end
         end)()
 
         Client.PlayerDataManagement.WaitForPlayerData(LocalPlayer)
-        Client.PlayerDataManagement.MyData = ReplicatedData.PlayerData[tostring(LocalPlayer.UserId)]
+        Client.PlayerDataManagement.MyData = Replication.ReplicatedData.PlayerData[tostring(LocalPlayer.UserId)]
     end)()
 end
-
-local function WaitForItem(Player, Key)
-
-    local UserId = tostring(Player.UserId)
-    local Result = ReplicatedData.PlayerData[UserId][Key]
-
-    while (Result == nil) do
-        wait()
-        Result = ReplicatedData.PlayerData[UserId][Key]
-    end
-
-    return Result
-end
-
-Client.PlayerDataManagement.WaitForItem = WaitForItem
 
 return Client

@@ -10,7 +10,7 @@ local ObjectRegistry = {
     Operates on a tag object and associates the
     result (hopefully an object) with the Instance.
 ]]
-function ObjectRegistry:Register(Tag, Operator)
+function ObjectRegistry:Register(Tag, Operator, Destructor)
     assert(Tag)
 
     local Mappings = self.Mappings
@@ -19,13 +19,17 @@ function ObjectRegistry:Register(Tag, Operator)
         local Target = Mappings[Item]
         assert(Target)
 
-        local DestroyMethod = Target.Destroy
-
-        if DestroyMethod then
-            Target:Destroy()
-            Logging.Debug(0, string.format("Instance '%s' and associated object successfully destroyed.", Item:GetFullName()))
+        if Destructor then
+            Destructor(Item, Target)
         else
-            warn(string.format("The object '%s' has no Destroy method!", Item:GetFullName()))
+            local DestroyMethod = Target.Destroy
+
+            if DestroyMethod then
+                Target:Destroy()
+                Logging.Debug(0, string.format("Instance '%s' and associated object successfully destroyed.", Item:GetFullName()))
+            else
+                warn(string.format("The object '%s' has no Destroy method!", Item:GetFullName()))
+            end
         end
     end
 

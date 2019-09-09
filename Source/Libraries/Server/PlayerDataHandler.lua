@@ -21,16 +21,25 @@ function Server.PlayerDataManagement.WaitForDataStore()
     Table.WaitFor(wait, Server, "PlayerDataStore")
 end
 
+function Server.PlayerDataManagement.WaitForPlayerDataCallback(Player, Callback)
+    assert(type(Callback) == "function")
+    Replication:WaitFor("PlayerData", tostring(Player.UserId), Callback)
+end
+
+function Server.PlayerDataManagement.WaitForPlayerDataAttribute(Player, ...)
+    Replication:WaitFor("PlayerData", tostring(Player.UserId), ...)
+end
+
+function Server.PlayerDataManagement.GetAttribute(Player, ...)
+    return Replication:Get("PlayerData", tostring(Player.UserId), ...)
+end
+
 function Server.PlayerDataManagement.WaitForPlayerData(Player)
-    Server.PlayerDataManagement.WaitForDataStore()
-    local TargetData = ReplicatedData.PlayerData[tostring(Player.UserId)]
+    return Replication:WaitForYield("PlayerData", tostring(Player.UserId))
+end
 
-    while (not TargetData) do
-        wait(0.05)
-        TargetData = ReplicatedData.PlayerData[tostring(Player.UserId)]
-    end
-
-    return TargetData
+function Server.PlayerDataManagement.WaitForPlayerDataAttribute(Player, ...)
+    return Replication:WaitForYield("PlayerData", tostring(Player.UserId), ...)
 end
 
 function Server.PlayerDataManagement.RecursiveSerialise(Data)
@@ -64,30 +73,27 @@ function Server.PlayerDataManagement.RecursiveBuild(Data)
 end
 
 function Server.PlayerDataManagement.Save(Player)
-
-    Server.PlayerDataManagement.WaitForPlayerData(Player)
-
-    local UserId = tostring(Player.UserId)
-    local Stripped = Table.Clone(ReplicatedData.PlayerData[UserId]) --Replication.StripReplicatedData(PlayerData[UserId]) -- No longer necessary
-    local Serial = Server.PlayerDataManagement.RecursiveSerialise(Stripped)
-
-    Server.PlayerDataStore:SetAsync(UserId, Serial)
+    Server.PlayerDataManagement.WaitForPlayerDataCallback(Player, function(PlayerData)
+        Server.PlayerDataStore:SetAsync(Player.UserId, Server.PlayerDataManagement.RecursiveSerialise(Table.Clone(PlayerData)))
+    end)
 end
 
 function Server.PlayerDataManagement.LeaveSave(Player)
+    local ID = tostring(Player.UserId)
 
-    local UserId = tostring(Player.UserId)
-    Server.PlayerDataManagement.WaitForPlayerData(Player)
-    -- TODO: check if table
-    local Stripped = Table.Clone(ReplicatedData.PlayerData[UserId]) --Replication.StripReplicatedData(PlayerData[UserId])
-    local Serial = Server.PlayerDataManagement.RecursiveSerialise(Stripped)
+    Server.PlayerDataManagement.WaitForPlayerDataCallback(Player, function(PlayerData)
+        wait(6.5)
 
-    wait(6.5)
+        ypcall(function()
+            Server.PlayerDataStore:SetAsync(Player.UserId, Server.PlayerDataManagement.RecursiveSerialise(Table.Clone(PlayerData)))
+        end)
+
+        ReplicatedData.PlayerData[ID] = nil
+    end)
 
     --[[Server.PlayerDataStore:UpdateAsync(UserId, function()
         return Serial
     end)]]
-    Server.PlayerDataStore:SetAsync(UserId, Serial)
 end
 
 function Server.Init()
@@ -159,20 +165,5 @@ function Server.Init()
         coroutine.wrap(Handle)(Item)
     end
 end
-
-local function WaitForItem(Player, Key)
-
-    local UserId = tostring(Player.UserId)
-    local Result = Server.PlayerData[UserId][Key]
-
-    while (Result == nil) do
-        wait()
-        Result = Server.PlayerData[UserId][Key]
-    end
-
-    return Result
-end
-
-Server.PlayerDataManagement.WaitForItem = WaitForItem
 
 return Server
