@@ -46,7 +46,14 @@ function Replication:Init()
                 local Key = Path[Index]
                 local Next = Last[Key]
 
-                if (not Next) then
+                if (Value == nil and not Next) then
+                    -- Setting things deeper in the path to nil after container is already nullified can cause inconsistency
+                    -- as it creates tables along the way. Thus, since we are not setting anything, we don't need to construct
+                    -- as we go along
+                    break
+                elseif (not Next) then
+                    -- Construct tree as we go along based on path
+                    -- All points except the endpoint will require a table created
                     Next = {}
                     Last[Key] = Next
                 end
