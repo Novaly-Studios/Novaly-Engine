@@ -173,20 +173,17 @@ function Graphics:UpdateBillboards()
 
     local SurfaceBillboards = Graphics.SurfaceBillboards
 
-    for Key, Value in pairs(SurfaceBillboards) do
+    for _, Value in pairs(SurfaceBillboards) do
         if (Value.Part.Parent) then
             Value:Update()
-        else
-            Value:Destroy()
-            SurfaceBillboards[Key] = nil
         end
     end
 end
-
+--[[ 
 function Graphics:RegisterSurfaceBillboard(Item)
     table.insert(self.SurfaceBillboards, Item)
 end
-
+ ]]
 function Graphics:HandlePartTransparency(Item)
     if Item then
         local SettingsFolder = Item:FindFirstChild("Settings")
@@ -324,33 +321,14 @@ function Graphics:Init()
         TransparentPartHandler:Add(Part)
     end)
 
---[[
-    CollectionService:GetInstanceAddedSignal(Graphics.Tags.SurfaceBillboard):Connect(function(Part)
-        if (not Graphics.SurfaceBillboards[Part]) then
-            Graphics.SurfaceBillboards[Part] = SurfaceBillboard.New(Part, Part.Parent, 0, CFrame.new())
-        end
-    end)
-
-    CollectionService:GetInstanceRemovedSignal(Graphics.Tags.SurfaceBillboard):Connect(function(Part)
-        local Target = Graphics.SurfaceBillboards[Part]
-        if Target then
-            Target:Destroy()
-            Graphics.SurfaceBillboards[Part] = nil
-        end
-    end)
-
-    for _, Part in pairs(CollectionService:GetTagged(Graphics.Tags.SurfaceBillboard)) do
-        Graphics.SurfaceBillboards[Part] = SurfaceBillboard.New(Part, Part.Parent, 0, CFrame.new())
-    end ]]
-
     ObjectRegistry:Register("Alternate:SurfaceBillboard", function(Item)
         local Object = SurfaceBillboard.New(Item, Item.Parent, 150, CFrame.new(0, 5.5, 0))
-        Graphics:RegisterSurfaceBillboard(Object)
         Graphics.SurfaceBillboards[Item] = Object
         return Object
     end, function(Item, Object)
-        Object:Destroy()
+        assert(Graphics.SurfaceBillboards[Item])
         Graphics.SurfaceBillboards[Item] = nil
+        Object:Destroy()
     end)
 
     for _, Part in pairs(CollectionService:GetTagged(Graphics.Tags.TransparentPart)) do

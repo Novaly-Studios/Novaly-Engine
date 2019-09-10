@@ -137,32 +137,6 @@ function Table.GetValueSequence(Arr, Keys)
     return Arr
 end
 
-function Table.IsMixed(Table) -- Determines if a table has both numerical and (hash or ref) keys
-    local Types = {}
-    local Count = 0
-
-    for Key, Value in pairs(Table) do
-        local KeyType = type(Key)
-
-        if (not Types[KeyType]) then
-            Count = Count + 1
-            Types[KeyType] = true
-        end
-
-        if (Types["number"] and Count > 1) then
-            return true
-        end
-
-        if (type(Value) == "table") then
-            if (Table.IsMixed(Value)) then
-                return true
-            end
-        end
-    end
-
-    return false
-end
-
 function Table.SetValueSequence(Arr, Keys, Val)
     local Len = #Keys
     for Key = 1, Len - 1 do
@@ -366,5 +340,43 @@ function Table.Equals(Initial, Other)
 
     return true
 end
+
+local function Mixed(Table, Path) -- Determines if a table has both numerical and (hash or ref) keys
+    local Types = {}
+    local Count = 0
+    Path = Path or {}
+
+    for Key, Value in pairs(Table) do
+        local KeyType = type(Key)
+
+        if (not Types[KeyType]) then
+            Count = Count + 1
+            Types[KeyType] = true
+        end
+
+        if (Types["number"] and Count > 1) then
+            for Key in pairs(Table) do
+                if (type(Key) == "number") then
+                    Path[#Path + 1] = Key
+                    break
+                end
+            end
+
+            return true, Path
+        end
+
+        if (type(Value) == "table") then
+            Path[#Path + 1] = Key
+
+            if (Mixed(Value, Path)) then
+                return true, Path
+            end
+        end
+    end
+
+    return false, Path
+end
+
+Table.Mixed = Mixed -- Don't change, for some reason recursive call mucks up otherwise
 
 return Table

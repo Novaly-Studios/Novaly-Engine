@@ -74,7 +74,7 @@ end
 
 function Server.PlayerDataManagement.Save(Player)
     Server.PlayerDataManagement.WaitForPlayerDataCallback(Player, function(PlayerData)
-        Server.PlayerDataStore:SetAsync(Player.UserId, Server.PlayerDataManagement.RecursiveSerialise(Table.Clone(PlayerData)))
+        Server.PlayerDataStore:SetAsync(tostring(Player.UserId), Server.PlayerDataManagement.RecursiveSerialise(Table.Clone(PlayerData)))
     end)
 end
 
@@ -85,7 +85,7 @@ function Server.PlayerDataManagement.LeaveSave(Player)
         wait(6.5)
 
         ypcall(function()
-            Server.PlayerDataStore:SetAsync(Player.UserId, Server.PlayerDataManagement.RecursiveSerialise(Table.Clone(PlayerData)))
+            Server.PlayerDataStore:SetAsync(tostring(Player.UserId), Server.PlayerDataManagement.RecursiveSerialise(Table.Clone(PlayerData)))
         end)
 
         ReplicatedData.PlayerData[ID] = nil

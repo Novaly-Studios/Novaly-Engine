@@ -35,16 +35,10 @@ function ObjectRegistry:Register(Tag, Operator, Destructor)
 
     local function HandleAdded(Item)
         Mappings[Item] = Operator(Item)
-
-        Item.Parent.DescendantRemoving:Connect(function(Removing)
-            if (Removing == Item) then
-                HandleRemoving(Item)
-            end
-        end)
     end
 
     CollectionService:GetInstanceAddedSignal(Tag):Connect(HandleAdded)
-    --CollectionService:GetInstanceRemovedSignal(Tag):Connect(HandleRemoving)
+    CollectionService:GetInstanceRemovedSignal(Tag):Connect(HandleRemoving)
 
     for _, Item in pairs(CollectionService:GetTagged(Tag)) do
         HandleAdded(Item)

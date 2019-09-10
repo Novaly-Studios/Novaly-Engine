@@ -63,13 +63,6 @@ function Replication:Init()
 
             self.OnUpdate:Fire(Path, Last[Path[#Path]], Value, State)
 
-            if (type(Value) ~= "userdata") then
-                print("-------------------------------")
-                Table.PrintTable(Path)
-                print("Val = ", Value)
-                print("-------------------------------")
-            end
-
             Last[Path[#Path]] = Value
             return true
         end)
@@ -80,9 +73,6 @@ function Replication:Init()
             if Finished then
                 self.Loaded = true
                 Logging.Debug(0, "Loaded replicated data!")
-                print("Got -->>")
-                Table.PrintTable(self.ReplicatedData)
-                print("<<--")
                 return
             end
 
@@ -108,7 +98,17 @@ function Replication:Init()
     coroutine.wrap(function()
         while wait(self.MonitorInterval) do
             self:Diff()
-            Communication.Broadcast("GetDataWhole", Replication.ReplicatedData.PlayerData or {})
+
+            local Mixed, Path = Table.Mixed(self.ReplicatedData)
+
+            if Mixed then
+                warn(string.format("FATAL: TABLE HAS MIXED KEYS // ReplicatedData/%s", Static.Reduce1D(Path, function(Current, Append)
+                    return Current .. "/" .. Append
+                end, "")))
+                break
+            end
+
+            ypcall(function() Communication.Broadcast("GetDataWhole", Replication.ReplicatedData or {}) end)
         end
     end)()
 
@@ -125,39 +125,10 @@ function Replication:Init()
             end
         end
 
-        print("Sent to " .. Player.Name .. " ----->")
-        Table.PrintTable(self.ReplicatedData)
-        print("<-----")
         Communication.FireRemoteEvent("GetReplicatedData", Player, self.ReplicatedData)
     end)
 
     local Handler = self.Handler
-
-    local function IsMixed(Table) -- Determines if a table has both numerical and (hash or ref) keys
-        local Types = {}
-        local Count = 0
-
-        for Key, Value in pairs(Table) do
-            local KeyType = type(Key)
-
-            if (not Types[KeyType]) then
-                Count = Count + 1
-                Types[KeyType] = true
-            end
-
-            if (Types["number"] and Count > 1) then
-                return true
-            end
-
-            if (type(Value) == "table") then
-                if (IsMixed(Value)) then
-                    return true
-                end
-            end
-        end
-
-        return false
-    end
 
     -- TODO: record paths we've sent the player and assume the client has cached them so we don't resend the whole path repetitively
     -- Maybe have client receive path ID, then send request to server for path if they don't know of that path
@@ -168,21 +139,13 @@ function Replication:Init()
                 -- Index the table
                 local Value = Table.TryIndex(self.ReplicatedData, unpack(Path)) -- TryIndex because some values can be nullified too
 
-                if (type(Value) == "table" and --[[ Table. ]]IsMixed(Value)) then
-                    warn(string.format("FATAL: TABLE HAS MIXED KEYS // ReplicatedData/%s", Static.Reduce1D(Path, function(Current, Append)
-                        return Current .. "/" .. Append
-                    end, "")))
-                else
-                    print("Waiting for ok to send")
-                    -- Wait until player has established that they will accept data
-                    Table.WaitFor(wait, self.ReplicationReady, Player)
-                    print("OK to send!")
+                -- Wait until player has established that they will accept data
+                Table.WaitFor(wait, self.ReplicationReady, Player)
 
-                    -- Keep trying to resend so long as player exists
-                    while (Player and Player.Parent and not Communication.InvokeRemoteFunction("OnReplicate", Player, Path, Value, State)) do
-                        wait(1)
-                        Logging.Debug(string.format("Player '%s' did not accept data. Retrying...", Player.Name))
-                    end
+                -- Keep trying to resend so long as player exists
+                while (Player and Player.Parent and not Communication.InvokeRemoteFunction("OnReplicate", Player, Path, Value, State)) do
+                    wait(1)
+                    Logging.Debug(string.format("Player '%s' did not accept data. Retrying...", Player.Name))
                 end
             end)()
         end
