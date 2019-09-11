@@ -19,12 +19,23 @@ local function StandardModifier(Item, Value)
 end
 
 Replication.Modifiers.Color3 = StandardModifier
+Replication.Modifiers.Vector3 = StandardModifier
+Replication.Modifiers.CFrame = StandardModifier
+Replication.Modifiers.boolean = StandardModifier
 Replication.Modifiers.number = StandardModifier
 Replication.Modifiers.string = StandardModifier
 Replication.Modifiers.table = function() end
 
 function Replication.Constructions.Color3()
     return Instance.new("Color3Value")
+end
+
+function Replication.Constructions:Vector3()
+    return Instance.new("Vector3Value")
+end
+
+function Replication.Constructions:CFrame()
+    return Instance.new("CFrameValue")
 end
 
 function Replication.Constructions:number()
@@ -35,15 +46,20 @@ function Replication.Constructions:string()
     return Instance.new("StringValue")
 end
 
+function Replication.Constructions:boolean()
+    return Instance.new("BoolValue")
+end
+
 function Replication:Init()
     local ReplicationFolder = ReplicatedStorage:FindFirstChild("ReplicationFolder") or Instance.new("Folder")
     ReplicationFolder.Name = "ReplicationFolder"
     ReplicationFolder.Parent = ReplicatedStorage
 
     coroutine.wrap(function()
-        while wait(1/10) do
+        while wait(1/5) do
             if (ReplicationFolder.Parent) then
                 self:Update(ReplicationFolder, self.ReplicatedData)
+                ypcall(function() Novarine:Get("Communication").Broadcast("GetDataWhole", Replication.ReplicatedData or {}) end)
             else
                 break
             end

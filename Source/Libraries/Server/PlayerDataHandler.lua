@@ -23,23 +23,23 @@ end
 
 function Server.PlayerDataManagement.WaitForPlayerDataCallback(Player, Callback)
     assert(type(Callback) == "function")
-    Replication:WaitFor("PlayerData", tostring(Player.UserId), Callback)
+    Replication:WaitFor("PlayerData", Player.UserId, Callback)
 end
 
 function Server.PlayerDataManagement.WaitForPlayerDataAttribute(Player, ...)
-    Replication:WaitFor("PlayerData", tostring(Player.UserId), ...)
+    Replication:WaitFor("PlayerData", Player.UserId, ...)
 end
 
 function Server.PlayerDataManagement.GetAttribute(Player, ...)
-    return Replication:Get("PlayerData", tostring(Player.UserId), ...)
+    return Replication:Get("PlayerData", Player.UserId, ...)
 end
 
 function Server.PlayerDataManagement.WaitForPlayerData(Player)
-    return Replication:WaitForYield("PlayerData", tostring(Player.UserId))
+    return Replication:WaitForYield("PlayerData", Player.UserId)
 end
 
 function Server.PlayerDataManagement.WaitForPlayerDataAttribute(Player, ...)
-    return Replication:WaitForYield("PlayerData", tostring(Player.UserId), ...)
+    return Replication:WaitForYield("PlayerData", Player.UserId, ...)
 end
 
 function Server.PlayerDataManagement.RecursiveSerialise(Data)
@@ -74,24 +74,24 @@ end
 
 function Server.PlayerDataManagement.Save(Player)
     Server.PlayerDataManagement.WaitForPlayerDataCallback(Player, function(PlayerData)
-        Server.PlayerDataStore:SetAsync(tostring(Player.UserId), Server.PlayerDataManagement.RecursiveSerialise(Table.Clone(PlayerData)))
+        Server.PlayerDataStore:SetAsync(Player.UserId, Server.PlayerDataManagement.RecursiveSerialise(Table.Clone(PlayerData)))
     end)
 end
 
 function Server.PlayerDataManagement.LeaveSave(Player)
-    local ID = tostring(Player.UserId)
+    local ID = Player.UserId
 
     Server.PlayerDataManagement.WaitForPlayerDataCallback(Player, function(PlayerData)
         wait(6.5)
 
         ypcall(function()
-            Server.PlayerDataStore:SetAsync(tostring(Player.UserId), Server.PlayerDataManagement.RecursiveSerialise(Table.Clone(PlayerData)))
+            Server.PlayerDataStore:SetAsync(Player.UserId, Server.PlayerDataManagement.RecursiveSerialise(Table.Clone(PlayerData)))
         end)
 
         ReplicatedData.PlayerData[ID] = nil
     end)
 
-    --[[Server.PlayerDataStore:UpdateAsync(UserId, function()
+    --[[Server.PlayerDataStore:UpdateAsync(UserId function()
         return Serial
     end)]]
 end
@@ -102,18 +102,22 @@ function Server.Init()
     ReplicatedData.PlayerData = Server.PlayerData
 
     local function Handle(Player)
+        print("WRYYYYYYYYYYYYYYYYYYYYYYYYY", Player)
         Server.PlayerDataManagement.WaitForDataStore()
+        print(0)
 
         local Success, Data = pcall(function()
-            return Server.PlayerDataStore:GetAsync(tostring(Player.UserId))
+            return Server.PlayerDataStore:GetAsync(Player.UserId)
         end)
 
         while (Success == false) do
             Success, Data = pcall(function()
-                return Server.PlayerDataStore:GetAsync(tostring(Player.UserId))
+                return Server.PlayerDataStore:GetAsync(Player.UserId)
             end)
             wait(Configuration.pPlayerDataRetry)
         end
+
+        print(1)
 
         Data = Data or {}
         Server.PlayerDataManagement.RecursiveBuild(Data)
@@ -122,7 +126,10 @@ function Server.Init()
             wait(0.05)
         end
 
-        ReplicatedData.PlayerData[tostring(Player.UserId)] = Data
+        print(2)
+
+        ReplicatedData.PlayerData[Player.UserId] = Data
+        Logging.Debug(0, string.format("Loaded player data in PlayerDataHandler for '%s'.", Player.Name))
 
         while wait(Configuration.pSaveInterval) do
             if not Player.Parent then break end

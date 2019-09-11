@@ -13,44 +13,44 @@ local Client                    = {
 
 function Client.PlayerDataManagement.WaitForPlayerDataCallback(Player, Callback)
     assert(type(Callback) == "function")
-    Replication:WaitFor("PlayerData", tostring(Player.UserId), Callback)
+    Replication:WaitFor("PlayerData", Player.UserId, Callback)
 end
 
 function Client.PlayerDataManagement.WaitForMyDataCallback(Callback)
     assert(type(Callback) == "function")
-    Replication:WaitFor("PlayerData", tostring(Players.LocalPlayer.UserId), Callback)
+    Replication:WaitFor("PlayerData", Players.LocalPlayer.UserId, Callback)
 end
 
 function Client.PlayerDataManagement.WaitForPlayerDataAttribute(Player, ...)
-    Replication:WaitFor("PlayerData", tostring(Player.UserId), ...)
+    Replication:WaitFor("PlayerData", Player.UserId, ...)
 end
 
 function Client.PlayerDataManagement.WaitForMyDataAttribute(...)
-    Replication:WaitFor("PlayerData", tostring(Players.LocalPlayer.UserId), ...)
+    Replication:WaitFor("PlayerData", Players.LocalPlayer.UserId, ...)
 end
 
 function Client.PlayerDataManagement.GetAttribute(Player, ...)
-    return Replication:Get("PlayerData", tostring(Player.UserId), ...)
+    return Replication:Get("PlayerData", Player.UserId, ...)
 end
 
 function Client.PlayerDataManagement.GetMyAttribute(...)
-    return Replication:Get("PlayerData", tostring(Players.LocalPlayer.UserId), ...)
+    return Replication:Get("PlayerData", Players.LocalPlayer.UserId, ...)
 end
 
 function Client.PlayerDataManagement.WaitForPlayerData(Player)
-    return Replication:WaitForYield("PlayerData", tostring(Player.UserId))
+    return Replication:WaitForYield("PlayerData", Player.UserId)
 end
 
 function Client.PlayerDataManagement.WaitForMyData()
-    return Replication:WaitForYield("PlayerData", tostring(Players.LocalPlayer.UserId))
+    return Replication:WaitForYield("PlayerData", Players.LocalPlayer.UserId)
 end
 
 function Client.PlayerDataManagement.WaitForPlayerDataAttribute(Player, ...)
-    return Replication:WaitForYield("PlayerData", tostring(Player.UserId), ...)
+    return Replication:WaitForYield("PlayerData", Player.UserId, ...)
 end
 
 function Client.PlayerDataManagement.WaitForMyDataAttribute(...)
-    return Replication:WaitForYield("PlayerData", tostring(Players.LocalPlayer.UserId), ...)
+    return Replication:WaitForYield("PlayerData", Players.LocalPlayer.UserId, ...)
 end
 
 function Client.Init()
@@ -74,7 +74,7 @@ function Client.Init()
         end)()
 
         Client.PlayerDataManagement.WaitForPlayerData(LocalPlayer)
-        Client.PlayerDataManagement.MyData = Replication.ReplicatedData.PlayerData[tostring(LocalPlayer.UserId)]
+        Client.PlayerDataManagement.MyData = Replication.ReplicatedData.PlayerData[LocalPlayer.UserId]
     end)()
 end
 

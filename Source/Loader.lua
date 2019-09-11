@@ -3,6 +3,7 @@ local Engine                = {}
 local Loaded                = {}
 
 local PreLoad = { -- Modules which must load before others are required e.g. to subscribe to events
+    "Communication";
     "Replication";
 }
 local Services = {
