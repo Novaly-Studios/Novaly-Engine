@@ -23,15 +23,16 @@ local Indicator             = Server and "Server" or "Client"
 local Libraries             = Parent:FindFirstChild("Libraries")
 local Classes               = Parent:FindFirstChild("Classes")
 
-local GameClient            = ReplicatedFirst:FindFirstChild("GAME_INDICATOR_CLIENT", true).Parent
-local GameShared            = ReplicatedFirst:FindFirstChild("GAME_INDICATOR_SHARED", true).Parent
+local GameClient            = ReplicatedFirst:FindFirstChild("GAME_INDICATOR_CLIENT", true)
+GameClient                  = (GameClient and GameClient.Parent or ReplicatedFirst)
+
+local GameShared            = ReplicatedFirst:FindFirstChild("GAME_INDICATOR_SHARED", true)
+GameShared                  = (GameShared and GameShared.Parent or ReplicatedFirst)
+
 local GameServer            = ServerScriptService:FindFirstChild("GAME_INDICATOR_SERVER", true)
+GameServer                  = (GameServer and GameServer.Parent or ServerScriptService)
 
 local DebugMode             = (ReplicatedFirst:FindFirstChild("DEBUG_MODE") and ReplicatedFirst.DEBUG_MODE.Value or false)
-
-if GameServer then
-    GameServer = GameServer.Parent
-end
 
 Engine["ClientFolder"] = GameClient
 Engine["SharedFolder"] = GameShared
