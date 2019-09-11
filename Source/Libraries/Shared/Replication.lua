@@ -119,6 +119,7 @@ function Replication:Init()
                 Logging.Debug(0, "Player data fully synced.")
                 Communication.FireRemoteEvent("GetReplicatedData", Player, nil, true)
                 self.ReplicationReady[Player] = true
+
                 return
             else
                 Logging.Debug(0, string.format("Player data maligned for player %s, retrying...", Player.Name))
@@ -140,7 +141,7 @@ function Replication:Init()
                 local Value = Table.TryIndex(self.ReplicatedData, unpack(Path)) -- TryIndex because some values can be nullified too
 
                 -- Wait until player has established that they will accept data
-                Table.WaitFor(wait, self.ReplicationReady, Player)
+                Table.WaitFor(function() wait(0.5) end, self.ReplicationReady, Player)
 
                 -- Keep trying to resend so long as player exists
                 while (Player and Player.Parent and not Communication.InvokeRemoteFunction("OnReplicate", Player, Path, Value, State)) do

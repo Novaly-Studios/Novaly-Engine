@@ -243,6 +243,7 @@ function Table.WaitFor(YieldFunction, Target, ...)
 
         if (MissCount == 60) then
             warn(string.format("Possible endless wait on '%s' for property '%s'.", tostring(Target), tostring(LastKey)))
+            warn(debug.traceback())
         end
 
         YieldFunction()
