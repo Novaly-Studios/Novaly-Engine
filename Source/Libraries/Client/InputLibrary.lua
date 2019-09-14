@@ -80,9 +80,9 @@ function InputLibrary.Init()
             Down:Fire()
         elseif (InputType == Enum.UserInputType.MouseButton2) then
             if (not GameProcessed) then
-                DownRightClick:Fire()
+                NGPDownRightClick:Fire()
             end
-            NGPDownRightClick:Fire()
+            DownRightClick:Fire()
         end
     end)
 
