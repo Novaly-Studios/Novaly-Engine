@@ -102,4 +102,61 @@ function String.NumberComma(Input)
     return Formatted
 end
 
+function String.LevenshteinDistance(Initial, Other, InitialLength, OtherLength)
+
+    local Matrix = {}
+
+    -- Set first column to incremental values
+    for Iter1 = 1, InitialLength do
+        for Iter2 = 1, OtherLength do
+            Matrix[Iter1] = Matrix[Iter1] or {}
+            Matrix[Iter1][Iter2] = Iter1
+        end
+    end
+
+    -- Set first row to incremental values
+    for Iter2 = 1, OtherLength do
+        Matrix[1][Iter2] = Iter2
+    end
+
+    for Iter2 = 2, OtherLength do
+        for Iter1 = 2, InitialLength do
+            local Cost = 1
+
+            if (Initial:sub(Iter2, Iter2) == Other:sub(Iter1, Iter1)) then
+                Cost = 0
+            end
+
+            Matrix[Iter1][Iter2] = math.min(
+                Matrix[Iter1 - 1][Iter2] + 1,
+                Matrix[Iter1][Iter2 - 1] + 1,
+                Matrix[Iter1 - 1][Iter2 - 1] + Cost
+            )
+        end
+    end
+
+    return Matrix[InitialLength][OtherLength]
+end
+
+function String.ApproximateSearch(Set, Text)
+    local Matches = {}
+
+    for _, Term in pairs(Set) do
+        table.insert(Matches, {String.LevenshteinDistance(Text:lower(), Term:lower(), #Text, #Term), Term})
+    end
+
+    table.sort(Matches, function(Initial, Other)
+        return Initial[1] < Other[1]
+    end)
+
+    local Result = {}
+
+    for Index, Item in pairs(Matches) do
+        Result[Index] = Item[2]
+    end
+
+    -- Table of likelihoods where index 1 is most likely and index #Result is least likely
+    return Result, Result[1]
+end
+
 return String
