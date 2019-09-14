@@ -111,9 +111,9 @@ function InputLibrary.Init()
             Up:Fire()
         elseif (InputType == Enum.UserInputType.MouseButton2) then
             if (not GameProcessed) then
-                UpRightClick:Fire()
+                NGPUpRightClick:Fire()
             end
-            NGPUpRightClick:Fire()
+            UpRightClick:Fire()
         end
     end)
 
