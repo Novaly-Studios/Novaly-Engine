@@ -138,6 +138,29 @@ function String.LevenshteinDistance(Initial, Other, InitialLength, OtherLength)
     return Matrix[InitialLength][OtherLength]
 end
 
+--[[
+    Uses edit distance to find the closest rough
+    search match for some text against a set of
+    terms.
+
+    @param Set An array of acceptable terms.
+    @param Text The search term.
+
+    @todo Add optional delay to prevent lag.
+
+    @usage
+        local Terms = {
+            "Apple";
+            "Bread";
+            "Phone";
+            "Cow";
+            "Pen";
+        }
+        local SearchFor = "bapple"
+        local Results, MostLikely = String.ApproximateSearch(Terms, SearchFor)
+        print(MostLikely)
+]]
+
 function String.ApproximateSearch(Set, Text)
     local Matches = {}
 
