@@ -86,11 +86,30 @@ end
     @param Tabs Internal; the indent accumulator.
 ]]
 
-function Table.PrintTable(Item, Tabs)
+function Table.PrintTable(Item)
+    print(Table.ToString(Item))
+end
+
+function Table.DeepCount(Data)
+    local Result = 0
+
+    for _, Value in pairs(Data) do
+        if (type(Value) == "table") then
+            Result = Result + Table.DeepCount(Value)
+        end
+        Result = Result + 1
+    end
+
+    return Result
+end
+
+function Table.ToString(Item, Tabs)
+
+    local Result = ""
 
     Tabs = Tabs or (function()
-        print("BaseTable = {")
-        return "\t"
+        Result = Result .. "BaseTable = {\n"
+        return (" "):rep(4)
     end)()
 
     for Key, Value in pairs(Item) do
@@ -98,25 +117,25 @@ function Table.PrintTable(Item, Tabs)
         local ValueType = type(Value)
         local KeyType = type(Key)
 
-        if (KeyType == "number") then
-            Key = ""
-        else
-            Key = Key .. " = "
-        end
+        local ReportString = (KeyType ~= "number")
+        local Join = ReportString and "\"" or ""
+        Key = "[" .. Join .. Key .. Join .. "]" .. " = "
 
         if (ValueType == "table") then
-            print(Tabs .. Key .. "{")
-            Table.PrintTable(Value, Tabs .. "\t")
-            print(Tabs .. "};")
+            Result = Result .. Tabs .. Key .. "{\n"
+            Result = Result .. Table.ToString(Value, Tabs .. (" "):rep(4))
+            Result = Result .. Tabs .. "};\n"
         else
             local Encapsulation = (ValueType == "string" and string.format("\"%s\"", Value) or tostring(Value))
-            print(Tabs .. Key .. Encapsulation .. ";")
+            Result = Result .. Tabs .. Key .. Encapsulation .. ";\n"
         end
     end
 
-    if (Tabs == "\t") then
-        print("};")
+    if (Tabs == (" "):rep(4)) then
+        Result = Result .. "};\n"
     end
+
+    return Result
 end
 
 function Table.Clone(Array)

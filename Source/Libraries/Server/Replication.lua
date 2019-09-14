@@ -21,6 +21,7 @@ end
 Replication.Modifiers.Color3 = StandardModifier
 Replication.Modifiers.Vector3 = StandardModifier
 Replication.Modifiers.CFrame = StandardModifier
+Replication.Modifiers.Instance = StandardModifier
 Replication.Modifiers.boolean = StandardModifier
 Replication.Modifiers.number = StandardModifier
 Replication.Modifiers.string = StandardModifier
@@ -36,6 +37,10 @@ end
 
 function Replication.Constructions:CFrame()
     return Instance.new("CFrameValue")
+end
+
+function Replication.Constructions:Instance()
+    return Instance.new("ObjectValue")
 end
 
 function Replication.Constructions:number()
@@ -56,13 +61,14 @@ function Replication:Init()
     ReplicationFolder.Parent = ReplicatedStorage
 
     coroutine.wrap(function()
-        while wait(1/5) do
+        while true do
             if (ReplicationFolder.Parent) then
                 self:Update(ReplicationFolder, self.ReplicatedData)
-                ypcall(function() Novarine:Get("Communication").Broadcast("GetDataWhole", Replication.ReplicatedData or {}) end)
             else
                 break
             end
+
+            wait(1/5)
         end
     end)()
 end
@@ -123,7 +129,7 @@ function Replication:Update(InstanceRoot, VirtualRoot)
     for _, Value in pairs(InstanceRoot:GetChildren()) do
         local Key = (tonumber(Value.Name) or Value.Name) -- Account for numerical indices
 
-        if (not VirtualRoot[Key]) then
+        if (VirtualRoot[Key] == nil) then
             Value:Destroy()
         end
     end

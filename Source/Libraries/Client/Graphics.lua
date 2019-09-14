@@ -321,15 +321,24 @@ function Graphics:Init()
         TransparentPartHandler:Add(Part)
     end)
 
-    ObjectRegistry:Register("Alternate:SurfaceBillboard", function(Item)
+    local function SurfaceBillboardCreate(Item)
+        if (not Item.Parent:IsA("BasePart")) then
+            return nil
+        end
+
         local Object = SurfaceBillboard.New(Item, Item.Parent, 150, CFrame.new(0, 5.5, 0))
         Graphics.SurfaceBillboards[Item] = Object
         return Object
-    end, function(Item, Object)
+    end
+
+    local function SurfaceBillboardDestroy(Item, Object)
         assert(Graphics.SurfaceBillboards[Item])
         Graphics.SurfaceBillboards[Item] = nil
         Object:Destroy()
-    end)
+    end
+
+    ObjectRegistry:Register("Graphics:SurfaceBillboard", SurfaceBillboardCreate, SurfaceBillboardDestroy)
+    ObjectRegistry:Register("Alternate:SurfaceBillboard", SurfaceBillboardCreate, SurfaceBillboardDestroy)
 
     for _, Part in pairs(CollectionService:GetTagged(Graphics.Tags.TransparentPart)) do
         TransparentPartHandler:Add(Part)

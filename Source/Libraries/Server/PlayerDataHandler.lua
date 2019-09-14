@@ -102,9 +102,7 @@ function Server.Init()
     ReplicatedData.PlayerData = Server.PlayerData
 
     local function Handle(Player)
-        print("WRYYYYYYYYYYYYYYYYYYYYYYYYY", Player)
         Server.PlayerDataManagement.WaitForDataStore()
-        print(0)
 
         local Success, Data = pcall(function()
             return Server.PlayerDataStore:GetAsync(Player.UserId)
@@ -117,16 +115,12 @@ function Server.Init()
             wait(Configuration.pPlayerDataRetry)
         end
 
-        print(1)
-
         Data = Data or {}
         Server.PlayerDataManagement.RecursiveBuild(Data)
 
         while (not Communication.TransmissionReady[Player.Name]) do
             wait(0.05)
         end
-
-        print(2)
 
         ReplicatedData.PlayerData[Player.UserId] = Data
         Logging.Debug(0, string.format("Loaded player data in PlayerDataHandler for '%s'.", Player.Name))
