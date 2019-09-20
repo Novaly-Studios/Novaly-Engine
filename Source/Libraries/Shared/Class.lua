@@ -7,6 +7,7 @@
 ]]
 
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
+local Static = Novarine:Get("Static")
 local Table = Novarine:Get("Table")
 
 local Class = {
@@ -149,6 +150,60 @@ function Class:IsEquivalentType(Subject, CheckSuperclass)
     end
 
     return false
+end
+
+--[[
+    @function Class.DeclarativeState
+
+    Constructs a class maker which supports methods
+    with a declarative state. Can make some scenarios
+    easier than regular classes, but are less performant.
+
+    @usage
+        local Player = Class:DeclarativeState()
+
+        function Player:AddMoney(Money)
+            self:Update({
+                Money = (self.State.Money or 0) + Money;
+            })
+        end
+
+        function Player:SetName(Name)
+            self:Update({
+                Name = Name;
+            })
+        end
+
+        local Player1 = Player.New({
+            Name = "Unspecified";
+            Money = 0;
+        })
+        Player1:SetName("Player1")
+        Player1:AddMoney(12)
+        Player1:AddMoney(5)
+]]
+
+function Class:DeclarativeState()
+    local BaseClass = {}
+
+    function BaseClass:Update(State)
+        self.State = Static.FuseNested(State, self.State)
+    end
+
+    local function Constructor(State)
+        return setmetatable({
+            State = State or {};
+        }, {__index = BaseClass})
+    end
+
+    for _, Value in pairs(self.ConstructorNames) do
+        BaseClass[Value] = Constructor
+    end
+
+    BaseClass.New = Constructor
+    BaseClass.Create = Constructor
+
+    return BaseClass
 end
 
 --[[

@@ -147,6 +147,7 @@ end
     @param Text The search term.
 
     @todo Add optional delay to prevent lag.
+    @return MatchTable, MostLikely, AverageSimilarity, MinSimilarity, MaxSimilarity
 
     @usage
         local Terms = {
@@ -157,29 +158,37 @@ end
             "Pen";
         }
         local SearchFor = "bapple"
-        local Results, MostLikely = String.ApproximateSearch(Terms, SearchFor)
+        local Results, MostLikely, Average = String.ApproximateSearch(Terms, SearchFor)
         print(MostLikely)
 ]]
 
 function String.ApproximateSearch(Set, Text)
     local Matches = {}
+    local SimilaritySum = 0
+    local MatchCount = 0
+    local MinSimilarity = math.huge
+    local MaxSimilarity = 0
 
     for _, Term in pairs(Set) do
-        table.insert(Matches, {String.LevenshteinDistance(Text:lower(), Term:lower(), #Text, #Term), Term})
+        local Similarity = String.LevenshteinDistance(Text:lower(), Term:lower(), #Text, #Term)
+        MinSimilarity = math.min(Similarity, MinSimilarity)
+        MaxSimilarity = math.max(Similarity, MaxSimilarity)
+        MatchCount = MatchCount + 1
+
+        Matches[MatchCount] = {
+            Similarity = Similarity;
+            Text = Term;
+        }
+
+        SimilaritySum = SimilaritySum + Similarity
     end
 
     table.sort(Matches, function(Initial, Other)
-        return Initial[1] < Other[1]
+        return Initial.Similarity < Other.Similarity
     end)
 
-    local Result = {}
-
-    for Index, Item in pairs(Matches) do
-        Result[Index] = Item[2]
-    end
-
     -- Table of likelihoods where index 1 is most likely and index #Result is least likely
-    return Result, Result[1]
+    return Matches, Matches[1].Text, SimilaritySum / MatchCount, MinSimilarity, MaxSimilarity
 end
 
 return String
