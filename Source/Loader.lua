@@ -1,6 +1,7 @@
 local Loader                = {}
 local Engine                = {}
 local Loaded                = {}
+local ExtraLocations        = {}
 
 local PreLoad = { -- Modules which must load before others are required e.g. to subscribe to events
     "Communication";
@@ -62,6 +63,17 @@ function Loader:Get(Name, Tabs)
         GameShared:FindFirstChild(Name, true)
     )
 
+    if (not Module) then
+        for _, Location in pairs(ExtraLocations) do
+            local Found = Location:FindFirstChild(Name, true)
+
+            if Found then
+                Module = Found
+                break
+            end
+        end
+    end
+
     assert(Module, string.format("No utility or class found with name '%s'!", Name))
     assert(Module.ClassName == "ModuleScript", string.format("'%s' is not a ModuleScript!", Name))
 
@@ -102,9 +114,14 @@ function Loader:Add(Name, Item)
     Engine[Name] = Item
 end
 
+function Loader:AddExtraLocation(Location)
+    ExtraLocations[Location.Name] = Location
+end
+
 function Loader:Init()
     if (self.Initialised) then
-        error("Novarine already initialised!")
+        warn("Novarine already initialised!")
+        return
     end
 
     if Server then

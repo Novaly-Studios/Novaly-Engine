@@ -1,0 +1,28 @@
+{
+	"name": "Novaly-Engine",
+	"tree": {
+		"$className": "DataModel",
+		"ReplicatedFirst": {
+			"$className": "ReplicatedFirst",
+			"Novarine": {
+				"$path": "Source"
+			}
+		},
+		"ServerScriptService": {
+			"$className": "ServerScriptService",
+			"NovarineServerTest": {
+				"$path": "ServerScriptService"
+			}
+		},
+		"StarterPlayer": {
+			"$className": "StarterPlayer",
+			"StarterPlayerScripts": {
+        "$className": "StarterPlayerScripts",
+				"$ignoreUnknownInstances": true,
+				"NovarineClientTest": {
+					"$path": "StarterPlayer"
+				}
+			}
+		}
+	}
+}

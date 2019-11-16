@@ -134,7 +134,7 @@ function Server.Init()
     coroutine.wrap(function()
 
         local function TryGet()
-            if (game.PlaceId <= 0) then
+            if (game.PlaceId <= 0 or (ReplicatedStorage:FindFirstChild("DataStoreFake") and ReplicatedStorage.DataStoreFake.Value == true)) then
                 -- Player data manager running in test mode.
                 Server.PlayerDataStore = {
                     GetAsync = function(Self, Key)
