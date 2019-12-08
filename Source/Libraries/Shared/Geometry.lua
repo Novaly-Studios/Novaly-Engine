@@ -30,8 +30,8 @@ local Geometry = {}
 
 function Geometry:PointIsWithinPolygon(Point, Polygon)
 
-    assert(typeof(Point) == "Vector2")
-    assert(typeof(Polygon) == "table")
+--[[     assert(typeof(Point) == "Vector2")
+    assert(typeof(Polygon) == "table") ]]
 
     local Result = false
     local Prev = #Polygon
