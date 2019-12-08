@@ -147,6 +147,8 @@ end
 
     @todo Recursive definitions.
     @todo Integration with class library.
+
+    DEPRECATED in favour of Typing library.
 ]]
 
 function DataStructures:GetType(Var)
