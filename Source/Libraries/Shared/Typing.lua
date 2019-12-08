@@ -2,6 +2,7 @@ local GetType = typeof or type
 
 local TypeChecker = {
     Types = {};
+    Checks = {};
 };
 
 function TypeChecker:GetCheck(...)
@@ -68,6 +69,14 @@ function TypeChecker:Equivalent(Value)
     })
 end
 
+function TypeChecker:Condition(Type, Checker)
+    return setmetatable({_TYPE = Type, _CONDITION = Checker}, {
+        __tostring = function()
+            return "Equals(" .. tostring(Checker) .. ")"
+        end;
+    })
+end
+
 function TypeChecker:IsType(Object, TypeDefinition)
 
     -- Optional and nil is acceptable
@@ -85,6 +94,11 @@ function TypeChecker:IsType(Object, TypeDefinition)
         return (Object == TypeDefinition._EQUIVALENT)
     end
 
+    -- Conditions for values and type definitions
+    if (TypeDefinition._CONDITION) then
+        return (self:IsType(Object, TypeDefinition._TYPE) and TypeDefinition._CONDITION(Object, TypeDefinition))
+    end
+
     -- Check primitives at roots of object are equivalent
     if (TypeDefinition._PRIMITIVE) then
         return GetType(Object) == TypeDefinition._PRIMITIVE
@@ -92,7 +106,7 @@ function TypeChecker:IsType(Object, TypeDefinition)
 
     -- Type could be one of many (type A or type B ... or type X)
     if (TypeDefinition._ONE_OF) then
-        for Key, SubItem in pairs(TypeDefinition._ONE_OF) do
+        for _, SubItem in pairs(TypeDefinition._ONE_OF) do
             if (self:IsType(Object, SubItem)) then
                 return true
             end
@@ -182,7 +196,7 @@ TypeChecker:AddDefinition("GenericVector2", {
 
 --[[
 
-Example:
+--Example:
 
 TypeChecker:AddDefinition("Test", {
     One = TypeChecker.Types.Number;
@@ -203,7 +217,9 @@ local Check = TypeChecker:GetCheck(
         TypeChecker.Types.String,
         TypeChecker.Types.Boolean
     ),
-    TypeChecker:Equivalent(10)
+    TypeChecker:Condition(TypeChecker.Types.Number, function(Value)
+        return Value > 10
+    end)
 )
 
 print(Check(1, "knsgkgdnklgd", function() end, {
@@ -213,6 +229,8 @@ print(Check(1, "knsgkgdnklgd", function() end, {
         Four = 4;
         Five = 5;
     };
-}, true))
+}, true, 11))
 
 ]]
+
+return TypeChecker
