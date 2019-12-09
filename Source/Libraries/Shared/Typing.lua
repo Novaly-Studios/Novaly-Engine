@@ -27,6 +27,7 @@ end
 
 function TypeChecker:AddDefinition(Name, Definition)
     assert(GetType(Definition) == "table")
+    assert(not self[Name])
 
     setmetatable(Definition, {
         __tostring = function()
@@ -35,6 +36,7 @@ function TypeChecker:AddDefinition(Name, Definition)
     })
 
     self.Types[Name] = Definition
+    self[Name] = Definition
 end
 
 function TypeChecker:Primitive(Name)
@@ -69,6 +71,14 @@ function TypeChecker:Equivalent(Value)
     })
 end
 
+function TypeChecker:Any()
+    return setmetatable({_NOT_NULL = true}, {
+        __tostring = function()
+            return "Any()"
+        end;
+    })
+end
+
 function TypeChecker:Condition(Type, Checker)
     return setmetatable({_TYPE = Type, _CONDITION = Checker}, {
         __tostring = function()
@@ -79,12 +89,17 @@ end
 
 function TypeChecker:IsType(Object, TypeDefinition)
 
-    -- Optional and nil is acceptable
+    -- Object is not null
+    if (TypeDefinition._NOT_NULL) then
+        return (Object ~= nil)
+    end
+
+    -- Optional type and nil type are acceptable
     if (TypeDefinition._OPTIONAL and Object == nil) then
         return true
     end
 
-    -- If optional value was not nill, ensure types are equivalent
+    -- If optional value was not nil, ensure types are equivalent
     if (TypeDefinition._OPTIONAL) then
         return self:IsType(Object, TypeDefinition._OPTIONAL)
     end
