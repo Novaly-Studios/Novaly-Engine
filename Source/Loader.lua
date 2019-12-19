@@ -99,6 +99,70 @@ function Loader:Get(Name, Tabs)
             else
                 warn(Reported)
             end
+
+            if (Got.Tests) then
+                delay(5 + (RunService:IsServer() and 3 or 0), function()
+                    -- Delay so the initial debugging output is hopefully completed by then
+                    -- Also server waits longer
+                    local Tests = {}
+                    local Cleanups = {}
+
+                    if (Got.Tests.Init) then
+                        Got.Tests.Init()
+                    end
+
+                    for TestName, Test in pairs(Got.Tests) do
+                        if (TestName ~= "Init" and TestName ~= "Finish") then
+                            Tests[TestName] = false
+
+                            coroutine.wrap(Test)(function()
+                                Tests[TestName] = string.format("Novarine - Test Passed: '%s'", TestName)
+                            end, function(Reason)
+                                Tests[TestName] = true
+                                error(string.format("Novarine - Test Failed: '%s', Reason: '%s'", TestName, Reason))
+                            end, function(CleanupHandler)
+                                Cleanups[TestName] = CleanupHandler
+                            end)
+                        end
+                    end
+
+                    local function IsSatisfied()
+                        for _, Item in pairs(Tests) do
+                            if (not Item) then
+                                return false
+                            end
+                        end
+
+                        return true
+                    end
+
+                    coroutine.wrap(function()
+                        while (not IsSatisfied()) do
+                            RunService.Stepped:Wait()
+                        end
+
+                        print(string.format("Novarine: Test Batch for '%s' {", Name))
+
+                        for TestName, Item in pairs(Tests) do
+                            if (Item ~= true) then
+                                print("    " .. Item)
+                            end
+
+                            local Cleanup = Cleanups[TestName]
+
+                            if Cleanup then
+                                coroutine.wrap(Cleanup)()
+                            end
+                        end
+
+                        print("}")
+
+                        if (Got.Tests.Finish) then
+                            Got.Tests.Finish()
+                        end
+                    end)()
+                end)
+            end
         end
 
         Loaded[Name] = true
