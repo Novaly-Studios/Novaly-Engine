@@ -26,14 +26,24 @@ function CollectiveObjectRegistry:Register(Tag, Components, CreationHandler, Des
 
     local function HandleObjectCreation(Object)
         local InstanceComponents = {}
-        self.InstanceToComponentCollection[Object] = InstanceComponents
+        local HadValidComponent = false
 
         for _, Component in pairs(Components) do
             SetComponentToInstaceCollectionValue(Object, Component, Object)
 
             local ComponentObject = CreationHandler(Component, Object)
-            ComponentObject._COMPONENT_REF = Component -- TODO: use BaseComponentRefs in singleton instead to assoc component object to class
-            InstanceComponents[Component] = ComponentObject
+
+            if ComponentObject then
+                ComponentObject._COMPONENT_REF = Component -- TODO: use BaseComponentRefs in singleton instead to assoc component object to class
+                InstanceComponents[Component] = ComponentObject
+                HadValidComponent = true
+            else
+                warn("Component returned from creation handler is nil!\n" .. debug.traceback())
+            end
+        end
+
+        if HadValidComponent then
+            self.InstanceToComponentCollection[Object] = InstanceComponents
         end
     end
 
