@@ -89,9 +89,9 @@ function Loader:Get(Name, Tabs)
 
         if DebugMode then
             local Diff = tick() - Time
-            local Nanoseconds = Diff * 1e+9
+            local Microseconds = Diff * 1e+6
             local Milliseconds = Diff * 1e+3
-            local Reported = string.format(("\t"):rep(Tabs or 0) .. "Novarine - Load '%s' : %s (%.2f ns / %.8f ms)", Name, Indicator, Nanoseconds, Milliseconds)
+            local Reported = string.format(("\t"):rep(Tabs or 0) .. "Novarine - Load '%s' : %s (%.2f µs / %.8f ms)", Name, Indicator, Microseconds, Milliseconds)
 
             -- Warn for slow modules
             if (Milliseconds < 16) then

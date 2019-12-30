@@ -8,13 +8,14 @@ local CollectiveObjectRegistry = {
     Warn = true;
 };
 
-function CollectiveObjectRegistry:Register(Tag, Components, CreationHandler, DestructionHandler)
+function CollectiveObjectRegistry:Register(Tag, Components, CreationHandler, DestructionHandler, AncestorTarget)
 
     if (self.Registered[Tag]) then
         warn(string.format("Tag already registered: '%s'", Tag))
         return
     end
 
+    AncestorTarget = AncestorTarget or game
     CreationHandler = CreationHandler or self.StandardConstruct
     DestructionHandler = DestructionHandler or self.StandardDestroy
 
@@ -25,6 +26,10 @@ function CollectiveObjectRegistry:Register(Tag, Components, CreationHandler, Des
     end
 
     local function HandleObjectCreation(Object)
+        if (not AncestorTarget:IsAncestorOf(Object)) then
+            return
+        end
+
         local InstanceComponents = {}
         local HadValidComponent = false
 
@@ -48,6 +53,10 @@ function CollectiveObjectRegistry:Register(Tag, Components, CreationHandler, Des
     end
 
     local function HandleObjectDestruction(Object)
+        if (not AncestorTarget:IsAncestorOf(Object)) then
+            return
+        end
+
         local InstanceComponents = self.InstanceToComponentCollection[Object]
 
         for _, ComponentObject in pairs(InstanceComponents) do
