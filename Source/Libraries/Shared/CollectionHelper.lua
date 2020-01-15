@@ -10,7 +10,7 @@ local CollectionService = Novarine:Get("CollectionService")
     @todo GetAncestorWithTag method
 ]]
 
-local CollectionHelper = {}
+local CollectionHelper = {Cache = {}, DescendantCache = {}}
 
 --[[
     @function CollectionHelper.HasTags
@@ -122,6 +122,69 @@ function CollectionHelper:FindFirstDescendantWithTag(Root, ...)
             return Object
         end
     end
+end
+
+function CollectionHelper:FindFirstDescendantWithTagPerformanceCached(Root, Tag)
+    local Cache = self.Cache
+    local ForThis = Cache[Root]
+
+    if ForThis then
+        local ForThisTag = ForThis[Tag]
+
+        if ForThisTag then
+            return ForThisTag
+        end
+    else
+        Cache[Root] = {}
+    end
+
+    for _, Object in pairs(Root:GetDescendants()) do
+        if (CollectionService:HasTag(Object, Tag)) then
+            Cache[Root][Tag] = Object
+
+            local Connection; Connection = Object.Parent.ChildRemoved:Connect(function(Child)
+                if (Child == Object) then
+                    Cache[Root][Tag] = nil
+                end
+
+                Connection:Disconnect()
+            end)
+
+            return Object
+        end
+    end
+end
+
+function CollectionHelper:GetDescendantsWithTagPerformanceCached(Root, Tag)
+    local DescendantCache = self.DescendantCache
+    local ForThis = DescendantCache[Root]
+
+    if ForThis then
+        local ForThisTag = ForThis[Tag]
+
+        if ForThisTag then
+            return ForThisTag
+        end
+    else
+        DescendantCache[Root] = {}
+        DescendantCache[Root][Tag] = {}
+    end
+
+    for _, Object in pairs(Root:GetDescendants()) do
+        if (CollectionService:HasTag(Object, Tag)) then
+            local Connection; Connection = Object.Parent.ChildRemoved:Connect(function(Child)
+                if (Child == Object) then
+                    DescendantCache[Root][Tag] = nil
+                end
+
+                Connection:Disconnect()
+            end)
+
+            table.insert(DescendantCache[Root][Tag], Object)
+        end
+    end
+
+    return DescendantCache[Root][Tag]
 end
 
 --[[

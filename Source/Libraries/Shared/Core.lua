@@ -9,6 +9,7 @@
 
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
 local RunService = Novarine:Get("RunService")
+local Async = Novarine:Get("Async")
 
 local Core = {}
 
@@ -348,7 +349,7 @@ end
 ]]
 
 function Core.Sub(Func, ...)
-    return coroutine.wrap(Func)(...)
+    return Async.Wrap(Func)(...)
 end
 
 --[[

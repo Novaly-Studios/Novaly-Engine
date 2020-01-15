@@ -8,6 +8,8 @@ local CollectiveObjectRegistry = {
     Warn = true;
 };
 
+-- @todo Test for applying multiple components, since we just fixed that bug.
+
 function CollectiveObjectRegistry:Register(Tag, Components, CreationHandler, DestructionHandler, AncestorTarget)
 
     if (self.Registered[Tag]) then
@@ -30,7 +32,7 @@ function CollectiveObjectRegistry:Register(Tag, Components, CreationHandler, Des
             return
         end
 
-        local InstanceComponents = {}
+        local InstanceComponents = self.InstanceToComponentCollection[Object] or {}
         local HadValidComponent = false
 
         for _, Component in pairs(Components) do
@@ -42,8 +44,6 @@ function CollectiveObjectRegistry:Register(Tag, Components, CreationHandler, Des
                 ComponentObject._COMPONENT_REF = Component -- TODO: use BaseComponentRefs in singleton instead to assoc component object to class
                 InstanceComponents[Component] = ComponentObject
                 HadValidComponent = true
-            else
-                warn("Component returned from creation handler is nil!\n" .. debug.traceback())
             end
         end
 
@@ -89,6 +89,18 @@ end
 
 function CollectiveObjectRegistry:GetInstances(ComponentClass)
     return self.ComponentToInstanceCollection[ComponentClass]
+end
+
+function CollectiveObjectRegistry:GetComponentFromDescendant(Object, ComponentClass)
+    while Object do
+        local Component = self:GetComponent(Object, ComponentClass)
+
+        if Component then
+            return Component
+        end
+
+        Object = Object.Parent
+    end
 end
 
 -- Constructors and destructors
@@ -289,6 +301,66 @@ function CollectiveObjectRegistry.Tests.TestGetComponentCleansUp(Accept, Fail)
 
     if (CollectiveObjectRegistry:GetComponent(TestModel, TestClass2)) then
         Fail("did not clean up for second item")
+    end
+
+    Accept()
+end
+
+function CollectiveObjectRegistry.Tests.TestGetComponentFromDescendant(Accept, Fail, OnCleanup)
+
+    local function GetTestClass()
+        local TestClass = {}
+        TestClass.__index = TestClass
+
+        function TestClass.New()
+            return setmetatable({}, TestClass)
+        end
+
+        return TestClass
+    end
+
+    local TestTag = "Test5"
+    local TestClass1 = GetTestClass()
+    local TestClass2 = GetTestClass()
+
+    CollectiveObjectRegistry:Register(TestTag, {TestClass1, TestClass2})
+
+    local TestModel = Instance.new("Model")
+    CollectionService:AddTag(TestModel, TestTag)
+    TestModel.Parent = game:GetService("Workspace")
+
+    local SubTestModel = Instance.new("Model")
+    SubTestModel.Parent = TestModel
+
+    local SubSubTestModel = Instance.new("Model")
+    SubSubTestModel.Parent = TestModel
+
+    OnCleanup(function()
+        TestModel:Destroy()
+    end)
+
+    if (not CollectiveObjectRegistry:GetComponentFromDescendant(TestModel, TestClass1)) then
+        Fail("not inclusive for first object")
+    end
+
+    if (not CollectiveObjectRegistry:GetComponentFromDescendant(TestModel, TestClass2)) then
+        Fail("not inclusive for second object")
+    end
+
+    if (not CollectiveObjectRegistry:GetComponentFromDescendant(SubTestModel, TestClass1)) then
+        Fail("did not get first object in sub-model")
+    end
+
+    if (not CollectiveObjectRegistry:GetComponentFromDescendant(SubSubTestModel, TestClass2)) then
+        Fail("did not get second object in sub-model")
+    end
+
+    if (not CollectiveObjectRegistry:GetComponentFromDescendant(SubSubTestModel, TestClass1)) then
+        Fail("did not get first object in sub-sub-model")
+    end
+
+    if (not CollectiveObjectRegistry:GetComponentFromDescendant(SubTestModel, TestClass2)) then
+        Fail("did not get second object in sub-sub-model")
     end
 
     Accept()

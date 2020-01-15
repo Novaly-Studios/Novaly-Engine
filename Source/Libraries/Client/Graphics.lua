@@ -299,7 +299,7 @@ function Graphics:Init()
         TransparentPartHandler:Clean(Clean, PartIters)
     end)
 
-    coroutine.wrap(function()
+    Async.Wrap(function()
         while wait(1/15) do
             Graphics:DetectPlayer()
             for _, Object in pairs(Graphics.SurfaceBillboards) do

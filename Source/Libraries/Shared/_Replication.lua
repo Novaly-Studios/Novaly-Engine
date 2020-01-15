@@ -8,6 +8,7 @@ local Logging = Novarine:Get("Logging")
 local Players = Novarine:Get("Players")
 local CustomEnum = Novarine:Get("CustomEnum")
 local Static = Novarine:Get("Static")
+local Async = Novarine:Get("Async")
 
 local Replication = {
     Last = {};
@@ -95,7 +96,7 @@ function Replication:Init()
     end
 
     -- On Server
-    coroutine.wrap(function()
+    Async.Wrap(function()
         while wait(self.MonitorInterval) do
             self:Diff()
 
@@ -136,7 +137,7 @@ function Replication:Init()
     local function SendUpdate(Path, State)
         -- Send modified path and new value to player
         for _, Player in pairs(Players:GetChildren()) do
-            coroutine.wrap(function()
+            Async.Wrap(function()
                 -- Index the table
                 local Value = Table.TryIndex(self.ReplicatedData, unpack(Path)) -- TryIndex because some values can be nullified too
 
@@ -174,7 +175,7 @@ function Replication:WaitFor(...)
     assert(type(Callback) == "function")
     Args[#Args] = nil
 
-    coroutine.wrap(function()
+    Async.Wrap(function()
         Callback(Table.WaitFor(wait, Replication, "ReplicatedData", unpack(Args)))
     end)()
 end

@@ -1,4 +1,5 @@
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
+local Async = Novarine:Get("Async")
 local Class = Novarine:Get("Class")
 local Core = Novarine:Get("Core")
 local SteppedWait = Core.SteppedWait
@@ -46,7 +47,7 @@ end
 
 function Event:Fire(...)
     for _, Handler in pairs(self.Handlers) do
-        coroutine.wrap(Handler)(...)
+        Async.Wrap(Handler)(...)
     end
 end
 

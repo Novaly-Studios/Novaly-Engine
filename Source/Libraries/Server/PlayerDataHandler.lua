@@ -8,6 +8,7 @@ local DataStructures = Novarine:Get("DataStructures")
 local DataStoreService = Novarine:Get("DataStoreService")
 local ReplicatedStorage = Novarine:Get("ReplicatedStorage")
 local Logging = Novarine:Get("Logging")
+local Async = Novarine:Get("Async")
 
 local ReplicatedData = Replication.ReplicatedData
 
@@ -131,7 +132,7 @@ function Server.Init()
         end
     end
 
-    coroutine.wrap(function()
+    Async.Wrap(function()
 
         local function TryGet()
             if (game.PlaceId <= 0 or (ReplicatedStorage:FindFirstChild("DataStoreFake") and ReplicatedStorage.DataStoreFake.Value == true)) then
@@ -163,7 +164,7 @@ function Server.Init()
     Players.PlayerRemoving:Connect(Server.PlayerDataManagement.LeaveSave)
 
     for _, Item in pairs(Players:GetChildren()) do
-        coroutine.wrap(Handle)(Item)
+        Async.Wrap(Handle)(Item)
     end
 end
 

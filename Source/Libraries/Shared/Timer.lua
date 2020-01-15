@@ -1,5 +1,6 @@
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
 local RunService = Novarine:Get("RunService")
+local Async = Novarine:Get("Async")
 
 local Timer = {}
 
@@ -16,7 +17,7 @@ function Timer:On(Interval, Execute)
             Execute()
         end)
     else
-        coroutine.wrap(function()
+        Async.Wrap(function()
             while wait(Interval) do
                 if (not Running) then
                     return

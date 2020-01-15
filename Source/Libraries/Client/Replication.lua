@@ -1,5 +1,6 @@
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
 local Table = Novarine:Get("Table")
+local Async = Novarine:Get("Async")
 
 local Replication = {
     ReplicatedData = {};
@@ -8,7 +9,7 @@ local Replication = {
 function Replication:Init()
     local ReplicationFolder = game:GetService("ReplicatedStorage"):WaitForChild("ReplicationFolder")
 
-    coroutine.wrap(function()
+    Async.Wrap(function()
         while wait(1/20) do
             self:Update(ReplicationFolder, self.ReplicatedData)
         end
@@ -67,7 +68,7 @@ function Replication:WaitFor(...)
     assert(type(Callback) == "function")
     Args[#Args] = nil
 
-    coroutine.wrap(function()
+    Async.Wrap(function()
         Callback(Table.WaitFor(wait, Replication, "ReplicatedData", unpack(Args)))
     end)()
 end

@@ -29,6 +29,14 @@ function Weld.Model(Class, Model, Base)
     end
 end
 
+function Weld.ModelRecursive(Class, Model, Base)
+    for _, Value in pairs(Model:GetDescendants()) do
+        if (Value ~= Base and Value:IsA("BasePart")) then
+            Weld.Part(Class, Base, Value, Base.CFrame:toObjectSpace(Value.CFrame))
+        end
+    end
+end
+
 function Weld.ConstrainPart(Part0, Part1)
     local Constraint = Instance.new("WeldConstraint", Part0)
     Constraint.Part0 = Part0

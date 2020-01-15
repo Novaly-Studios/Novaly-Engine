@@ -119,7 +119,7 @@ function Table.ToString(Item, Tabs)
 
         local ReportString = (KeyType ~= "number")
         local Join = ReportString and "\"" or ""
-        Key = "[" .. Join .. Key .. Join .. "]" .. " = "
+        Key = "[" .. Join .. tostring(Key) .. Join .. "]" .. " = "
 
         if (ValueType == "table") then
             Result = Result .. Tabs .. Key .. "{\n"

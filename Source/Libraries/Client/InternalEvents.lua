@@ -1,5 +1,6 @@
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
 local RunService = Novarine:Get("RunService")
+local Async = Novarine:Get("Async")
 local Event = Novarine:Get("Event")
 local Core = Novarine:Get("Core")
 
@@ -37,7 +38,7 @@ function InternalEvents:Invoke(Name, Pass, Arguments)
             end;
             ["On"] = function()
                 local Interval = Arguments.Interval
-                coroutine.wrap(function()
+                Async.Wrap(function()
                     local Passed, Data = Arguments.Check()
                     while (not Passed) do
                         if (Interval < 1 / 30) then

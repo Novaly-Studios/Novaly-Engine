@@ -1,6 +1,7 @@
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
-local Players = Novarine:Get("Players")
 local Replication = Novarine:Get("Replication")
+local Players = Novarine:Get("Players")
+local Async = Novarine:Get("Async")
 
 if (Novarine:Get("RunService"):IsServer()) then
     return false
@@ -54,7 +55,7 @@ function Client.PlayerDataManagement.WaitForMyDataAttribute(...)
 end
 
 function Client.Init()
-    coroutine.wrap(function()
+    Async.Wrap(function()
         while (Players.LocalPlayer == nil) do
             wait()
         end
@@ -66,7 +67,7 @@ function Client.Init()
             wait(0.05)
         end
 
-        coroutine.wrap(function()
+        Async.Wrap(function()
             while wait(0.1) do
                 Client.PlayerDataManagement.PlayerData = Replication.ReplicatedData.PlayerData
                 Client.PlayerData = Replication.ReplicatedData.PlayerData

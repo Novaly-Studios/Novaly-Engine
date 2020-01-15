@@ -14,6 +14,7 @@ local Event = Novarine:Get("Event")
 local Configuration = Novarine:Get("Configuration")
 local Players = Novarine:Get("Players")
 local Logging = Novarine:Get("Logging")
+local Async = Novarine:Get("Async")
 
 local Server = {
     TransmissionReady = {};
@@ -40,7 +41,7 @@ Server.BindRemoteFunction   = BindRemoteFunction
 
 function Server.WaitForTransmissionReady(Player, Callback)
 
-    coroutine.wrap(function()
+    Async.Wrap(function()
         while (Player.Parent and Server.TransmissionReady[Player.Name] == nil) do
             wait(Configuration.coPollInterval)
         end

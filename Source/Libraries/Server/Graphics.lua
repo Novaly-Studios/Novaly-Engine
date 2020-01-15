@@ -1,10 +1,11 @@
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
 local CollectionService = Novarine:Get("CollectionService")
+local Async = Novarine:Get("Async")
 
 local GraphicsLibrary = {}
 
 function GraphicsLibrary:Init()
-    coroutine.wrap(function()
+    Async.Wrap(function()
         for Index, Part in pairs(CollectionService:GetTagged("Graphics:TransparentPart")) do
             local Settings = Part:FindFirstChild("Settings")
 

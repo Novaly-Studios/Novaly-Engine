@@ -67,7 +67,7 @@ end
 ]]
 
 function Async.Delay(Time, Callback)
-    coroutine.wrap(function()
+    Async.Wrap(function()
         wait(Time)
         Callback()
     end)()
@@ -88,8 +88,8 @@ function Async.Wrap(Call)
         local BindableEvent = Instance.new("BindableEvent")
         BindableEvent.Event:Connect(Call)
 
-        return function()
-            BindableEvent:Fire()
+        return function(...)
+            BindableEvent:Fire(...)
             BindableEvent:Destroy()
         end
     end
