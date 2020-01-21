@@ -54,11 +54,19 @@ function Sequencer.Init()
 
     -- Main update event
     RunService.Stepped:Connect(function(_, Step)
+        debug.profilebegin("SequenceBatch")
+
         for Subject in pairs(Sequencer.Sequences) do
             if (Subject.Play) then
+                debug.profilebegin("SequenceStep")
+
                 Subject:Step(Step)
+
+                debug.profileend()
             end
         end
+
+        debug.profileend()
     end)
 
     for Name, Properties in pairs(Sequencer.PresetEasing) do

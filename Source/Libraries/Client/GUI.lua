@@ -82,26 +82,26 @@ function GUI:RippleEffect(Parent, Position, StartRadius, EndRadius, StartTranspa
     RippleImage.Parent = Parent
 
     local RippleSequence = Sequence.New({Duration = Time})
-    local RipplePosition = TweenValue.New("SingleTransition", "Linear", Configuration["_TargetFramerate"], {
-        ["EasingStyle"] = Style;
+    local RipplePosition = TweenValue.New("SingleTransition", "Linear", Configuration._TargetFramerate, {
+        EasingStyle = Style;
     }, {
         RippleImage.Position;
         UDim2.new(0, Position.X.Offset - EndRadius, 0, Position.Y.Offset - EndRadius);
     })
-    local RippleSize = TweenValue.New("SingleTransition", "Linear", Configuration["_TargetFramerate"], {
-        ["EasingStyle"] = Style;
+    local RippleSize = TweenValue.New("SingleTransition", "Linear", Configuration._TargetFramerate, {
+        EasingStyle = Style;
     }, {
         RippleImage.Size;
         UDim2.new(0, EndRadius * 2, 0, EndRadius * 2);
     })
-    local RippleTransparency = TweenValue.New("SingleTransition", "Linear", Configuration["_TargetFramerate"], {
-        ["EasingStyle"] = Style;
+    local RippleTransparency = TweenValue.New("SingleTransition", "Linear", Configuration._TargetFramerate, {
+        EasingStyle = Style;
     }, {
         StartTransparency;
         EndTransparency;
     })
-    local RippleColour = TweenValue.New("SingleTransition", "Linear", Configuration["_TargetFramerate"], {
-        ["EasingStyle"] = Style;
+    local RippleColour = TweenValue.New("SingleTransition", "Linear", Configuration._TargetFramerate, {
+        EasingStyle = Style;
     }, {
         StartColour;
         EndColour;

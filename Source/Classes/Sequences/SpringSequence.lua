@@ -9,8 +9,8 @@ local SpringSequence = Class:FromName(script.Name)
 function SpringSequence:SpringSequence()
 
     local Object = {
-        ["Animations"]          = setmetatable({}, {__mode = "k"}); -- A table of spring animation objects
-        ["Play"]                = false; -- When true, allows the sequence to step
+        Animations = setmetatable({}, {__mode = "k"}); -- A table of spring animation objects
+        Play = false; -- When true, allows the sequence to step
     }
 
     return Object

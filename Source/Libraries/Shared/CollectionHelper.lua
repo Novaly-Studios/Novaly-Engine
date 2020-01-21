@@ -10,40 +10,12 @@ local CollectionService = Novarine:Get("CollectionService")
     @todo GetAncestorWithTag method
 ]]
 
-local CollectionHelper = {Cache = {}, DescendantCache = {}}
-
---[[
-    @function CollectionHelper.HasTags
-
-    Determines whether an object has any specified tag(s).
-
-    @usage
-        print(CollectionHelper:HasTags(Workspace.Test, "Tag1", "Tag2"))
-
-    @param Object The object to test.
-    @param ... Strings denoting tags to test the object for.
-
-    @return A boolean denoting whether the object contained any of the specified tags.
-]]
-
-function CollectionHelper:HasTags(Object, ...)
-
-    local Args = {...}
-    assert(#Args > 0, "No tags given!")
-
-    for _, Tag in pairs(Args) do
-        if (not CollectionService:HasTag(Object, Tag)) then
-            return false
-        end
-    end
-
-    return true
-end
+local CollectionHelper = {Cache = {}, DescendantCache = {}, ChildCache = {}}
 
 --[[
     @function CollectionHelper.GetDescendantsWithTag
 
-    Finds any descendant objects with specified tag(s).
+    Finds any descendant objects with specified tag.
 
     @usage
         for _, Item in pairs(CollectionHelper:GetDescendantsWithTag(Workspace, "MakeTransparent")) do
@@ -51,18 +23,17 @@ end
         end
 
     @param Root The top-level instance to search.
-    @param ... The tags to check for.
+    @param Tag The tag to check for.
 
     @return A table of items found by the search.
 ]]
 
-function CollectionHelper:GetDescendantsWithTag(Root, ...)
+function CollectionHelper:GetDescendantsWithTag(Root, Tag)
 
     local Result = {}
-    assert(#({...}) > 0, "No tags given!")
 
     for _, Object in pairs(Root:GetDescendants()) do
-        if (self:HasTags(Object, ...)) then
+        if (CollectionService:HasTag(Object, Tag)) then
             table.insert(Result, Object)
         end
     end
@@ -74,7 +45,7 @@ end
     @function CollectionHelper.GetChildrenWithTag
 
     Finds any children (not descendants) with
-    specified tag(s).
+    specified tag.
 
     @usage
         for _, Item in pairs(CollectionHelper:GetChildrenWithTag(Workspace, "MakeTransparent")) do
@@ -82,18 +53,17 @@ end
         end
 
     @param Root The top-level instance to search.
-    @param ... The tags to check for.
+    @param Tag The tag to check for.
 
     @return A table of items found by the search.
 ]]
 
-function CollectionHelper:GetChildrenWithTag(Root, ...)
+function CollectionHelper:GetChildrenWithTag(Root, Tag)
 
     local Result = {}
-    assert(#({...}) > 0, "No tags given!")
 
     for _, Object in pairs(Root:GetChildren()) do
-        if (self:HasTags(Object, ...)) then
+        if (CollectionService:HasTag(Object, Tag)) then
             table.insert(Result, Object)
         end
     end
@@ -104,21 +74,21 @@ end
 --[[
     @function CollectionHelper.FindFirstDescendantWithTag
 
-    Finds the first descendant with any given tags.
+    Finds the first descendant with any given tag.
 
     @usage
         CollectionHelper:FindFirstDescendantWithTag(Workspace, "MakeThisUniquePartTransparent").Transparency = 1
 
     @param Root The top-level instance to search.
-    @param ... The tags to check for.
+    @param Tag The tag to check for.
 
-    @return An instance with the specified tags, if one was found.
+    @return An instance with the specified tag, if one was found.
 ]]
 
-function CollectionHelper:FindFirstDescendantWithTag(Root, ...)
-    assert(#({...}) > 0, "No tags given!")
+function CollectionHelper:FindFirstDescendantWithTag(Root, Tag)
+
     for _, Object in pairs(Root:GetDescendants()) do
-        if (self:HasTags(Object, ...)) then
+        if (CollectionService:HasTag(Object, Tag)) then
             return Object
         end
     end
@@ -139,6 +109,37 @@ function CollectionHelper:FindFirstDescendantWithTagPerformanceCached(Root, Tag)
     end
 
     for _, Object in pairs(Root:GetDescendants()) do
+        if (CollectionService:HasTag(Object, Tag)) then
+            Cache[Root][Tag] = Object
+
+            local Connection; Connection = Object.Parent.ChildRemoved:Connect(function(Child)
+                if (Child == Object) then
+                    Cache[Root][Tag] = nil
+                end
+
+                Connection:Disconnect()
+            end)
+
+            return Object
+        end
+    end
+end
+
+function CollectionHelper:FindFirstChildWithTagPerformanceCached(Root, Tag)
+    local Cache = self.ChildCache
+    local ForThis = Cache[Root]
+
+    if ForThis then
+        local ForThisTag = ForThis[Tag]
+
+        if ForThisTag then
+            return ForThisTag
+        end
+    else
+        Cache[Root] = {}
+    end
+
+    for _, Object in pairs(Root:GetChildren()) do
         if (CollectionService:HasTag(Object, Tag)) then
             Cache[Root][Tag] = Object
 
@@ -190,21 +191,21 @@ end
 --[[
     @function CollectionHelper.FindFirstChildWithTag
 
-    Finds the first child with any given tags.
+    Finds the first child with any given tag.
 
     @usage
         CollectionHelper:FindFirstChildWithTag(Workspace, "MakeThisUniquePartTransparent").Transparency = 1
 
     @param Root The top-level instance to search.
-    @param ... The tags to check for.
+    @param Tag The tag to check for.
 
-    @return An instance with the specified tags, if one was found.
+    @return An instance with the specified tag, if one was found.
 ]]
 
-function CollectionHelper:FindFirstChildWithTag(Root, ...)
-    assert(#({...}) > 0, "No tags given!")
+function CollectionHelper:FindFirstChildWithTag(Root, Tag)
+
     for _, Object in pairs(Root:GetChildren()) do
-        if (self:HasTags(Object, ...)) then
+        if (CollectionService:HasTag(Object, Tag)) then
             return Object
         end
     end

@@ -9,13 +9,13 @@ local Sequence = Class:FromName(script.Name)
 function Sequence:Sequence(Properties)
 
     local Object = {
-        ["Duration"]            = 0.0;  -- The duration of the sequence
-        ["Increment"]           = 1.0;  -- A multiplier on framely time delta
-        ["CurrentTime"]         = 0.0;  -- Current time of the sequence
-        ["TimePercentile"]      = 0.0;  -- A number between 0 and 1 denoting whole sequence progress
-        ["Animations"]          = setmetatable({}, {__mode = "k"}); -- A table of animation objects
-        ["AutoStop"]            = true;  -- Automatically stops the sequence when done
-        ["Play"]                = false; -- When true, allows the sequence to step
+        Duration = 0.0;  -- The duration of the sequence
+        Increment = 1.0;  -- A multiplier on framely time delta
+        CurrentTime = 0.0;  -- Current time of the sequence
+        TimePercentile = 0.0;  -- A number between 0 and 1 denoting whole sequence progress
+        Animations = setmetatable({}, {__mode = "k"}); -- A table of animation objects
+        AutoStop = true;  -- Automatically stops the sequence when done
+        Play = false; -- When true, allows the sequence to step
     }
 
     for Key, Value in pairs(Properties) do

@@ -97,4 +97,26 @@ function Async.Wrap(Call)
     return coroutine.wrap(Call)
 end
 
+--[[
+    @function Async.Await
+
+    Waits for callback-based APIs to finish.
+
+    @tparam Operation Function The function to wait on.
+
+    @return The arguments passed to the callback.
+]]
+function Async.Await(Operation)
+	local Running = coroutine.running()
+	local Returns
+
+	coroutine.wrap(Operation)(function(...)
+		Returns = ...
+		assert(coroutine.resume(Running))
+	end)
+
+	coroutine.yield()
+	return Returns
+end
+
 return Async

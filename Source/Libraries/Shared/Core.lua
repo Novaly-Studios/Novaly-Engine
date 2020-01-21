@@ -89,7 +89,7 @@ end
     processed inputs.
 
     @usage
-        local New = Map({1, 2, 3}, function(x)
+        local New = Map({1, 2, 3}, function(_, x)
             return x * 2
         end)
 

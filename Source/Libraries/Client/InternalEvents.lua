@@ -31,12 +31,12 @@ function InternalEvents:Invoke(Name, Pass, Arguments)
     if Arguments then
         assert(Arguments.Action, "No action specified on event!")
         Core.Switch(Arguments.Action) {
-            ["Delay"] = function()
+            Delay = function()
                 delay(Arguments.Duration, function()
                     Target:Fire(unpack(Pass))
                 end)
             end;
-            ["On"] = function()
+            On = function()
                 local Interval = Arguments.Interval
                 Async.Wrap(function()
                     local Passed, Data = Arguments.Check()
@@ -51,7 +51,7 @@ function InternalEvents:Invoke(Name, Pass, Arguments)
                     Target:Fire(unpack(Data))
                 end)()
             end;
-            ["At"] = function()
+            At = function()
                 local EndTime
 
                 if (Arguments.Reset) then
@@ -82,6 +82,8 @@ end
 
 function InternalEvents:Init()
     RunService.RenderStepped:Connect(function()
+        debug.profilebegin("InternalEventsSequence")
+
         for Target in pairs(InternalEvents.Scheduled) do
             local EndTime = Target.State.EndTime
             if EndTime then
@@ -91,6 +93,8 @@ function InternalEvents:Init()
                 end
             end
         end
+
+        debug.profileend()
     end)
 end
 

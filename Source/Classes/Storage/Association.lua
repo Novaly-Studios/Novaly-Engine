@@ -18,7 +18,7 @@ function Association:InternalRelate(Sequence, Values, Value)
         Values[Key] = New
         Values = New
     end
-    Values["Value"] = Value
+    Values.Value = Value
 end
 
 function Association:GetRelationInternal(Subject, Values)

@@ -138,7 +138,7 @@ function Static.Map1D(Input, Operator)
     local Result = {}
 
     for Key, Value in pairs(Input) do
-        Result[Key] = Operator(Value)
+        Result[Key] = Operator(Key, Value)
     end
 
     return Result
@@ -149,7 +149,7 @@ end
     and output table *with custom keys*.
 
     @param Input The target table.
-    @param Operator A function to which will operate on each value. Must return Key, Value tuple
+    @param Operator A function to which will operate on each value. Must return Key, Value tuple.
 
     @usage
         local Items = {
@@ -158,7 +158,7 @@ end
             ...
         }
 
-        local NewItems = Static.KMap1D(Items, function(Item)
+        local NewItems = Static.KMap1D(Items, function(_, Item)
             return Item.Name .. "|", {
                 Name = Item.Name;
                 Price = Items.Price * 2;
@@ -169,9 +169,9 @@ end
 function Static.KMap1D(Input, Operator)
     local Result = {}
 
-    for _, Value in pairs(Input) do
-        local Key, ResultValue = Operator(Value)
-        Result[Key] = ResultValue
+    for OriginalKey, Value in pairs(Input) do
+        local NewKey, ResultValue = Operator(OriginalKey, Value)
+        Result[NewKey] = ResultValue
     end
 
     return Result

@@ -14,7 +14,9 @@ function Timer:On(Interval, Execute)
                 Connection:Disconnect()
                 return
             end
+            debug.profilebegin("TimerCall")
             Execute()
+            debug.profileend()
         end)
     else
         Async.Wrap(function()
@@ -22,7 +24,9 @@ function Timer:On(Interval, Execute)
                 if (not Running) then
                     return
                 end
+                debug.profilebegin("TimerCall")
                 Execute()
+                debug.profileend()
             end
         end)()
     end

@@ -6,8 +6,8 @@ local SpringAnimation = Class:FromName(script.Name)
 function SpringAnimation:SpringAnimation(Properties, Springs)
 
     local Object = {
-        ["Target"]      = workspace;    -- Target instance to animate
-        ["Springs"]     = Springs;      -- Springs (per property)
+        Target = workspace;    -- Target instance to animate
+        Springs = Springs;      -- Springs (per property)
     }
 
     for Key, Value in pairs(Properties) do

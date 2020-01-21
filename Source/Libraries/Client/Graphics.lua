@@ -292,11 +292,15 @@ function Graphics:Init()
     end
 
     RunService.Heartbeat:Connect(function(Step)
+        debug.profilebegin("GraphicsUpdate")
+
         local PartIters = math.floor(Configuration.gTransparentPartsPerFrame * (1 / Step) / Configuration._TargetFramerate)
         Graphics:UpdateLensFlares()
         Graphics:UpdateBillboards()
         TransparentPartHandler:Next(PartIters)
         TransparentPartHandler:Clean(Clean, PartIters)
+
+        debug.profileend()
     end)
 
     Async.Wrap(function()

@@ -122,7 +122,9 @@ function InputLibrary.Init()
     end) ]]
 
     RunService.RenderStepped:Connect(function()
+        debug.profilebegin("MouseUpdate")
         InputLibrary:UpdateMouse()
+        debug.profileend()
     end)
 end
 
