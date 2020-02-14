@@ -74,23 +74,32 @@ function Server.PlayerDataManagement.RecursiveBuild(Data)
 end
 
 function Server.PlayerDataManagement.Save(Player)
-    Server.PlayerDataManagement.WaitForPlayerDataCallback(Player, function(PlayerData)
+    local PlayerData = Server.PlayerData[Player.UserId]
+
+    if PlayerData then
         Server.PlayerDataStore:SetAsync(Player.UserId, Server.PlayerDataManagement.RecursiveSerialise(Table.Clone(PlayerData)))
-    end)
+        print("Saved player data for " .. Player.Name)
+    else
+        warn(string.format("No player data found for player ID '%d'!", Player.UserId))
+    end
 end
 
 function Server.PlayerDataManagement.LeaveSave(Player)
     local ID = Player.UserId
+    local PlayerData = Server.PlayerData[ID]
 
-    Server.PlayerDataManagement.WaitForPlayerDataCallback(Player, function(PlayerData)
-        wait(6.5)
+    if PlayerData then
+        --[[
+            Todo: player joined index records the last time players joined.
+            If last time < 6 secs ago, wait the remaining time.
+        ]]
 
-        ypcall(function()
-            Server.PlayerDataStore:SetAsync(Player.UserId, Server.PlayerDataManagement.RecursiveSerialise(Table.Clone(PlayerData)))
-        end)
-
+        Server.PlayerDataStore:SetAsync(ID, Server.PlayerDataManagement.RecursiveSerialise(Table.Clone(PlayerData)))
         ReplicatedData.PlayerData[ID] = nil
-    end)
+        print("Saved player data for " .. Player.Name .. " and nullified store")
+    else
+        warn(string.format("No player data found for player ID '%d'!", ID))
+    end
 
     --[[Server.PlayerDataStore:UpdateAsync(UserId function()
         return Serial
@@ -113,15 +122,20 @@ function Server.Init()
             Success, Data = pcall(function()
                 return Server.PlayerDataStore:GetAsync(Player.UserId)
             end)
+            print("Wait for Data Store")
             wait(Configuration.pPlayerDataRetry)
         end
 
         Data = Data or {}
         Server.PlayerDataManagement.RecursiveBuild(Data)
 
+        print("Waiting for transmission ready for " .. Player.Name)
+
         while (not Communication.TransmissionReady[Player.Name]) do
             wait(0.05)
         end
+
+        print("Transmission ready for " .. Player.Name)
 
         ReplicatedData.PlayerData[Player.UserId] = Data
         Logging.Debug(0, string.format("Loaded player data in PlayerDataHandler for '%s'.", Player.Name))
@@ -145,7 +159,7 @@ function Server.Init()
                         Self[Key] = Value
                     end;
                 }
-                Logging.Debug(1, "Set data store as table")
+                Logging.Debug(1, "Set data store as table.")
             else
                 Logging.Debug(1, "Set data store as live.")
                 Server.PlayerDataStore = DataStoreService:GetDataStore(ReplicatedStorage:FindFirstChild("DataStoreVersion") and ReplicatedStorage.DataStoreVersion.Value or Configuration.pDataStoreVersion)

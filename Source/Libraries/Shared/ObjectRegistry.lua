@@ -26,9 +26,6 @@ function ObjectRegistry:Register(Tag, Operator, Destructor)
 
             if DestroyMethod then
                 Target:Destroy()
-                Logging.Debug(0, string.format("Instance '%s' and associated object successfully destroyed.", Item:GetFullName()))
-            else
-                warn(string.format("The object '%s' has no Destroy method!", Item:GetFullName()))
             end
         end
     end

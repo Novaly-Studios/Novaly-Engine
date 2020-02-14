@@ -20,8 +20,11 @@ local GUI = Novarine:Get("GUI")
 local Misc = Novarine:Get("Misc")
 local Math = Novarine:Get("Math")
 local Table = Novarine:Get("Table")
-local ObjectRegistry = Novarine:Get("ObjectRegistry")
-local SurfaceBillboard = Novarine:Get("SurfaceBillboard")
+local Workspace = Novarine:Get("Workspace")
+local NewSurfaceBillboard = Novarine:Get("NewSurfaceBillboard")
+--local ObjectRegistry = Novarine:Get("ObjectRegistry")
+--local SurfaceBillboard = Novarine:Get("SurfaceBillboard")
+local CollectiveObjectRegistry = Novarine:Get("CollectiveObjectRegistry")
 local Lighting = Novarine:Get("Lighting")
 
 if (Novarine:Get("RunService"):IsServer()) then
@@ -325,7 +328,7 @@ function Graphics:Init()
         TransparentPartHandler:Add(Part)
     end)
 
-    local function SurfaceBillboardCreate(Item)
+--[[     local function SurfaceBillboardCreate(Item)
         if (not Item.Parent:IsA("BasePart")) then
             return nil
         end
@@ -342,7 +345,15 @@ function Graphics:Init()
     end
 
     ObjectRegistry:Register("Graphics:SurfaceBillboard", SurfaceBillboardCreate, SurfaceBillboardDestroy)
-    ObjectRegistry:Register("Alternate:SurfaceBillboard", SurfaceBillboardCreate, SurfaceBillboardDestroy)
+    ObjectRegistry:Register("Alternate:SurfaceBillboard", SurfaceBillboardCreate, SurfaceBillboardDestroy) ]]
+
+    CollectiveObjectRegistry:Register("Graphics:SurfaceBillboard", {NewSurfaceBillboard}, function(_, Item)
+        if (Workspace:IsAncestorOf(Item)) then
+            local Object = NewSurfaceBillboard.New(Item)
+            Object:Initial()
+            return Object
+        end
+    end)
 
     for _, Part in pairs(CollectionService:GetTagged(Graphics.Tags.TransparentPart)) do
         TransparentPartHandler:Add(Part)

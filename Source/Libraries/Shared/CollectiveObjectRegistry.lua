@@ -2,13 +2,14 @@ local CollectionService = game:GetService("CollectionService")
 local CollectiveObjectRegistry = {
     InstanceToComponentCollection = {};
     ComponentToInstanceCollection = {};
+    RegisteredObjects = {};
     Registered = {};
 
     Tests = {};
-    Warn = true;
 };
 
 -- @todo Test for applying multiple components, since we just fixed that bug.
+-- @todo Propogate component list upwards (in a separate array) for O(d) efficiency.
 
 function CollectiveObjectRegistry:Register(Tag, Components, CreationHandler, DestructionHandler, AncestorTarget)
 
@@ -16,6 +17,10 @@ function CollectiveObjectRegistry:Register(Tag, Components, CreationHandler, Des
         warn(string.format("Tag already registered: '%s'", Tag))
         return
     end
+
+    assert(Tag, "No tag given!")
+    assert(Components, "No components given!")
+    assert(#Components > 0, "Components list empty!")
 
     AncestorTarget = AncestorTarget or game
     CreationHandler = CreationHandler or self.StandardConstruct
@@ -49,6 +54,7 @@ function CollectiveObjectRegistry:Register(Tag, Components, CreationHandler, Des
 
         if HadValidComponent then
             self.InstanceToComponentCollection[Object] = InstanceComponents
+            self.RegisteredObjects[Object] = true
         end
     end
 
@@ -57,7 +63,12 @@ function CollectiveObjectRegistry:Register(Tag, Components, CreationHandler, Des
             return
         end
 
+        if (not self.RegisteredObjects[Object]) then
+            return
+        end
+
         local InstanceComponents = self.InstanceToComponentCollection[Object]
+        assert(InstanceComponents, string.format("No instance components for object '%s'!", Object:GetFullName()))
 
         for _, ComponentObject in pairs(InstanceComponents) do
             SetComponentToInstaceCollectionValue(Object, ComponentObject._COMPONENT_REF, nil)
@@ -65,6 +76,7 @@ function CollectiveObjectRegistry:Register(Tag, Components, CreationHandler, Des
         end
 
         self.InstanceToComponentCollection[Object] = nil
+        self.RegisteredObjects[Object] = nil
     end
 
     for _, Item in pairs(CollectionService:GetTagged(Tag)) do
@@ -80,18 +92,56 @@ end
 -- Information retrieval
 
 function CollectiveObjectRegistry:GetComponents(Object)
+    assert(Object, "No object given!")
+
     return self.InstanceToComponentCollection[Object]
 end
 
 function CollectiveObjectRegistry:GetComponent(Object, ComponentClass)
+    assert(Object, "No object given!")
+    assert(ComponentClass, "No component class given!")
+
     return self:GetComponents(Object) and self:GetComponents(Object)[ComponentClass] or nil
 end
 
+function CollectiveObjectRegistry:WaitForComponent(Object, ComponentClass)
+    assert(Object, "No object given!")
+    assert(ComponentClass, "No component class given!")
+
+    local Got = self:GetComponent(Object, ComponentClass)
+
+    while (not Got) do
+        Got = self:GetComponent(Object, ComponentClass)
+        wait()
+    end
+
+    return Got
+end
+
+function CollectiveObjectRegistry:WaitForComponentFromDescendant(Object, ComponentClass)
+    assert(Object, "No object given!")
+    assert(ComponentClass, "No component class given!")
+
+    local Got = self:GetComponentFromDescendant(Object, ComponentClass)
+
+    while (not Got) do
+        Got = self:GetComponentFromDescendant(Object, ComponentClass)
+        wait()
+    end
+
+    return Got
+end
+
 function CollectiveObjectRegistry:GetInstances(ComponentClass)
+    assert(ComponentClass, "No component class given!")
+
     return self.ComponentToInstanceCollection[ComponentClass]
 end
 
 function CollectiveObjectRegistry:GetComponentFromDescendant(Object, ComponentClass)
+    assert(Object, "No object given!")
+    assert(ComponentClass, "No component class given!")
+
     while Object do
         local Component = self:GetComponent(Object, ComponentClass)
 
@@ -106,10 +156,16 @@ end
 -- Constructors and destructors
 
 function CollectiveObjectRegistry.StandardConstruct(Component, Object)
+    assert(Component, "No component given!")
+    assert(Object, "No object given!")
+
     return Component.New(Object)
 end
 
 function CollectiveObjectRegistry.ComponentConstruct(Component, Object)
+    assert(Component, "No component given!")
+    assert(Object, "No object given!")
+
     local Parent = Object.Parent
     local Settings = {}
 
@@ -124,10 +180,6 @@ end
 function CollectiveObjectRegistry.StandardDestroy(Component)
 
     if (not Component.Destroy) then
-        if (CollectiveObjectRegistry.Warn) then
-            warn(string.format("Warning: no Destroy method found for '%s'.", tostring(Component)))
-        end
-
         return
     end
 
@@ -135,14 +187,6 @@ function CollectiveObjectRegistry.StandardDestroy(Component)
 end
 
 -- Tests
-
-function CollectiveObjectRegistry.Tests.Init()
-    CollectiveObjectRegistry.Warn = false
-end
-
-function CollectiveObjectRegistry.Tests.Finish()
-    CollectiveObjectRegistry.Warn = true
-end
 
 function CollectiveObjectRegistry.Tests.TestGetComponent(Accept, Fail, OnCleanup)
 
@@ -361,6 +405,47 @@ function CollectiveObjectRegistry.Tests.TestGetComponentFromDescendant(Accept, F
 
     if (not CollectiveObjectRegistry:GetComponentFromDescendant(SubTestModel, TestClass2)) then
         Fail("did not get second object in sub-sub-model")
+    end
+
+    Accept()
+end
+
+function CollectiveObjectRegistry.Tests.TestWaitForComponent(Accept, Fail, OnCleanup)
+    local TestClass = {}
+    TestClass.__index = TestClass
+
+    function TestClass.New()
+        return setmetatable({}, TestClass)
+    end
+
+    local TestTag = "Test6"
+    local TestModel = Instance.new("Model")
+    CollectionService:AddTag(TestModel, TestTag)
+    TestModel.Parent = game:GetService("Workspace")
+
+    OnCleanup(function()
+        TestModel:Destroy()
+    end)
+
+    local GotComponent
+
+    coroutine.wrap(function()
+        wait(1)
+        CollectiveObjectRegistry:Register(TestTag, {TestClass})
+    end)()
+
+    coroutine.wrap(function()
+        GotComponent = CollectiveObjectRegistry:WaitForComponent(TestModel, TestClass)
+    end)()
+
+    if GotComponent then
+        Fail("got immediately, should not happen")
+    end
+
+    wait(3)
+
+    if (not GotComponent) then
+        Fail("did not get component after 3 seconds")
     end
 
     Accept()
