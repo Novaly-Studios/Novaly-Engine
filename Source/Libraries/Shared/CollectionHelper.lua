@@ -10,13 +10,19 @@ local CollectionService = Novarine:Get("CollectionService")
     @todo GetAncestorWithTag method
 ]]
 
-local CollectionHelper = {Cache = {}, DescendantCache = {}, ChildCache = {}}
+local CollectionHelper = {
+    Cache = {};
+    ChildCache = {};
+    HasTagCache = {};
+    HasTagLastTime = {};
+    DescendantCache = {},
+};
 
 --[[
     @function CollectionHelper.GetDescendantsWithTag
 
     Finds any descendant objects with specified tag.
-
+    
     @usage
         for _, Item in pairs(CollectionHelper:GetDescendantsWithTag(Workspace, "MakeTransparent")) do
             Item.Transparency = 1
@@ -270,6 +276,36 @@ end
 
 function CollectionHelper:GetFirstTagged(Tag)
     return CollectionService:GetTagged(Tag)[1]
+end
+
+--[[
+    @function CollectionHelper.HasTagCached
+
+    Performant version of CollectionService.HasTag.
+    Assumes the tag will not be removed.
+]]
+--[[ function CollectionHelper:HasTagCached(Item, Tag)
+    return CollectionService:HasTag(Item, Tag)
+end ]]
+
+function CollectionHelper:HasTagCached(Item, Tag)
+    local HasTagCache = self.HasTagCache
+    local HasTags = HasTagCache[Item]
+
+    if (not HasTags) then
+        HasTags = {}
+        HasTagCache[Item] = HasTags
+    end
+
+    local HasTag = HasTags[Tag]
+
+    if (HasTag and tick() - HasTag[2] <= 0.2) then
+        return HasTag[1]
+    end
+
+    local Result = CollectionService:HasTag(Item, Tag)
+    HasTags[Tag] = {Result, tick()}
+    return Result
 end
 
 return CollectionHelper

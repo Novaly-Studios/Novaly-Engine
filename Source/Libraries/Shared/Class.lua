@@ -64,6 +64,17 @@ function Class:New(Name, ClassTable)
         end
 
         Result[self.ClassRefKey] = ClassTable
+
+        function Result:__tostring()
+            local Stringed = Name .. " (\n"
+
+            for Key, Item in pairs(self) do
+                Stringed = Stringed .. "    " .. tostring(Key) .. " = " .. tostring(Item) .. ";\n"
+            end
+
+            return Stringed .. "\n)"
+        end
+
         setmetatable(Result, ClassTable)
 
         return Result
@@ -76,7 +87,11 @@ function Class:New(Name, ClassTable)
     ClassTable[self.NameKey] = Name
     ClassTable.__index = ClassTable
 
-    setmetatable(ClassTable, self.ClassMetatable)
+    setmetatable(ClassTable, Static.Fuse1D(self.ClassMetatable, {
+        __tostring = function()
+            return "Class (" .. Name .. ")"
+        end
+    }))
 
     return ClassTable
 end

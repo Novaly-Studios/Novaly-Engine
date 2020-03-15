@@ -58,11 +58,7 @@ function Sequencer.Init()
 
         for Subject in pairs(Sequencer.Sequences) do
             if (Subject.Play) then
-                debug.profilebegin("SequenceStep")
-
                 Subject:Step(Step)
-
-                debug.profileend()
             end
         end
 

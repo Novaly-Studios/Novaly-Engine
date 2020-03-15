@@ -81,7 +81,7 @@ function InternalEvents:Clean()
 end
 
 function InternalEvents:Init()
-    RunService.RenderStepped:Connect(function()
+    RunService.--[[ Render ]]Stepped:Connect(function()
         debug.profilebegin("InternalEventsSequence")
 
         for Target in pairs(InternalEvents.Scheduled) do

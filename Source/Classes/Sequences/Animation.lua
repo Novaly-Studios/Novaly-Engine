@@ -22,14 +22,21 @@ function Animation:Animation(Properties, Transitions)
     assert(Object.Target ~= game, "No target found!")
     Object.EndTime = Object.StartTime + Object.Duration
     Object.Transitions = Transitions
+    Object.LastProperties = {}
 
     return Object
 end
 
 function Animation:Update()
     for Property, Transition in pairs(self.Transitions) do
-        self.Target[Property] = Transition:GetValueAt(self.CurrentTime, self.Duration)
+        local Value = Transition:GetValueAt(self.CurrentTime, self.Duration)
+
+        if (self.LastProperties[Property] ~= Value) then
+            self.Target[Property] = Value
+            self.LastProperties[Property] = Value
+        end
     end
+
     return self
 end
 

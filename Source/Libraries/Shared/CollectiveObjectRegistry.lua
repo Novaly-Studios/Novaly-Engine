@@ -8,9 +8,6 @@ local CollectiveObjectRegistry = {
     Tests = {};
 };
 
--- @todo Test for applying multiple components, since we just fixed that bug.
--- @todo Propogate component list upwards (in a separate array) for O(d) efficiency.
-
 function CollectiveObjectRegistry:Register(Tag, Components, CreationHandler, DestructionHandler, AncestorTarget)
 
     if (self.Registered[Tag]) then
@@ -40,7 +37,11 @@ function CollectiveObjectRegistry:Register(Tag, Components, CreationHandler, Des
         local InstanceComponents = self.InstanceToComponentCollection[Object] or {}
         local HadValidComponent = false
 
-        for _, Component in pairs(Components) do
+        --for _, Component in pairs(Components) do
+
+        for Index = 1, #Components do -- Maintain order
+            local Component = Components[Index]
+            assert(Component, "No component found at index for " .. Tag .. "!")
             SetComponentToInstaceCollectionValue(Object, Component, Object)
 
             local ComponentObject = CreationHandler(Component, Object)
@@ -89,6 +90,48 @@ function CollectiveObjectRegistry:Register(Tag, Components, CreationHandler, Des
     self.Registered[Tag] = true
 end
 
+-- Misc
+
+function CollectiveObjectRegistry:UpFlowExplicitComponent(Origin, ComponentIdentity, Data)
+    assert(Origin, "No origin given.")
+    assert(Origin.Parent, "Unparented object passed.")
+
+    while (Origin.Parent) do
+
+        local Components = self.InstanceToComponentCollection[Origin]
+
+        if Components then
+            local Target = Components[ComponentIdentity]
+
+            if Target then
+                assert(Target.ReceiveFlow, "No method defined to receive information.")
+                Target:ReceiveFlow(Data)
+            end
+        end
+
+        Origin = Origin.Parent
+    end
+end
+
+function CollectiveObjectRegistry:UpFlow(Origin, Data)
+    assert(Origin, "No origin given.")
+    assert(Origin.Parent, "Unparented object passed.")
+
+    while (Origin.Parent) do
+
+        local Components = self.InstanceToComponentCollection[Origin]
+
+        if Components then
+            for _, Target in pairs(Components) do
+                assert(Target.ReceiveFlow, "No method defined to receive information.")
+                Target:ReceiveFlow(Data)
+            end
+        end
+
+        Origin = Origin.Parent
+    end
+end
+
 -- Information retrieval
 
 function CollectiveObjectRegistry:GetComponents(Object)
@@ -105,12 +148,22 @@ function CollectiveObjectRegistry:GetComponent(Object, ComponentClass)
 end
 
 function CollectiveObjectRegistry:WaitForComponent(Object, ComponentClass)
+    local Trace = debug.traceback()
     assert(Object, "No object given!")
     assert(ComponentClass, "No component class given!")
 
     local Got = self:GetComponent(Object, ComponentClass)
 
-    while (not Got) do
+    coroutine.wrap(function()
+        wait(5)
+
+        if (Got == nil) then
+            warn(string.format("Potential infinite wait on (\n    Object = '%s';\n    Component = '%s'\n)\n%s",
+                                Object:GetFullName(), tostring(ComponentClass), Trace))
+        end
+    end)()
+
+    while (Got == nil) do
         Got = self:GetComponent(Object, ComponentClass)
         wait()
     end
@@ -119,12 +172,22 @@ function CollectiveObjectRegistry:WaitForComponent(Object, ComponentClass)
 end
 
 function CollectiveObjectRegistry:WaitForComponentFromDescendant(Object, ComponentClass)
+    local Trace = debug.traceback()
     assert(Object, "No object given!")
     assert(ComponentClass, "No component class given!")
 
     local Got = self:GetComponentFromDescendant(Object, ComponentClass)
 
-    while (not Got) do
+    coroutine.wrap(function()
+        wait(5)
+
+        if (Got == nil) then
+            warn(string.format("Potential infinite wait on (\n    Object = '%s';\n    Component = '%s'\n)\n%s",
+                                Object:GetFullName(), tostring(ComponentClass), Trace))
+        end
+    end)()
+
+    while (Got == nil) do
         Got = self:GetComponentFromDescendant(Object, ComponentClass)
         wait()
     end
@@ -162,19 +225,20 @@ function CollectiveObjectRegistry.StandardConstruct(Component, Object)
     return Component.New(Object)
 end
 
-function CollectiveObjectRegistry.ComponentConstruct(Component, Object)
-    assert(Component, "No component given!")
-    assert(Object, "No object given!")
+function CollectiveObjectRegistry.AsyncInitial(Component, InstanceObject)
+    local Object = Component.New(InstanceObject)
 
-    local Parent = Object.Parent
-    local Settings = {}
+    coroutine.wrap(function()
+        Object:Initial()
+    end)()
 
-    for _, Item in pairs(Object:GetChildren()) do
-        assert(Item:IsA("BaseValue"), string.format("Item '%s' within component is not a Value!", Item:GetFullName()))
-        Settings[Item.Name] = Item.Value
-    end
+    return Object
+end
 
-    return Component.New(Parent, Settings)
+function CollectiveObjectRegistry.SyncInitial(Component, InstanceObject)
+    local Object = Component.New(InstanceObject)
+    Object:Initial()
+    return Object
 end
 
 function CollectiveObjectRegistry.StandardDestroy(Component)
@@ -410,45 +474,72 @@ function CollectiveObjectRegistry.Tests.TestGetComponentFromDescendant(Accept, F
     Accept()
 end
 
-function CollectiveObjectRegistry.Tests.TestWaitForComponent(Accept, Fail, OnCleanup)
-    local TestClass = {}
-    TestClass.__index = TestClass
+--[[ function CollectiveObjectRegistry.Tests.TestUpFlow(Accept, Fail, OnCleanup)
 
-    function TestClass.New()
-        return setmetatable({}, TestClass)
+    local function GetTestClass()
+        local TestClass = {}
+        TestClass.__index = TestClass
+
+        function TestClass.New()
+            return setmetatable({}, TestClass)
+        end
+
+        function TestClass:ReceiveFlow(Data)
+            self.Callback(Data)
+        end
+
+        return TestClass
     end
 
-    local TestTag = "Test6"
-    local TestModel = Instance.new("Model")
-    CollectionService:AddTag(TestModel, TestTag)
-    TestModel.Parent = game:GetService("Workspace")
+    local function TestModel(Parent, Tag)
+        local Model = Instance.new("Model")
+        CollectionService:AddTag(Model, Tag)
+        Model.Parent = Parent
+        return Model
+    end
+
+    local TestModel1 = TestModel(game:GetService("Workspace"), "Test7")
+    local TestModel2 = TestModel(TestModel1, "Test8")
+    local TestModel3 = TestModel(TestModel2, "Test9")
+
+    local TestClass1 = GetTestClass()
+    local TestClass2 = GetTestClass()
 
     OnCleanup(function()
-        TestModel:Destroy()
+        TestModel1:Destroy()
+        TestModel2:Destroy()
+        TestModel3:Destroy()
     end)
 
-    local GotComponent
+    CollectiveObjectRegistry:Register(, {TestClass1, TestClass2})
 
-    coroutine.wrap(function()
-        wait(1)
-        CollectiveObjectRegistry:Register(TestTag, {TestClass})
-    end)()
+    local DataTC1 = {}
+    local DataTC2 = {}
 
-    coroutine.wrap(function()
-        GotComponent = CollectiveObjectRegistry:WaitForComponent(TestModel, TestClass)
-    end)()
+    local DataFoundTC1 = {}
+    local DataFoundTC2 = {}
 
-    if GotComponent then
-        Fail("got immediately, should not happen")
+    TestClass1.Callback = function(Data)
+        DataFoundTC1[Data] = true
     end
 
-    wait(3)
-
-    if (not GotComponent) then
-        Fail("did not get component after 3 seconds")
+    TestClass2.Callback = function(Data)
+        DataFoundTC2[Data] = true
     end
 
-    Accept()
-end
+    CollectiveObjectRegistry:UpFlow(CollectiveObjectRegistry:GetComponent(TestModel3), DataTC1)
+    CollectiveObjectRegistry:UpFlow(CollectiveObjectRegistry:GetComponent(TestModel3), DataTC1)
+
+    if (DataFoundTC1[DataTC1] and DataFoundTC2[DataTC1] and DataFoundTC2[DataTC2]) then
+        Accept()
+        return
+    end
+
+    Fail("invalid data principles")
+end ]]
+
+-- TODO: create incremental ID for every object
+-- and add object to ID queue. (Server)
+-- Then claim data from replication.
 
 return CollectiveObjectRegistry

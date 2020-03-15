@@ -306,6 +306,13 @@ function Graphics:Init()
         debug.profileend()
     end)
 
+    --[[ RunService:BindToRenderStep("BillboardUpdates", Enum.RenderPriority.Camera.Value - 1, function()
+        debug.profilebegin("GraphicsUpdateRenderStepped")
+
+
+        debug.profileend()
+    end) ]]
+
     Async.Wrap(function()
         while wait(1/15) do
             Graphics:DetectPlayer()

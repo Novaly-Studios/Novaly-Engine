@@ -23,73 +23,13 @@ local Static = {}
     - Keys1D
     - Values1D
     - Range
-    - Reverse
 
     Todo:
+    - NumericInsert
+    - NumericRemove
     - Differential1D
     - DifferentialNested
-    - Shuffle
-    - TwoWay
 ]]
-
-function Static.TwoWay(Table)
-    local Result = {}
-
-    for Key, Value in pairs(Table) do
-        Result[Key] = Value
-        Result[Value] = Key
-    end
-
-    return Result
-end
-
---[[
-    Randomises a table.
-
-    @param Table The table to randomise.
-
-    @return The randomised table.
-]]
-function Static.Shuffle(Table, Seed)
-    if Seed then
-        math.randomseed(Seed)
-    end
-
-    local Result = {}
-    local Size = #Table
-
-    -- Copy
-    for Index = 1, Size do
-        Result[Index] = Table[Index]
-    end
-
-    -- Shuffle
-    for Index = 1, Size do
-        local Other = math.random(1, Size)
-        Result[Other], Result[Index] = Result[Index], Result[Other]
-    end
-
-    return Result
-end
-
---[[
-    Reverses a numerical table.
-
-    @param Table The table to reverse.
-
-    @return A copy of the original table, reversed.
-]]
-
-function Static.Reverse(Table)
-    local Result = {}
-    local Length = #Table
-
-    for Index = 1, Table do
-        Result[Length - Index + 1] = Table[Index]
-    end
-
-    return Result
-end
 
 --[[
     Operates on a nested structure and maps
@@ -209,7 +149,7 @@ end
     and output table *with custom keys*.
 
     @param Input The target table.
-    @param Operator A function to which will operate on each value. Must return Key, Value tuple
+    @param Operator A function to which will operate on each value. Must return Key, Value tuple.
 
     @usage
         local Items = {
@@ -218,7 +158,7 @@ end
             ...
         }
 
-        local NewItems = Static.KMap1D(Items, function(Item)
+        local NewItems = Static.KMap1D(Items, function(_, Item)
             return Item.Name .. "|", {
                 Name = Item.Name;
                 Price = Items.Price * 2;

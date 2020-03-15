@@ -122,12 +122,12 @@ function Table.ToString(Item, Tabs)
         Key = "[" .. Join .. tostring(Key) .. Join .. "]" .. " = "
 
         if (ValueType == "table") then
-            Result = Result .. Tabs .. Key .. "{\n"
+            Result = Result .. Tabs .. tostring(Key) .. "{\n"
             Result = Result .. Table.ToString(Value, Tabs .. (" "):rep(4))
             Result = Result .. Tabs .. "};\n"
         else
             local Encapsulation = (ValueType == "string" and string.format("\"%s\"", Value) or tostring(Value))
-            Result = Result .. Tabs .. Key .. Encapsulation .. ";\n"
+            Result = Result .. Tabs .. tostring(Key) .. Encapsulation .. ";\n"
         end
     end
 

@@ -16,7 +16,7 @@ local Config = {
     coPollInterval = 0.5;
 
     gEnableGraphics = true;
-    gEnableLensFlare = true;
+    gEnableLensFlare = false;
     gTransparentPartsPerFrame = 15;
 
     sConditionalTimeTolerance = 1 / 60;

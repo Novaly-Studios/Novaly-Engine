@@ -1,7 +1,9 @@
-local String = {}
+local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
+local Math = Novarine:Get("Math")
 
-local Compression   = {}
-Compression.LZW     = {}
+local String = {}
+local Compression = {}
+Compression.LZW = {}
 
 function Compression.LZW.Compress(Str)
 
@@ -100,6 +102,22 @@ function String.NumberComma(Input)
     end
 
     return Formatted
+end
+
+function String.NumberSuffix(Number, DecimalPlaces)
+    DecimalPlaces = DecimalPlaces or 1
+
+    if (Number > 1e12) then
+        Number = Math.NumberToLength(Number / 1e12, DecimalPlaces) .. "T"
+    elseif (Number > 1e9) then
+        Number = Math.NumberToLength(Number / 1e9, DecimalPlaces) .. "B"
+    elseif (Number > 1e6) then
+        Number = Math.NumberToLength(Number / 1e6, DecimalPlaces) .. "M"
+    elseif (Number > 1e3) then
+        Number = Math.NumberToLength(Number / 1e3, DecimalPlaces) .. "K"
+    end
+
+    return tostring(Number)
 end
 
 function String.LevenshteinDistance(Initial, Other, InitialLength, OtherLength)
