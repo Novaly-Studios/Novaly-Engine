@@ -34,7 +34,7 @@ function NewSurfaceBillboard:NewSurfaceBillboard(Part)
 end
 
 function NewSurfaceBillboard:Initial()
-    self.Connection = RunService.Stepped:Connect(function()
+    self.Connection = RunService.RenderStepped:Connect(function()
         self:Update()
     end)
 end

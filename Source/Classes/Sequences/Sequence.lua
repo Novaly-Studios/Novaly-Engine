@@ -89,6 +89,11 @@ end
 
 function Sequence:Destroy()
     Sequencer:Deregister(self)
+
+    if (self.FinishBind) then
+        self.FinishBind()
+    end
+
     for Key in pairs(self) do
         self[Key] = nil
     end
@@ -115,15 +120,18 @@ function Sequence:Step(TimeDelta)
     if (self.AutoStop) then
         if (CurrentTime < 0 or CurrentTime > self.Duration) then
             self.Play = false
+
             for Animation, Update in pairs(CurrentAnimations) do
                 if Update then
                     Animation.CurrentTime = (self.Increment > 0 and Animation.Duration or 0)
                     Animation:Update()
                 end
             end
+
             if FinishBind then
                 FinishBind(self)
             end
+
             return
         end
     else

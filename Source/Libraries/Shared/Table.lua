@@ -90,6 +90,8 @@ function Table.PrintTable(Item)
     print(Table.ToString(Item))
 end
 
+Table.Print = Table.PrintTable
+
 function Table.DeepCount(Data)
     local Result = 0
 

@@ -4,6 +4,7 @@
 
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
 local Promise = Novarine:Get("Promise")
+local RunService = game:GetService("RunService")
 
 local Async = {}
 
@@ -117,6 +118,26 @@ function Async.Await(Operation)
 
 	coroutine.yield()
 	return Returns
+end
+
+--[[
+    @function Async.CWait
+
+    Conditionally waits, whereby if the condition
+    function returns false or nil the waiting
+    will terminate.
+]]
+function Async.CWait(Time, Condition, Event)
+    local InitialTime = tick()
+    local AwaitEvent = RunService[Event or "RenderStepped"]
+
+    while (tick() - InitialTime < Time) do
+        if (not Condition()) then
+            break
+        end
+
+        AwaitEvent:Wait()
+    end
 end
 
 --[[ function Async.AwaitItem(Table, TargetKey)

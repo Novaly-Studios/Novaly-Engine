@@ -1,5 +1,4 @@
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
-local Configuration = Novarine:Get("Configuration")
 local Players = Novarine:Get("Players")
 local Communication = Novarine:Get("Communication")
 local Replication = Novarine:Get("Replication")
@@ -11,11 +10,13 @@ local Logging = Novarine:Get("Logging")
 local Async = Novarine:Get("Async")
 
 local ReplicatedData = Replication.ReplicatedData
+local DataStoreFake = ReplicatedStorage.DataStoreFake.Value
 
 --local PlayerData                = {}
 local Server                    = {
     PlayerDataManagement        = {};
     PlayerData                  = {};
+    LastSaveTimes               = {};
 }
 
 function Server.PlayerDataManagement.WaitForDataStore()
@@ -73,113 +74,77 @@ function Server.PlayerDataManagement.RecursiveBuild(Data)
     return Data
 end
 
-function Server.PlayerDataManagement.Save(Player)
-    local PlayerData = Server.PlayerData[Player.UserId]
+--[[
+    @function Server.PlayerDataManagement.LeaveSave
 
-    if PlayerData then
-        Server.PlayerDataStore:SetAsync(Player.UserId, Server.PlayerDataManagement.RecursiveSerialise(Table.Clone(PlayerData)))
-        print("Saved player data for " .. Player.Name)
-    else
-        warn(string.format("No player data found for player ID '%d'!", Player.UserId))
-    end
-end
+    Saves the data when the player leaves the server.
 
+    @note This is the only time the data saves.
+]]
 function Server.PlayerDataManagement.LeaveSave(Player)
     local ID = Player.UserId
-    local PlayerData = Server.PlayerData[ID]
 
-    if PlayerData then
-        --[[
-            Todo: player joined index records the last time players joined.
-            If last time < 6 secs ago, wait the remaining time.
-        ]]
-
-        Server.PlayerDataStore:SetAsync(ID, Server.PlayerDataManagement.RecursiveSerialise(Table.Clone(PlayerData)))
-        ReplicatedData.PlayerData[ID] = nil
-        print("Saved player data for " .. Player.Name .. " and nullified store")
-    else
-        warn(string.format("No player data found for player ID '%d'!", ID))
+    if (not Server.PlayerData[ID]) then
+        return
     end
 
-    --[[Server.PlayerDataStore:UpdateAsync(UserId function()
-        return Serial
-    end)]]
+    Logging.Log(0, "Saving data for player %d(%s)...", Player.UserId, Player.Name)
+
+    Server.PlayerDataStore:UpdateAsync(ID, function()
+        return Server.PlayerData[ID]
+    end)
+
+    Logging.Log(0, "Successfully saved data for player %d(%s)", Player.UserId, Player.Name)
+
+    ReplicatedData.PlayerData[ID] = nil
+    Server.PlayerData[ID] = nil
+end
+
+function Server.PlayerDataManagement.Load(Player)
+    local ID = Player.UserId
+
+    -- Repetitive attempt to obtain data
+    Logging.Log(0, "Attempting to get data for player %d(%s)...", Player.UserId, Player.Name)
+    
+    local Success = false
+
+    while ((not Success) and Player.Parent) do
+        Success = ypcall(function()
+            Server.PlayerData[ID] = Server.PlayerDataStore:GetAsync(ID) or {}
+        end)
+
+        if Success then
+            break
+        end
+
+        wait(8)
+    end
+
+    Logging.Log(0, "Got data for player %d(%s)", Player.UserId, Player.Name)
 end
 
 function Server.Init()
-    -- Metamethods are necessary to convert player ID to string when ID < 0
-
+    Server.PlayerDataStore = (
+        DataStoreFake
+        and Server.FakeDataStore
+        or DataStoreService:GetDataStore(ReplicatedStorage.DataStoreVersion.Value)
+    )
     ReplicatedData.PlayerData = Server.PlayerData
 
-    local function Handle(Player)
-        Server.PlayerDataManagement.WaitForDataStore()
-
-        local Success, Data = pcall(function()
-            return Server.PlayerDataStore:GetAsync(Player.UserId)
-        end)
-
-        while (Success == false) do
-            Success, Data = pcall(function()
-                return Server.PlayerDataStore:GetAsync(Player.UserId)
-            end)
-            print("Wait for Data Store")
-            wait(Configuration.pPlayerDataRetry)
-        end
-
-        Data = Data or {}
-        Server.PlayerDataManagement.RecursiveBuild(Data)
-
-        print("Waiting for transmission ready for " .. Player.Name)
-
-        while (not Communication.TransmissionReady[Player.Name]) do
-            wait(0.05)
-        end
-
-        print("Transmission ready for " .. Player.Name)
-
-        ReplicatedData.PlayerData[Player.UserId] = Data
-        Logging.Debug(0, string.format("Loaded player data in PlayerDataHandler for '%s'.", Player.Name))
-
-        while wait(Configuration.pSaveInterval) do
-            if not Player.Parent then break end
-            Server.PlayerDataManagement.Save(Player)
-        end
-    end
-
-    Async.Wrap(function()
-
-        local function TryGet()
-            if (game.PlaceId <= 0 or (ReplicatedStorage:FindFirstChild("DataStoreFake") and ReplicatedStorage.DataStoreFake.Value == true)) then
-                -- Player data manager running in test mode.
-                Server.PlayerDataStore = {
-                    GetAsync = function(Self, Key)
-                        return Self[Key]
-                    end;
-                    SetAsync = function(Self, Key, Value)
-                        Self[Key] = Value
-                    end;
-                }
-                Logging.Debug(1, "Set data store as table.")
-            else
-                Logging.Debug(1, "Set data store as live.")
-                Server.PlayerDataStore = DataStoreService:GetDataStore(ReplicatedStorage:FindFirstChild("DataStoreVersion") and ReplicatedStorage.DataStoreVersion.Value or Configuration.pDataStoreVersion)
-            end
-        end
-
-        while true do
-            if pcall(TryGet) then
-                break
-            end
-            wait(Configuration.pDataStoreGetRetrywait)
-        end
-    end)()
-
-    Players.PlayerAdded:Connect(Handle)
+    Players.PlayerAdded:Connect(Server.PlayerDataManagement.Load)
     Players.PlayerRemoving:Connect(Server.PlayerDataManagement.LeaveSave)
-
-    for _, Item in pairs(Players:GetChildren()) do
-        Async.Wrap(Handle)(Item)
-    end
 end
+
+Server.FakeDataStore = {
+    GetAsync = function(Self, Key)
+        return Self[Key]
+    end;
+    SetAsync = function(Self, Key, Value)
+        Self[Key] = Value
+    end;
+    UpdateAsync = function(Self, Key, Operator)
+        Self[Key] = Operator(Self[Key])
+    end;
+}
 
 return Server

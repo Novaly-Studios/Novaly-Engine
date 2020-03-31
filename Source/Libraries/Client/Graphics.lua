@@ -174,13 +174,13 @@ end
 
 function Graphics:UpdateBillboards()
 
-    local SurfaceBillboards = Graphics.SurfaceBillboards
+    --[[ local SurfaceBillboards = Graphics.SurfaceBillboards
 
     for _, Value in pairs(SurfaceBillboards) do
         if (Value.Part.Parent) then
             Value:Update()
         end
-    end
+    end ]]
 end
 --[[ 
 function Graphics:RegisterSurfaceBillboard(Item)
@@ -299,7 +299,7 @@ function Graphics:Init()
 
         local PartIters = math.floor(Configuration.gTransparentPartsPerFrame * (1 / Step) / Configuration._TargetFramerate)
         Graphics:UpdateLensFlares()
-        Graphics:UpdateBillboards()
+        --Graphics:UpdateBillboards()
         TransparentPartHandler:Next(PartIters)
         TransparentPartHandler:Clean(Clean, PartIters)
 

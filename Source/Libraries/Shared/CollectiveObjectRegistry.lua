@@ -1,6 +1,6 @@
 local CollectionService = game:GetService("CollectionService")
 local CollectiveObjectRegistry = {
-    InstanceToComponentCollection = {};
+    InstanceToComponentCollection = {}; --TODO: test this extensively: setmetatable({}, {__mode = "k"});
     ComponentToInstanceCollection = {};
     RegisteredObjects = {};
     Registered = {};
