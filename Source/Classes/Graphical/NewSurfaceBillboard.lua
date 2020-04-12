@@ -30,6 +30,8 @@ function NewSurfaceBillboard:NewSurfaceBillboard(Part)
         MinimumScale = SettingsAsTable.MinimumScale or 1.5;
         DistanceScale = SettingsAsTable.DistanceScale;
         DistanceMultiplier = SettingsAsTable.DistanceMultiplier or 0.5;
+        RotationOffset = SettingsAsTable.RotationOffset or CFrame.new();
+        Enabled = true;
     };
 end
 
@@ -75,8 +77,8 @@ function NewSurfaceBillboard:Update()
         Part.Size = Vector3.new(math.clamp(DesiredSize.X, self.MinimumScale * self.OriginalSize.X, self.MaximumScale * self.OriginalSize.X), math.clamp(DesiredSize.Y, self.MinimumScale * self.OriginalSize.Y, self.MaximumScale * self.OriginalSize.Y), self.OriginalSize.Z)
     end
 
-    GUI.Enabled =  true
-    Part.CFrame = CFrame.new(From, To)
+    GUI.Enabled = self.Enabled
+    Part.CFrame = CFrame.new(From, To) * self.RotationOffset
 end
 
 function NewSurfaceBillboard:Destroy()

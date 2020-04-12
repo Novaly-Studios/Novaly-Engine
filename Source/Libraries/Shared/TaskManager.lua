@@ -15,21 +15,13 @@ end
 
 function TaskManager:Run(Times)
 
-    debug.profilebegin("TaskManagerBatch")
-
     for _ = 1, Times do
-        debug.profilebegin("TaskManagerTask")
-
         local Item = self.Queue:Pop()
 
         if Item then
             Item.Data()
         end
-
-        debug.profileend()
     end
-
-    debug.profileend()
 end
 
 function TaskManager:AddOnStep(VDP)

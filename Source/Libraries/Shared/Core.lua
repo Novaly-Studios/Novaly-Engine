@@ -23,7 +23,6 @@ local Core = {}
     @param Items The table of items to count.
     @return The count of table elements.
 ]]
-
 function Core.Count(Items)
     local Count = 0
     for _ in pairs(Items) do
@@ -46,7 +45,6 @@ end
     @param ... The input objects to test.
     @return A table of values denoting the primitive Lua types of the input variables.
 ]]
-
 function Core.TypeChain(...)
     local Result = {}
     for _, Item in pairs({...}) do
@@ -71,7 +69,6 @@ end
     @param ... Properties to overwrite as strings.
     @return A callable function, accepting a table of desired key-value modifications.
 ]]
-
 function Core.With(...)
     local Items = {...}
     return function(Append)
@@ -81,56 +78,6 @@ function Core.With(...)
             end
         end
     end
-end
-
---[[
-    Map accepts a table of inputs, operates on those
-    inputs using a function and returns a new table of
-    processed inputs.
-
-    @usage
-        local New = Map({1, 2, 3}, function(_, x)
-            return x * 2
-        end)
-
-    @param Items The table containing inputs.
-    @param Operator The function which will operate on the inputs.
-    @return A table containing the processed inputs.
-]]
-
-function Core.Map(Items, Operator)
-    local Result = {}
-    for _, Item in pairs(Items) do
-        table.insert(Result, Operator(Item))
-    end
-    return Result
-end
-
---[[
-    Filter accepts a table of inputs to filter.
-    It iterates through these inputs with a
-    condition function; items which meet the
-    condition are inserted into a new table and
-    returned.
-
-    @usage:
-        Filter({1, 2, 3, 4, 5}, function(Num)
-            return Num < 4
-        end)
-
-    @param Items The input items to test.
-    @param Assess The condition function which assesses each input.
-    @return A table with all filtered objects which met the condition.
-]]
-
-function Core.Filter(Items, Assess)
-    local Result = {}
-    for Key, Item in pairs(Items) do
-        if (Assess(Item, Key)) then
-            table.insert(Result, Item)
-        end
-    end
-    return Result
 end
 
 --[[
@@ -144,7 +91,6 @@ end
     @param End The larger number of the range.
     @return A table of the range {Start, ..., End}.
 ]]
-
 function Core.Range(Start, End)
     local Result = {}
     for Index = Start, End do
@@ -172,7 +118,6 @@ end
     @param Operator The function which operates on each input.
     @return A single reduced value.
 ]]
-
 function Core.Reduce(Items, Operator)
     local Result = Items[1]
     local Count = #Items
@@ -200,7 +145,6 @@ end
 
     @todo Detect and implement negative increments.
 ]]
-
 function Core.GetNaryLoop(Bounds)
 
     local Recursive
@@ -239,7 +183,6 @@ end
     @param Sample The sample table consisting of several sub-tables.
     @return The permutations of the values of the sub-tables.
 ]]
-
 function Core.Product(Sample)
 
     local Ranges = {}
@@ -277,7 +220,6 @@ end
 
     @todo Verify performance of Switch vs elseif on small and large data sets
 ]]
-
 function Core.Switch(Value)
     return function(Cases)
         local Target = Cases[Value] or Cases["Default"]
@@ -304,7 +246,6 @@ end
     @param Item The table which will be stripped of its values.
     @return The processed table.
 ]]
-
 function Core.Keys(Item)
     local Result = {}
     for Key in pairs(Item) do

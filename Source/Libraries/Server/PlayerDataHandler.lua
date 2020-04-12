@@ -84,28 +84,34 @@ end
 function Server.PlayerDataManagement.LeaveSave(Player)
     local ID = Player.UserId
 
+    -- Could still be loading, in which case better to discard,
+    -- since player has probable moved to another server by this time
     if (not Server.PlayerData[ID]) then
         return
     end
 
-    Logging.Log(0, "Saving data for player %d(%s)...", Player.UserId, Player.Name)
+    Logging.Debug(0, "Saving data for player %d(%s)...", Player.UserId, Player.Name)
 
     Server.PlayerDataStore:UpdateAsync(ID, function()
         return Server.PlayerData[ID]
     end)
 
-    Logging.Log(0, "Successfully saved data for player %d(%s)", Player.UserId, Player.Name)
+    Logging.Debug(0, "Successfully saved data for player %d(%s)", Player.UserId, Player.Name)
 
     ReplicatedData.PlayerData[ID] = nil
     Server.PlayerData[ID] = nil
+
+    if DataStoreFake then
+        Server.PlayerDataStore[ID] = nil
+    end
 end
 
 function Server.PlayerDataManagement.Load(Player)
     local ID = Player.UserId
 
     -- Repetitive attempt to obtain data
-    Logging.Log(0, "Attempting to get data for player %d(%s)...", Player.UserId, Player.Name)
-    
+    Logging.Debug(0, "Attempting to get data for player %d(%s)...", Player.UserId, Player.Name)
+
     local Success = false
 
     while ((not Success) and Player.Parent) do
@@ -120,9 +126,14 @@ function Server.PlayerDataManagement.Load(Player)
         wait(8)
     end
 
-    Logging.Log(0, "Got data for player %d(%s)", Player.UserId, Player.Name)
+    Logging.Debug(0, "Got data for player %d(%s)", Player.UserId, Player.Name)
 end
 
+--[[
+    @function Server.Init
+
+    Initialises the DataStore.
+]]
 function Server.Init()
     Server.PlayerDataStore = (
         DataStoreFake

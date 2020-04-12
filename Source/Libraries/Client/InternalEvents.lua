@@ -82,8 +82,6 @@ end
 
 function InternalEvents:Init()
     RunService.--[[ Render ]]Stepped:Connect(function()
-        debug.profilebegin("InternalEventsSequence")
-
         for Target in pairs(InternalEvents.Scheduled) do
             local EndTime = Target.State.EndTime
             if EndTime then
@@ -93,8 +91,6 @@ function InternalEvents:Init()
                 end
             end
         end
-
-        debug.profileend()
     end)
 end
 

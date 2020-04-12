@@ -27,11 +27,9 @@ local Geometry = {}
     @param Point The Vector2 point to check intersection.
     @param Polygon A table of Vector2 points defining the vertices of the polygon.
 ]]
-
 function Geometry:PointIsWithinPolygon(Point, Polygon)
-
---[[     assert(typeof(Point) == "Vector2")
-    assert(typeof(Polygon) == "table") ]]
+    assert(typeof(Point) == "Vector2")
+    assert(typeof(Polygon) == "table")
 
     local Result = false
     local Prev = #Polygon

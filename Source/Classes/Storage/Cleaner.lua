@@ -19,7 +19,7 @@ function Cleaner:Clean()
     for Index, Item in pairs(self.ToProcess) do
         local Type = typeof(Item)
 
-        if (Type == "RBXScriptSignal") then
+        if (Type == "RBXScriptConnection") then
             Item:Disconnect()
         elseif (Type == "table") then
             if (Item.Disconnect) then
@@ -29,6 +29,8 @@ function Cleaner:Clean()
             if (Item.Destroy) then
                 Item:Destroy()
             end
+        else
+            error("Unsupported type: " .. Type)
         end
 
         self.ToProcess[Index] = nil

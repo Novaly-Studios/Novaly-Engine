@@ -34,12 +34,12 @@ GameShared                  = (GameShared and GameShared.Parent or ReplicatedFir
 local GameServer            = ServerScriptService:FindFirstChild("GAME_INDICATOR_SERVER", true)
 GameServer                  = (GameServer and GameServer.Parent or ServerScriptService)
 
-local DebugMode             = (ReplicatedFirst:FindFirstChild("DEBUG_MODE") and ReplicatedFirst.DEBUG_MODE.Value or false)
+local LogLevel              = (ReplicatedFirst:FindFirstChild("LOG_LEVEL") and ReplicatedFirst.LOG_LEVEL.Value or 10)
 
 Engine["ClientFolder"] = GameClient
 Engine["SharedFolder"] = GameShared
 Engine["ServerFolder"] = GameServer
-Engine["DebugMode"] = DebugMode
+Engine["LogLevel"] = LogLevel
 
 function Loader:Get(Name, Tabs)
 
@@ -87,7 +87,7 @@ function Loader:Get(Name, Tabs)
             Got:Init()
         end
 
-        if DebugMode then
+        if (LogLevel >= 10) then
             local Diff = tick() - Time
             local Microseconds = Diff * 1e+6
             local Milliseconds = Diff * 1e+3
@@ -141,24 +141,26 @@ function Loader:Get(Name, Tabs)
                             RunService.Stepped:Wait()
                         end
 
-                        print(string.format("Novarine: Test Batch for '%s' {", Name))
+                        if (LogLevel >= 2) then
+                            print(string.format("Novarine: Test Batch for '%s' {", Name))
 
-                        for TestName, Item in pairs(Tests) do
-                            if (Item ~= true) then
-                                print("    " .. Item)
+                            for TestName, Item in pairs(Tests) do
+                                if (Item ~= true) then
+                                    print("    " .. Item)
+                                end
+
+                                local Cleanup = Cleanups[TestName]
+
+                                if Cleanup then
+                                    coroutine.wrap(Cleanup)()
+                                end
                             end
 
-                            local Cleanup = Cleanups[TestName]
+                            print("}")
 
-                            if Cleanup then
-                                coroutine.wrap(Cleanup)()
+                            if (Got.Tests.Finish) then
+                                Got.Tests.Finish()
                             end
-                        end
-
-                        print("}")
-
-                        if (Got.Tests.Finish) then
-                            Got.Tests.Finish()
                         end
                     end)()
                 end)
@@ -172,9 +174,10 @@ function Loader:Get(Name, Tabs)
 end
 
 function Loader:Add(Name, Item)
-    if DebugMode then
+    if (LogLevel >= 11) then
         print(string.format("Novarine - Add '%s' (%s)", Name, Indicator))
     end
+
     Engine[Name] = Item
 end
 
@@ -227,14 +230,15 @@ function Loader:Init()
         Engine[Name] = game:GetService(Name)
     end
 
-    if DebugMode then
+    if (LogLevel >= 10) then
         print(string.format("Novarine - Initialised (%s)", Indicator))
     end
 
     for _, Item in pairs(PreLoad) do
-        if DebugMode then
+        if (LogLevel >= 10) then
             print("Novarine - Preload Tree")
         end
+
         Loader:Get(Item, 1)
     end
 

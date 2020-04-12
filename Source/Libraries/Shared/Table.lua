@@ -108,10 +108,11 @@ end
 function Table.ToString(Item, Tabs)
 
     local Result = ""
+    local Spacing = (" "):rep(4)
 
     Tabs = Tabs or (function()
         Result = Result .. "BaseTable = {\n"
-        return (" "):rep(4)
+        return Spacing
     end)()
 
     for Key, Value in pairs(Item) do
@@ -125,7 +126,7 @@ function Table.ToString(Item, Tabs)
 
         if (ValueType == "table") then
             Result = Result .. Tabs .. tostring(Key) .. "{\n"
-            Result = Result .. Table.ToString(Value, Tabs .. (" "):rep(4))
+            Result = Result .. Table.ToString(Value, Tabs .. Spacing)
             Result = Result .. Tabs .. "};\n"
         else
             local Encapsulation = (ValueType == "string" and string.format("\"%s\"", Value) or tostring(Value))
@@ -133,7 +134,7 @@ function Table.ToString(Item, Tabs)
         end
     end
 
-    if (Tabs == (" "):rep(4)) then
+    if (Tabs == Spacing) then
         Result = Result .. "};\n"
     end
 
@@ -397,6 +398,14 @@ local function Mixed(Table, Path) -- Determines if a table has both numerical an
     end
 
     return false, Path
+end
+
+function Table.WeakKeys()
+    return setmetatable({}, {__mode = "k"})
+end
+
+function Table.WeakValues()
+    return setmetatable({}, {__mode = "v"})
 end
 
 Table.Mixed = Mixed -- Don't change, for some reason recursive call mucks up otherwise

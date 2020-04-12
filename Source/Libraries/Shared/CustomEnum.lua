@@ -4,12 +4,13 @@
     @module Enum Library
     @alias EnumLibrary
     @author TPC9000
+    @deprecate
 ]]
 
 local CustomEnums = {}
 
 --[[
-    @function CustomEnums.New
+    @function New
 
     Creates a new Enum.
 
@@ -20,7 +21,6 @@ local CustomEnums = {}
     @param Name The name of the Enum to create.
     @param Values The table of string key to numeric value associations.
 ]]
-
 function CustomEnums:New(Name, Values)
     assert(Name, "Argument missing: #1 Name (name of Enum)")
     assert(Values, "Argument missing: #2 Values (Enum values)")
@@ -29,7 +29,7 @@ function CustomEnums:New(Name, Values)
 end
 
 --[[
-    @function CustomEnums.NewCollection
+    @function NewCollection
 
     Creates a new automatically numbered Enum.
 
@@ -40,7 +40,6 @@ end
     @param Name The name of the Enum to create.
     @param Values The table of string values.
 ]]
-
 function CustomEnums:NewCollection(Name, Values)
     for Index, Value in pairs(Values) do
         Values[Value] = Index

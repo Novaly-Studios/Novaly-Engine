@@ -1,6 +1,8 @@
 local Static = {}
 
 --[[
+    https://github.com/adammabin/Static
+
     Directory:
     - FilterNested
     - MapNested
@@ -10,8 +12,8 @@ local Static = {}
     - Reduce
     - Flatten
     - FlattenNumeric
-    - SatisfiesAll
-    - SatisfiesOnce
+    - SatisfiesAll1D
+    - SatisfiesOnce1D1D
     - Fuse1D
     - FuseNumeric1D
     - FuseNested
@@ -24,14 +26,26 @@ local Static = {}
     - Values1D
     - Range
     - Reverse
-
-    Todo:
-    - Differential1D
-    - DifferentialNested
     - Shuffle
     - TwoWay
+
+    Functions Todo:
+    - Differential1D
+    - DifferentialNested
+
+    General Todo:
+
 ]]
 
+--[[
+    Creates a two-way associative array.
+
+    @param Table The table to map.
+
+    @return A new table such that both keys and
+            values are doubly associated with
+            each other.
+]]
 function Static.TwoWay(Table)
     local Result = {}
 
@@ -47,8 +61,15 @@ end
     Randomises a table.
 
     @param Table The table to randomise.
+    @param[opt] Seed The random seed to utilise for the RNG.
 
-    @return The randomised table.
+    @return The shuffled table.
+
+    @usage
+        local SoundIDs = {
+            1234, 5678, 9012,
+            3456, 7890, 1000
+        }
 ]]
 function Static.Shuffle(Table, Seed)
     if Seed then
@@ -371,12 +392,12 @@ end
         local Items = {
             1, 5, 3, 2, 9
         }
-        local Satisfied = Static.SatisfiesAll(Items, function(Item)
+        local Satisfied = Static.SatisfiesAll1D(Items, function(Item)
             return Item >= 1
         end)
 ]]
 
-function Static.SatisfiesAll(Table, Assessment)
+function Static.SatisfiesAll1D(Table, Assessment)
     for _, Value in pairs(Table) do
         if (not Assessment(Value)) then
             return false
@@ -396,12 +417,12 @@ end
         local Items = {
             1, 4, 7, 5, 8
         }
-        local Satisfied = Static.SatisfiesOnce(Items, function(Item)
+        local Satisfied = Static.SatisfiesOnce1D(Items, function(Item)
             return Item > 5
         end)
 ]]
 
-function Static.SatisfiesOnce(Table, Assessment)
+function Static.SatisfiesOnce1D(Table, Assessment)
     for _, Value in pairs(Table) do
         if (Assessment(Value)) then
             return true
@@ -693,6 +714,10 @@ end
 -- Intuitive references
 Static.Map = Static.Map1D
 Static.KMap = Static.KMap1D
+Static.Keys = Static.Keys1D
+Static.Sort = Static.Sort1D
+Static.Copy = Static.Copy1D
 Static.Filter = Static.Filter1D
+Static.Values = Static.Values1D
 
 return Static

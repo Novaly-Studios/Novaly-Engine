@@ -28,6 +28,7 @@ local function BindRemoteEvent(Name, Handler)
     local Found = Events[Name] or Event.New()
     local Connection = Found:Connect(Handler)
     Events[Name] = Found
+    Client.ReadyEvent:FireServer(Name)
     return Connection
 end
 
@@ -47,11 +48,13 @@ function Client.InvokeRemoteFunction(...)
 end
 
 function Client.Init()
+    local RemoteEvent = ReplicatedStorage:WaitForChild("RemoteEvent")
+    local RemoteFunction = ReplicatedStorage:WaitForChild("RemoteFunction")
+    local ReadyEvent = ReplicatedStorage:WaitForChild("ReadyEvent")
 
-    local RemoteEvent       = ReplicatedStorage:WaitForChild("RemoteEvent")
-    local RemoteFunction    = ReplicatedStorage:WaitForChild("RemoteFunction")
-    Client.RemoteEvent      = RemoteEvent
-    Client.RemoteFunction   = RemoteFunction
+    Client.RemoteEvent = RemoteEvent
+    Client.RemoteFunction = RemoteFunction
+    Client.ReadyEvent = ReadyEvent
 
     RemoteEvent.OnClientEvent:Connect(function(Name, ...)
 

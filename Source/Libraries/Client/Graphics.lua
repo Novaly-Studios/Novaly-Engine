@@ -295,15 +295,11 @@ function Graphics:Init()
     end
 
     RunService.Heartbeat:Connect(function(Step)
-        debug.profilebegin("GraphicsUpdate")
-
         local PartIters = math.floor(Configuration.gTransparentPartsPerFrame * (1 / Step) / Configuration._TargetFramerate)
         Graphics:UpdateLensFlares()
         --Graphics:UpdateBillboards()
         TransparentPartHandler:Next(PartIters)
         TransparentPartHandler:Clean(Clean, PartIters)
-
-        debug.profileend()
     end)
 
     --[[ RunService:BindToRenderStep("BillboardUpdates", Enum.RenderPriority.Camera.Value - 1, function()
@@ -334,25 +330,6 @@ function Graphics:Init()
     CollectionService:GetInstanceAddedSignal(Graphics.Tags.TransparentPart):Connect(function(Part)
         TransparentPartHandler:Add(Part)
     end)
-
---[[     local function SurfaceBillboardCreate(Item)
-        if (not Item.Parent:IsA("BasePart")) then
-            return nil
-        end
-
-        local Object = SurfaceBillboard.New(Item, Item.Parent, 150, CFrame.new(0, 5.5, 0))
-        Graphics.SurfaceBillboards[Item] = Object
-        return Object
-    end
-
-    local function SurfaceBillboardDestroy(Item, Object)
-        assert(Graphics.SurfaceBillboards[Item])
-        Graphics.SurfaceBillboards[Item] = nil
-        Object:Destroy()
-    end
-
-    ObjectRegistry:Register("Graphics:SurfaceBillboard", SurfaceBillboardCreate, SurfaceBillboardDestroy)
-    ObjectRegistry:Register("Alternate:SurfaceBillboard", SurfaceBillboardCreate, SurfaceBillboardDestroy) ]]
 
     CollectiveObjectRegistry:Register("Graphics:SurfaceBillboard", {NewSurfaceBillboard}, function(_, Item)
         if (Workspace:IsAncestorOf(Item)) then

@@ -19,7 +19,7 @@ local CollectionHelper = {
 };
 
 --[[
-    @function CollectionHelper.GetDescendantsWithTag
+    @function GetDescendantsWithTag
 
     Finds any descendant objects with specified tag.
     
@@ -33,7 +33,6 @@ local CollectionHelper = {
 
     @return A table of items found by the search.
 ]]
-
 function CollectionHelper:GetDescendantsWithTag(Root, Tag)
 
     local Result = {}
@@ -48,7 +47,7 @@ function CollectionHelper:GetDescendantsWithTag(Root, Tag)
 end
 
 --[[
-    @function CollectionHelper.GetChildrenWithTag
+    @function GetChildrenWithTag
 
     Finds any children (not descendants) with
     specified tag.
@@ -63,7 +62,6 @@ end
 
     @return A table of items found by the search.
 ]]
-
 function CollectionHelper:GetChildrenWithTag(Root, Tag)
 
     local Result = {}
@@ -78,7 +76,7 @@ function CollectionHelper:GetChildrenWithTag(Root, Tag)
 end
 
 --[[
-    @function CollectionHelper.FindFirstDescendantWithTag
+    @function FindFirstDescendantWithTag
 
     Finds the first descendant with any given tag.
 
@@ -90,7 +88,6 @@ end
 
     @return An instance with the specified tag, if one was found.
 ]]
-
 function CollectionHelper:FindFirstDescendantWithTag(Root, Tag)
 
     for _, Object in pairs(Root:GetDescendants()) do
@@ -100,6 +97,13 @@ function CollectionHelper:FindFirstDescendantWithTag(Root, Tag)
     end
 end
 
+--[[
+    @function FindFirstDescendantWithTagPerformanceCached
+
+    Same as FindFirstDescendantWithTag but is cached once.
+    Use for performance-intensive searches where the
+    hierarchy cannot change.
+]]
 function CollectionHelper:FindFirstDescendantWithTagPerformanceCached(Root, Tag)
     local Cache = self.Cache
     local ForThis = Cache[Root]
@@ -131,6 +135,13 @@ function CollectionHelper:FindFirstDescendantWithTagPerformanceCached(Root, Tag)
     end
 end
 
+--[[
+    @function FindFirstChildWithTagPerformanceCached
+
+    Same as FindFirstChildWithTag but is cached once.
+    Use for performance-intensive searches where the
+    hierarchy cannot change.
+]]
 function CollectionHelper:FindFirstChildWithTagPerformanceCached(Root, Tag)
     local Cache = self.ChildCache
     local ForThis = Cache[Root]
@@ -162,6 +173,13 @@ function CollectionHelper:FindFirstChildWithTagPerformanceCached(Root, Tag)
     end
 end
 
+--[[
+    @function GetDescendantsWithTagPerformanceCached
+
+    Same as GetDescendantsWithTag but is cached once.
+    Use for performance-intensive searches where the
+    hierarchy cannot change.
+]]
 function CollectionHelper:GetDescendantsWithTagPerformanceCached(Root, Tag)
     local DescendantCache = self.DescendantCache
     local ForThis = DescendantCache[Root]
@@ -195,7 +213,7 @@ function CollectionHelper:GetDescendantsWithTagPerformanceCached(Root, Tag)
 end
 
 --[[
-    @function CollectionHelper.FindFirstChildWithTag
+    @function FindFirstChildWithTag
 
     Finds the first child with any given tag.
 
@@ -207,7 +225,6 @@ end
 
     @return An instance with the specified tag, if one was found.
 ]]
-
 function CollectionHelper:FindFirstChildWithTag(Root, Tag)
 
     for _, Object in pairs(Root:GetChildren()) do
@@ -218,7 +235,7 @@ function CollectionHelper:FindFirstChildWithTag(Root, Tag)
 end
 
 --[[
-    @function CollectionHelper.TagHasPrefix
+    @function TagHasPrefix
 
     Checks if any tags of an object are prefixed
     by a certain string.
@@ -233,7 +250,6 @@ end
 
     @return A boolean denoting whether the object had any tags prefixed as specified.
 ]]
-
 function CollectionHelper:TagHasPrefix(Object, Prefix)
 
     local PrefixLength = #Prefix
@@ -248,7 +264,7 @@ function CollectionHelper:TagHasPrefix(Object, Prefix)
 end
 
 --[[
-    @function CollectionHelper.RemoveTags
+    @function RemoveTags
 
     Removes all tags from a given object.
 
@@ -257,7 +273,6 @@ end
 
     @param Object The Instance to remove tags from.
 ]]
-
 function CollectionHelper:RemoveTags(Object)
     for _, Tag in pairs(CollectionService:GetTags(Object)) do
         CollectionService:RemoveTag(Object, Tag)
@@ -265,7 +280,7 @@ function CollectionHelper:RemoveTags(Object)
 end
 
 --[[
-    @function CollectionHelper.GetFirstTagged
+    @function GetFirstTagged
 
     Returns the first item in the game with a given tag.
     Useful for finding unique items.
@@ -273,39 +288,8 @@ end
     @param Tag The tag to search for.
     @return Any item found with the given tag.
 ]]
-
 function CollectionHelper:GetFirstTagged(Tag)
     return CollectionService:GetTagged(Tag)[1]
-end
-
---[[
-    @function CollectionHelper.HasTagCached
-
-    Performant version of CollectionService.HasTag.
-    Assumes the tag will not be removed.
-]]
---[[ function CollectionHelper:HasTagCached(Item, Tag)
-    return CollectionService:HasTag(Item, Tag)
-end ]]
-
-function CollectionHelper:HasTagCached(Item, Tag)
-    local HasTagCache = self.HasTagCache
-    local HasTags = HasTagCache[Item]
-
-    if (not HasTags) then
-        HasTags = {}
-        HasTagCache[Item] = HasTags
-    end
-
-    local HasTag = HasTags[Tag]
-
-    if (HasTag and tick() - HasTag[2] <= 0.2) then
-        return HasTag[1]
-    end
-
-    local Result = CollectionService:HasTag(Item, Tag)
-    HasTags[Tag] = {Result, tick()}
-    return Result
 end
 
 return CollectionHelper

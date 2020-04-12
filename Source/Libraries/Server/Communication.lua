@@ -13,16 +13,16 @@ local ReplicatedStorage = Novarine:Get("ReplicatedStorage")
 local Event = Novarine:Get("Event")
 local Configuration = Novarine:Get("Configuration")
 local Players = Novarine:Get("Players")
-local Logging = Novarine:Get("Logging")
 local Async = Novarine:Get("Async")
 
 local Server = {
     TransmissionReady = {};
-}
+    EventsReady = {};
+};
 local Binds = {
     Events = {};
     Functions = {}
-}
+};
 
 local function BindRemoteEvent(Name, Handler)
     local Events = Binds.Events
@@ -60,18 +60,61 @@ function Server.InvokeRemoteFunction(Name, Player, ...)
     return Server.RemoteFunction:InvokeClient(Player, Name, ...)
 end
 
+function Server.FireRemoteEventWhenAvailable(Name, Player, ...)
+    local Args = ...
+
+    Async.Wrap(function()
+        local Ready
+
+        while (Player.Parent) do
+            local PlayerEvents = Server.EventsReady[Player.UserId]
+
+            if (not PlayerEvents) then
+                PlayerEvents = {}
+                Server.EventsReady[Player.UserId] = PlayerEvents
+            end
+
+            Ready = PlayerEvents[Name]
+
+            if Ready then
+                break
+            end
+
+            wait()
+        end
+
+        if (not Player.Parent) then
+            return
+        end
+
+        Server.FireRemoteEvent(Name, Player, Args)
+    end)()
+end
+
 function Server.Broadcast(...)
     Server.RemoteEvent:FireAllClients(...)
 end
 
 function Server.Init()
 
-    local RemoteEvent       = ReplicatedStorage:FindFirstChild("RemoteEvent") or
+    local RemoteEvent = ReplicatedStorage:FindFirstChild("RemoteEvent") or
                             Instance.new("RemoteEvent", ReplicatedStorage)
-    local RemoteFunction    = ReplicatedStorage:FindFirstChild("RemoteFunction") or
+    local RemoteFunction = ReplicatedStorage:FindFirstChild("RemoteFunction") or
                             Instance.new("RemoteFunction", ReplicatedStorage)
-    Server.RemoteEvent      = RemoteEvent
-    Server.RemoteFunction   = RemoteFunction
+    local ReadyEvent = ReplicatedStorage:FindFirstChild("ReadyEvent") or
+                            Instance.new("RemoteEvent", ReplicatedStorage)
+
+    ReadyEvent.Name = "ReadyEvent"
+
+    Server.RemoteEvent = RemoteEvent
+    Server.RemoteFunction = RemoteFunction
+    Server.ReadyEvent = ReadyEvent
+
+    ReadyEvent.OnServerEvent:Connect(function(Player, Name)
+        assert(typeof(Name) == "string")
+        Server.EventsReady[Player.UserId] = Server.EventsReady[Player.UserId] or {}
+        Server.EventsReady[Player.UserId][Name] = true
+    end)
 
     RemoteEvent.OnServerEvent:Connect(function(Player, Name, ...)
 

@@ -1,12 +1,45 @@
+local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
+local Async = Novarine:Get("Async")
+
 local CollectionService = game:GetService("CollectionService")
 local CollectiveObjectRegistry = {
-    InstanceToComponentCollection = {}; --TODO: test this extensively: setmetatable({}, {__mode = "k"});
-    ComponentToInstanceCollection = {};
+    InstanceToComponentCollection = {}; -- Instance -> {Component1 = true, Component2 = true, ...}
+    ComponentToInstanceCollection = {}; -- Component Class -> {Component1 = Instance1, Component2 = Instance2, ...}
     RegisteredObjects = {};
     Registered = {};
 
     Tests = {};
 };
+
+coroutine.wrap(function()
+    if (game:GetService("RunService"):IsClient()) then
+        return
+    end
+
+    while wait(60) do
+        local Unparented1 = 0
+
+        for Instance in pairs(CollectiveObjectRegistry.InstanceToComponentCollection) do
+            if (not Instance.Parent) then
+                Unparented1 = Unparented1 + 1
+            end
+        end
+
+        print("Unparented1: " .. Unparented1)
+
+        local Unparented2 = 0
+
+        for _, Instances in pairs(CollectiveObjectRegistry.ComponentToInstanceCollection) do
+            for _, Instance in pairs(Instances) do
+                if (not Instance.Parent) then
+                    Unparented2 = Unparented2 + 1
+                end
+            end
+        end
+
+        print("Unparented2: " .. Unparented2)
+    end
+end)()
 
 function CollectiveObjectRegistry:Register(Tag, Components, CreationHandler, DestructionHandler, AncestorTarget)
 
@@ -23,7 +56,7 @@ function CollectiveObjectRegistry:Register(Tag, Components, CreationHandler, Des
     CreationHandler = CreationHandler or self.StandardConstruct
     DestructionHandler = DestructionHandler or self.StandardDestroy
 
-    local function SetComponentToInstaceCollectionValue(Object, Component, Value)
+    local function SetComponentToInstanceCollectionValue(Object, Component, Value)
         local TargetComponentToInstanceCollection = self.ComponentToInstanceCollection[Component] or {}
         TargetComponentToInstanceCollection[Object] = Value
         self.ComponentToInstanceCollection[Component] = TargetComponentToInstanceCollection
@@ -37,12 +70,10 @@ function CollectiveObjectRegistry:Register(Tag, Components, CreationHandler, Des
         local InstanceComponents = self.InstanceToComponentCollection[Object] or {}
         local HadValidComponent = false
 
-        --for _, Component in pairs(Components) do
-
         for Index = 1, #Components do -- Maintain order
             local Component = Components[Index]
             assert(Component, "No component found at index for " .. Tag .. "!")
-            SetComponentToInstaceCollectionValue(Object, Component, Object)
+            SetComponentToInstanceCollectionValue(Object, Component, Object)
 
             local ComponentObject = CreationHandler(Component, Object)
 
@@ -72,8 +103,8 @@ function CollectiveObjectRegistry:Register(Tag, Components, CreationHandler, Des
         assert(InstanceComponents, string.format("No instance components for object '%s'!", Object:GetFullName()))
 
         for _, ComponentObject in pairs(InstanceComponents) do
-            SetComponentToInstaceCollectionValue(Object, ComponentObject._COMPONENT_REF, nil)
-            DestructionHandler(ComponentObject)
+            SetComponentToInstanceCollectionValue(Object, ComponentObject._COMPONENT_REF, nil)
+            Async.Wrap(DestructionHandler)(ComponentObject)
         end
 
         self.InstanceToComponentCollection[Object] = nil
