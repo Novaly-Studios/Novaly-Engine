@@ -37,8 +37,22 @@ end
 
 function NewSurfaceBillboard:Initial()
     self.Connection = RunService.RenderStepped:Connect(function()
+        if (not self.Graphics) then
+            self.Graphics = Novarine:Get("Graphics")
+        end
+
         self:Update()
     end)
+
+    local Part = self.Part
+    local GUI = Part:FindFirstChildWhichIsA("SurfaceGui", true)
+
+    while (not GUI) do
+        GUI = Part:FindFirstChildWhichIsA("SurfaceGui", true)
+        wait(0.05)
+    end
+
+    self.GUI = GUI
 end
 
 function NewSurfaceBillboard:Destroy()
@@ -48,23 +62,30 @@ end
 function NewSurfaceBillboard:Update()
     local Part = self.Part
 
-    if (not self.Part) then
+    if (not Part) then
         self:Destroy()
+        return
+    end
+
+    local GUI = self.GUI
+
+    if (not GUI) then
+        return
+    end
+
+    GUI.Enabled = self.Enabled
+
+    if (not self.Enabled) then
         return
     end
 
     local Offset = self.Offset
     local Adornee = self.Adornee
     local MaxDistance = self.MaxDistance
-    local GUI = Part:FindFirstChildWhichIsA("SurfaceGui", true)
-
-    if (not GUI) then
-        return
-    end
 
     local OffsetPos = (self.OffsetPos or Vector3.new()) + Vector3.new(0, Part.Size.Y / 2, 0)
     local From = (Adornee.CFrame * Offset).Position + OffsetPos
-    local To = Novarine:Get("Graphics").Camera.CFrame.Position
+    local To = self.Graphics.Camera.CFrame.Position
     local Distance = (From - To).magnitude
 
     if (Distance > MaxDistance) then
@@ -72,12 +93,11 @@ function NewSurfaceBillboard:Update()
         return
     end
 
-    if (self.DistanceScale) then
+    if (self.DistanceScale and self.Enabled) then
         local DesiredSize = self.OriginalSize * (Distance * self.DistanceMultiplier) / self.DistanceScale
         Part.Size = Vector3.new(math.clamp(DesiredSize.X, self.MinimumScale * self.OriginalSize.X, self.MaximumScale * self.OriginalSize.X), math.clamp(DesiredSize.Y, self.MinimumScale * self.OriginalSize.Y, self.MaximumScale * self.OriginalSize.Y), self.OriginalSize.Z)
     end
 
-    GUI.Enabled = self.Enabled
     Part.CFrame = CFrame.new(From, To) * self.RotationOffset
 end
 

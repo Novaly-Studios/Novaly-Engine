@@ -34,20 +34,15 @@ function TweenValue.SingleTransition:Linear(Points, CurrentTime, Duration)
     assert(From and To, string.format("Point is nil!\n%s", self.Traceback))
 
     if (DataType == "CFrame") then
-
         return From:Lerp(To, TimeRatio)
-
     elseif (DataType == "UDim2") then
-
         return UDim2.new(
             Math.Lerp(From.X.Scale, To.X.Scale, TimeRatio),
             Math.Lerp(From.X.Offset, To.X.Offset, TimeRatio),
             Math.Lerp(From.Y.Scale, To.Y.Scale, TimeRatio),
             Math.Lerp(From.Y.Offset, To.Y.Offset, TimeRatio)
         )
-
     elseif (DataType == "Color3") then
-
         return Color3.new(
             Math.Lerp(From.r, To.r, TimeRatio),
             Math.Lerp(From.g, To.g, TimeRatio),
@@ -181,33 +176,38 @@ function TweenValue:TweenValue(TransitionClassificationName, TransitionerName, T
         TargetFramerateTime     = 1 / TargetFramerate;
         ControlPointsDynamic    = ControlPointsDynamic;
         Traceback               = debug.traceback(); -- Used for error reporting so we can trace back to where sequences were constructed
-    }
+
+        -- For performance with non dynamic control points
+        FirstPoint = Points[1];
+        SecondPoint = Points[2];
+    };
 end
 
 function TweenValue:GetValueAt(CurrentTime, Duration)
-
-    local Frame = math.floor(CurrentTime * self.TargetFramerate + 0.5) -- Access the current frame we are on (e.g. 0.5 seconds through = 30 frames)
-    local ComputedPoints = self.ComputedPoints
-    local UniquePoints = ComputedPoints[Duration]
-
-    -- Durations differ, so too will framely caching
-    if UniquePoints then
-        ComputedPoints = UniquePoints
-    else
-        local Points = {}
-        ComputedPoints[Duration] = Points
-        ComputedPoints = Points
-    end
 
     -- Dynamic control points disallow framely caching of interpolated values as they cannot be predicted from here
     if (self.ControlPointsDynamic) then
         return self:Transitioner(self.Points, CurrentTime, Duration, self.TransitionerData)
     elseif (CurrentTime < self.TargetFramerateTime) then -- Low inaccurate times (0.0004 etc) can cause first frame to be cached, so this solves that issue
-        return self.Points[1]
+        return self.FirstPoint
     elseif (CurrentTime == Duration) then
-        return self.Points[2]
+        return self.SecondPoint
     else
+        local Frame = math.floor(CurrentTime * self.TargetFramerate + 0.5) -- Access the current frame we are on (e.g. 0.5 seconds through = 30 frames)
+        local ComputedPoints = self.ComputedPoints
+        local UniquePoints = ComputedPoints[Duration]
+    
+        -- Durations differ, so too will framely caching
+        if UniquePoints then
+            ComputedPoints = UniquePoints
+        else
+            local Points = {}
+            ComputedPoints[Duration] = Points
+            ComputedPoints = Points
+        end
+
         ComputedPoints[Frame] = ComputedPoints[Frame] or self:Transitioner(self.Points, CurrentTime, Duration, self.TransitionerData)
+
         return ComputedPoints[Frame]
     end
 end

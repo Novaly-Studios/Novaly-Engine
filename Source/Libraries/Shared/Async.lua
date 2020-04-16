@@ -5,6 +5,7 @@
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
 local Promise = Novarine:Get("Promise")
 local RunService = game:GetService("RunService")
+local IsServer = RunService:IsServer()
 
 local Async = {}
 
@@ -126,20 +127,51 @@ end
     will terminate.
 
     @tparam Time number The time to wait for.
-    @tparam Condition function The assessment function.
+    @tparam Condition[opt='whatever'] function The assessment function.
     @tparam Event string[opt='RenderStepped'] A granular wait event name of RunService.
 ]]
 function Async.CWait(Time, Condition, Event)
+    Time = Time or 1/30
+
     local InitialTime = tick()
-    local AwaitEvent = RunService[Event or "RenderStepped"]
+    local AwaitEvent = IsServer and Async.ServerWait or RunService[Event or "Stepped"]
+
+    Condition = Condition or function()
+        return true
+    end
 
     while (tick() - InitialTime < Time) do
         if (not Condition()) then
             break
         end
 
-        AwaitEvent:Wait()
+        AwaitEvent:Wait(Time)
     end
+
+    return true
 end
+
+function Async.Wait(Time, Event)
+    Time = Time or 1/30
+
+    local InitialTime = tick()
+    local AwaitEvent = IsServer and Async.ServerWait or RunService[Event or "Stepped"]
+
+    if (Time <= 1/59) then
+        AwaitEvent:Wait()
+    else
+        while (tick() - InitialTime < Time) do
+            AwaitEvent:Wait(Time)
+        end
+    end
+
+    return true
+end
+
+Async.ServerWait = {
+    Wait = function()
+        wait()
+    end;
+};
 
 return Async

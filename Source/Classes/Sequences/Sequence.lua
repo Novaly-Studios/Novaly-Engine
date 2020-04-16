@@ -14,9 +14,10 @@ function Sequence:Sequence(Properties)
         CurrentTime = 0.0;  -- Current time of the sequence
         TimePercentile = 0.0;  -- A number between 0 and 1 denoting whole sequence progress
         Animations = setmetatable({}, {__mode = "k"}); -- A table of animation objects
+        StaticAnimate = false; -- User-signified: only set to true to avoid performance issues when the animation is dependent on a condition and when no dynamic control points are being used
         AutoStop = true;  -- Automatically stops the sequence when done
         Play = false; -- When true, allows the sequence to step
-    }
+    };
 
     for Key, Value in pairs(Properties) do
         local ValueType = type(Value)
@@ -45,7 +46,7 @@ end
 
 function Sequence:GetActiveAnimationsAtTime(CurrentTime)
 
-    local Active = {}
+    local Active = setmetatable({}, {__mode = "k"}) --{}
 
     for Animation in pairs(self.Animations) do
         if (CurrentTime >= Animation.StartTime) then
@@ -84,6 +85,7 @@ function Sequence:Wait()
     while (self.Play) do
         RunService.Stepped:Wait()
     end
+
     return self
 end
 
@@ -110,12 +112,25 @@ function Sequence:Step(TimeDelta)
         return
     end
 
-    local PreviousTime = self.CurrentTime
-    local FinishBind = self.FinishBind
     local StepBind = self.StepBind
+    local PreviousTime = self.CurrentTime
     local CurrentTime = PreviousTime + TimeDelta * self.Increment
     local ClampedTime = math.clamp(CurrentTime, 0, self.Duration)
+
+    if (self.PreviousTime == ClampedTime and self.StaticAnimate and not self.AutoStop) then
+        -- Prevents static animations from updating and causing performance issues
+
+        if StepBind then
+            StepBind(self)
+        end
+
+        return
+    end
+
+    local FinishBind = self.FinishBind
     local CurrentAnimations = self:GetActiveAnimationsAtTime(ClampedTime)
+
+    self.PreviousTime = ClampedTime
 
     if (self.AutoStop) then
         if (CurrentTime < 0 or CurrentTime > self.Duration) then
@@ -158,7 +173,6 @@ function Sequence:Step(TimeDelta)
     end
 
     self.CurrentTime = CurrentTime
-    return self
 end
 
 return Sequence

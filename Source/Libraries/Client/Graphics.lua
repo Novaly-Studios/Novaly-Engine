@@ -309,7 +309,7 @@ function Graphics:Init()
         debug.profileend()
     end) ]]
 
-    Async.Wrap(function()
+    --[[ Async.Wrap(function()
         while wait(1/15) do
             Graphics:DetectPlayer()
             for _, Object in pairs(Graphics.SurfaceBillboards) do
@@ -325,7 +325,7 @@ function Graphics:Init()
                 end
             end
         end
-    end)()
+    end)() ]]
 
     CollectionService:GetInstanceAddedSignal(Graphics.Tags.TransparentPart):Connect(function(Part)
         TransparentPartHandler:Add(Part)

@@ -22,6 +22,7 @@ function LensFlareCollection:LensFlareCollection(Name, FadeTime, Adornee, MaxDis
     local FlareSequence = Sequence.New({
         Duration = FadeTime;
         AutoStop = false;
+        StaticAnimate = true;
     })
     FlareSequence:BindOnUpdate(function()
         FlareSequence.Increment = (self.Show and self.Enabled) and 1 or -1
