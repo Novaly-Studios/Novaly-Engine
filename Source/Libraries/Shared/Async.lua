@@ -74,27 +74,38 @@ function Async.Delay(Time, Callback)
 end
 
 --[[
+    @function Spawn
+    
+    Immediately spawns a function with
+    correct tracebacks.
+]]
+function Async.Spawn(Call, ...)
+    local Args = {...}
+    local BindableEvent = Instance.new("BindableEvent")
+
+    BindableEvent.Event:Connect(function()
+        Call(unpack(Args))
+    end)
+
+    BindableEvent:Fire()
+    BindableEvent:Destroy()
+end
+
+--[[
     @function Wrap
 
-    Uses coroutine.wrap or accurate traceback
-    for a coroutine. The latter is faster and
-    runs in non-debug mode.
+    Uses accurate traceback; acts as a
+    replacement for coroutine.wrap.
 
     @tparam Call Function The function to wrap.
     @return A function which will begin the wrapped function.
 ]]
-function Async.Wrap(Call)
-    if (Novarine.DebugMode) then
-        local BindableEvent = Instance.new("BindableEvent")
-        BindableEvent.Event:Connect(Call)
-
-        return function(...)
-            BindableEvent:Fire(...)
-            BindableEvent:Destroy()
-        end
+function Async.Wrap(Call)    
+    return function(...)
+        Async.Spawn(Call, ...)
     end
 
-    return coroutine.wrap(Call)
+    --return coroutine.wrap(Call)
 end
 
 --[[

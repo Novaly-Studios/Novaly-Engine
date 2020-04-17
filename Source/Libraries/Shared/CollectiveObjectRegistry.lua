@@ -259,7 +259,7 @@ end
 function CollectiveObjectRegistry.AsyncInitial(Component, InstanceObject)
     local Object = Component.New(InstanceObject)
 
-    coroutine.wrap(function()
+    Async.Wrap(function()
         Object:Initial()
     end)()
 
