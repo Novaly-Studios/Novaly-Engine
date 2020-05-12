@@ -6,7 +6,9 @@ local Async = Novarine:Get("Async")
 local Replication = {
     ReplicatedData = {};
     Constructions = {};
+    Unchanging = {};
     Modifiers = {};
+    Changed = {};
 };
 
 -- Changes an ObjectValue's value
@@ -61,20 +63,28 @@ function Replication:Init()
     ReplicationFolder.Name = "ReplicationFolder"
     ReplicationFolder.Parent = ReplicatedStorage
 
-    Async.Wrap(function()
-        while true do
-            if (ReplicationFolder.Parent) then
-                self:Update(ReplicationFolder, self.ReplicatedData)
-            else
-                break
-            end
-
-            wait(1/5)
+    Async.Timer(1/10, function(Halt)
+        if (ReplicationFolder.Parent) then
+            self:Update(ReplicationFolder, self.ReplicatedData, 0)
+        else
+            Halt()
         end
-    end)()
+    end)
 end
 
-function Replication:Update(InstanceRoot, VirtualRoot)
+--[[
+    Stops server mapping the whole tree
+    each iteration, performance benefit.
+]]
+function Replication:SetUnchangingKeyAbsolute(Key)
+    self.Unchanging[Key] = true
+end
+
+function Replication:Update(InstanceRoot, VirtualRoot, Depth)
+
+    if (self.Unchanging[InstanceRoot.Name] and self.Changed[InstanceRoot.Name]) then
+        return
+    end
 
     --[[
         Create or update values in the Instance
@@ -83,6 +93,10 @@ function Replication:Update(InstanceRoot, VirtualRoot)
     for Key, Value in pairs(VirtualRoot) do
         Key = tostring(Key) -- Account for numerical indices
         -- TODO: numerical indices aren't removed, fix
+
+        if (Depth == 1) then
+            debug.profilebegin("NReplicate(" .. Key .. ")")
+        end
 
         local InstanceObject = InstanceRoot:FindFirstChild(Key)
         local TargetType = typeof(Value)
@@ -96,9 +110,9 @@ function Replication:Update(InstanceRoot, VirtualRoot)
                 if it's an endpoint or recurse deeper.
             ]]
             if (TargetType == "table") then
-                self:Update(InstanceObject, Value)
+                self:Update(InstanceObject, Value, Depth + 1)
             else
-                TargetModifier(InstanceObject, Value)
+                TargetModifier(InstanceObject, Value, Depth + 1)
             end
         else
             --[[
@@ -121,6 +135,13 @@ function Replication:Update(InstanceRoot, VirtualRoot)
                 Item.Parent = InstanceRoot
             end
         end
+
+        self.Changed[Key] = true
+
+        if (Depth == 1) then
+            debug.profileend()
+            Async.Wait(1/60)
+        end
     end
 
     --[[
@@ -128,7 +149,7 @@ function Replication:Update(InstanceRoot, VirtualRoot)
         in the virtual tree
     ]]
     for _, Value in pairs(InstanceRoot:GetChildren()) do
-        local Key = (tonumber(Value.Name) or Value.Name) -- Account for numerical indices
+        local Key = tonumber(Value.Name) or Value.Name -- Account for numerical indices
 
         if (VirtualRoot[Key] == nil) then
             Value:Destroy()

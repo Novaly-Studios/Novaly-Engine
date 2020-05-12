@@ -71,13 +71,14 @@ function Class:New(Name, ClassTable)
         Result[self.ClassRefKey] = ClassTable
 
         function Result:__tostring()
-            local Stringed = Name .. " (\n"
+            --[[ local Stringed = Name .. " (\n"
 
             for Key, Item in pairs(self) do
                 Stringed = Stringed .. "    " .. tostring(Key) .. " = " .. tostring(Item) .. ";\n"
             end
 
-            return Stringed .. "\n)"
+            return Stringed .. "\n)" ]]
+            return Name .. "(Object)"
         end
 
         setmetatable(Result, ClassTable)

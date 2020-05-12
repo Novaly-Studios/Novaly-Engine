@@ -1,4 +1,5 @@
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
+local InstancePerformanceWrapper = Novarine:Get("InstancePerformanceWrapper")
 local Table = Novarine:Get("Table")
 local Async = Novarine:Get("Async")
 
@@ -8,13 +9,14 @@ local Replication = {
     LoggedCount = 0;
     Unchanging = {};
     Downloaded = {};
+    Wrapper = InstancePerformanceWrapper.New();
 };
 
 function Replication:Init()
     local ReplicationFolder = game:GetService("ReplicatedStorage"):WaitForChild("ReplicationFolder")
 
     Async.Wrap(function()
-        while (Async.Wait(1/20)) do
+        while (Async.Wait(1/--[[ 20 ]]60)) do
             self:Update(ReplicationFolder, self.ReplicatedData, 0)
         end
     end)()
@@ -29,6 +31,7 @@ function Replication:SetUnchangingKeyAbsolute(Key)
 end
 
 function Replication:Update(InstanceRoot, VirtualRoot, Level)
+    --InstanceRoot = self.Wrapper:Wrap(InstanceRoot)
 
     if (self.Unchanging[InstanceRoot.Name] and self.Downloaded[InstanceRoot.Name]) then
         return
@@ -55,7 +58,10 @@ function Replication:Update(InstanceRoot, VirtualRoot, Level)
         tree.
     ]]
     for _, Item in pairs(InstanceRoot:GetChildren()) do
-        local Key = (tonumber(Item.Name) or Item.Name) -- Account for numerical indices
+        --Item = Replication.Wrapper:Wrap(Item)
+
+        local Name = Item.Name
+        local Key = tonumber(Name) or Name -- Account for numerical indices
 
         if (VirtualRoot[Key]) then
             if (Item.ClassName == "Folder") then

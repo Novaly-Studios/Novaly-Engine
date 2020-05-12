@@ -6,15 +6,16 @@ local Table = Novarine:Get("Table")
 local DataStructures = Novarine:Get("DataStructures")
 local DataStoreService = Novarine:Get("DataStoreService")
 local ReplicatedStorage = Novarine:Get("ReplicatedStorage")
+local RunService = Novarine:Get("RunService")
 local Logging = Novarine:Get("Logging")
 local Async = Novarine:Get("Async")
 
 local ReplicatedData = Replication.ReplicatedData
-local DataStoreFake = ReplicatedStorage.DataStoreFake.Value
+local DataStoreFake
 
 --local PlayerData                = {}
 local Server                    = {
-    PlayerDataManagement        = {};
+    PlayerDataManagement        = {Saving = {}};
     PlayerData                  = {};
     LastSaveTimes               = {};
 }
@@ -90,13 +91,7 @@ function Server.PlayerDataManagement.LeaveSave(Player)
         return
     end
 
-    Logging.Debug(0, "Saving data for player %d(%s)...", Player.UserId, Player.Name)
-
-    Server.PlayerDataStore:UpdateAsync(ID, function()
-        return Server.PlayerData[ID]
-    end)
-
-    Logging.Debug(0, "Successfully saved data for player %d(%s)", Player.UserId, Player.Name)
+    Server.PlayerDataManagement.Save(ID)
 
     ReplicatedData.PlayerData[ID] = nil
     Server.PlayerData[ID] = nil
@@ -106,27 +101,28 @@ function Server.PlayerDataManagement.LeaveSave(Player)
     end
 end
 
+function Server.PlayerDataManagement.Save(ID, Player)
+    if (Server.PlayerDataManagement.Saving[ID]) then
+        return
+    end
+
+    Server.PlayerDataManagement.Saving[ID] = true
+    Logging.Debug(0, "Saving data for player %d(%s)...", ID, (Player and Player.Name or "Unknown"))
+
+    Server.PlayerDataStore:UpdateAsync(ID, function()
+        return Server.PlayerData[ID]
+    end)
+
+    Logging.Debug(0, "Successfully saved data for player %d(%s)", ID, (Player and Player.Name or "Unknown"))
+    Server.PlayerDataManagement.Saving[ID] = false
+end
+
 function Server.PlayerDataManagement.Load(Player)
     local ID = Player.UserId
 
-    -- Repetitive attempt to obtain data
-    Logging.Debug(0, "Attempting to get data for player %d(%s)...", Player.UserId, Player.Name)
-
-    local Success = false
-
-    while ((not Success) and Player.Parent) do
-        Success = ypcall(function()
-            Server.PlayerData[ID] = Server.PlayerDataStore:GetAsync(ID) or {}
-        end)
-
-        if Success then
-            break
-        end
-
-        wait(8)
-    end
-
-    Logging.Debug(0, "Got data for player %d(%s)", Player.UserId, Player.Name)
+    Logging.Debug(0, "Attempting to get data for player %d(%s)...", ID, Player.Name)
+    Server.PlayerData[ID] = Server.PlayerDataStore:GetAsync(ID) or {}
+    Logging.Debug(0, "Got data for player %d(%s)", ID, Player.Name)
 end
 
 --[[
@@ -135,14 +131,39 @@ end
     Initialises the DataStore.
 ]]
 function Server.Init()
-    Server.PlayerDataStore = (
-        DataStoreFake
-        and Server.FakeDataStore
-        or DataStoreService:GetDataStore(ReplicatedStorage.DataStoreVersion.Value)
-    )
+    local DataStore
+
+    ypcall(function()
+        DataStore = DataStoreService:GetDataStore(ReplicatedStorage.DataStoreVersion.Value)
+        Logging.Debug(0, "Got datastore.")
+    end)
+
+    if (not DataStore) then
+        Logging.Debug(0, "Could not get DataStore, using fake.")
+        DataStoreFake = true
+        DataStore = Server.FakeDataStore
+    end
+
+    Server.PlayerDataStore = DataStore
     ReplicatedData.PlayerData = Server.PlayerData
 
-    Players.PlayerAdded:Connect(Server.PlayerDataManagement.Load)
+    Players.PlayerAdded:Connect(function(Player)
+        Server.PlayerDataManagement.Load(Player)
+
+        game:BindToClose(function()
+            Server.PlayerDataManagement.LeaveSave(Player)
+        end)
+
+        local Halt; Halt = Async.Timer(10, function()
+            if (not Player.Parent) then
+                Halt()
+                return
+            end
+
+            Server.PlayerDataManagement.Save(Player.UserId)
+        end)
+    end)
+
     Players.PlayerRemoving:Connect(Server.PlayerDataManagement.LeaveSave)
 end
 

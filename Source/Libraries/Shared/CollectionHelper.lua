@@ -11,11 +11,9 @@ local CollectionService = Novarine:Get("CollectionService")
 ]]
 
 local CollectionHelper = {
-    Cache = {};
-    ChildCache = {};
-    HasTagCache = {};
-    HasTagLastTime = {};
-    DescendantCache = {},
+    Cache = setmetatable({}, {__mode = "k"});
+    ChildCache = setmetatable({}, {__mode = "k"});
+    DescendantCache = setmetatable({}, {__mode = "k"}),
 };
 
 --[[

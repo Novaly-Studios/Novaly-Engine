@@ -294,38 +294,12 @@ function Graphics:Init()
         return not Value
     end
 
-    RunService.Heartbeat:Connect(function(Step)
+    --[[ Async.Timer(1/60, function(Step)
         local PartIters = math.floor(Configuration.gTransparentPartsPerFrame * (1 / Step) / Configuration._TargetFramerate)
         Graphics:UpdateLensFlares()
-        --Graphics:UpdateBillboards()
         TransparentPartHandler:Next(PartIters)
         TransparentPartHandler:Clean(Clean, PartIters)
-    end)
-
-    --[[ RunService:BindToRenderStep("BillboardUpdates", Enum.RenderPriority.Camera.Value - 1, function()
-        debug.profilebegin("GraphicsUpdateRenderStepped")
-
-
-        debug.profileend()
-    end) ]]
-
-    --[[ Async.Wrap(function()
-        while wait(1/15) do
-            Graphics:DetectPlayer()
-            for _, Object in pairs(Graphics.SurfaceBillboards) do
-                local Settings = Object.Part:FindFirstChild("Settings")
-                if Settings then
-                    local SettingsTable = Misc:TableFromTreeValues(Settings)
-                    local MaxDistance = SettingsTable.MaxDistance
-                    local Offset = SettingsTable.Offset
-                    if (MaxDistance and Offset) then
-                        Object.MaxDistance = MaxDistance
-                        Object.OffsetPos = Offset
-                    end
-                end
-            end
-        end
-    end)() ]]
+    end, "GraphicsStep") ]]
 
     CollectionService:GetInstanceAddedSignal(Graphics.Tags.TransparentPart):Connect(function(Part)
         TransparentPartHandler:Add(Part)

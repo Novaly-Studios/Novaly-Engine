@@ -29,6 +29,8 @@ function Cleaner:Clean()
             if (Item.Destroy) then
                 Item:Destroy()
             end
+        elseif (Type == "function") then
+            Item()
         else
             error("Unsupported type: " .. Type)
         end

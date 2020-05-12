@@ -11,7 +11,7 @@ local CollectiveObjectRegistry = {
     Tests = {};
 };
 
-coroutine.wrap(function()
+--[[ coroutine.wrap(function()
     if (game:GetService("RunService"):IsClient()) then
         return
     end
@@ -39,7 +39,7 @@ coroutine.wrap(function()
 
         print("Unparented2: " .. Unparented2)
     end
-end)()
+end)() ]]
 
 function CollectiveObjectRegistry:Register(Tag, Components, CreationHandler, DestructionHandler, AncestorTarget)
 
@@ -74,6 +74,11 @@ function CollectiveObjectRegistry:Register(Tag, Components, CreationHandler, Des
             local Component = Components[Index]
             assert(Component, "No component found at index for " .. Tag .. "!")
             SetComponentToInstanceCollectionValue(Object, Component, Object)
+
+            if (InstanceComponents[Component]) then
+                --warn("Instance component already assigned: " .. tostring(Component))
+                continue
+            end
 
             local ComponentObject = CreationHandler(Component, Object)
 
@@ -185,14 +190,14 @@ function CollectiveObjectRegistry:WaitForComponent(Object, ComponentClass)
 
     local Got = self:GetComponent(Object, ComponentClass)
 
-    coroutine.wrap(function()
+    Async.Spawn(function()
         wait(5)
 
         if (Got == nil) then
             warn(string.format("Potential infinite wait on (\n    Object = '%s';\n    Component = '%s'\n)\n%s",
                                 Object:GetFullName(), tostring(ComponentClass), Trace))
         end
-    end)()
+    end)
 
     while (Got == nil) do
         Got = self:GetComponent(Object, ComponentClass)
@@ -209,14 +214,14 @@ function CollectiveObjectRegistry:WaitForComponentFromDescendant(Object, Compone
 
     local Got = self:GetComponentFromDescendant(Object, ComponentClass)
 
-    coroutine.wrap(function()
+    Async.Spawn(function()
         wait(5)
 
         if (Got == nil) then
             warn(string.format("Potential infinite wait on (\n    Object = '%s';\n    Component = '%s'\n)\n%s",
                                 Object:GetFullName(), tostring(ComponentClass), Trace))
         end
-    end)()
+    end)
 
     while (Got == nil) do
         Got = self:GetComponentFromDescendant(Object, ComponentClass)
@@ -229,7 +234,7 @@ end
 function CollectiveObjectRegistry:GetInstances(ComponentClass)
     assert(ComponentClass, "No component class given!")
 
-    return self.ComponentToInstanceCollection[ComponentClass]
+    return self.ComponentToInstanceCollection[ComponentClass] or {}
 end
 
 function CollectiveObjectRegistry:GetComponentFromDescendant(Object, ComponentClass)

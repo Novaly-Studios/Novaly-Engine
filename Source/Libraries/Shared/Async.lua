@@ -6,6 +6,7 @@ local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
 local Promise = Novarine:Get("Promise")
 local RunService = game:GetService("RunService")
 local IsServer = RunService:IsServer()
+local WaitEvent = RunService.Heartbeat
 
 local Async = {}
 
@@ -82,13 +83,28 @@ end
 function Async.Spawn(Call, ...)
     local Args = {...}
     local BindableEvent = Instance.new("BindableEvent")
+    local Profile
+
+    if (type(Call) == "string") then
+        Profile = Call
+        Call = Args[1]
+    end
 
     BindableEvent.Event:Connect(function()
+        if Profile then
+            debug.profilebegin(Profile)
+        end
+
         Call(unpack(Args))
+
+        if Profile then
+            debug.profileend()
+        end
     end)
 
     BindableEvent:Fire()
     BindableEvent:Destroy()
+    --coroutine.wrap(Call)(...)
 end
 
 --[[
@@ -100,12 +116,63 @@ end
     @tparam Call Function The function to wrap.
     @return A function which will begin the wrapped function.
 ]]
-function Async.Wrap(Call)    
+function Async.Wrap(Call, Name)    
     return function(...)
+        if Name then
+            Async.Spawn(Name, Call, ...)
+            return
+        end
+
         Async.Spawn(Call, ...)
     end
 
     --return coroutine.wrap(Call)
+end
+
+--[[
+    @function Timer
+
+    Creates a synchronised, blockable timer loop.
+    Useful for UI updating and such.
+
+    @tparam Interval Number How long to wait between calls.
+    @tparam Call Function The function to call.
+    @tparam Name[opt] Name of the label in microprofiler.
+
+    @return A function to stop the timer.
+]]
+function Async.Timer(Interval, Call, Name)
+    if Name then
+        Name = Name .. "(" .. math.floor(Interval * 100) / 100 .. ")"
+    end
+
+    local Running = true
+
+    local function Halt()
+        Running = false
+    end
+
+    local LastTime = tick()
+
+    Async.Spawn(function()
+        while Running do
+            if Name then
+                debug.profilebegin(Name)
+            end
+
+            local CurrentTime = tick()
+            Call(CurrentTime - LastTime)
+
+            if Name then
+                debug.profileend()
+            end
+
+            Async.Wait(Interval)
+            LastTime = CurrentTime
+        end
+    end)
+
+    return Halt
 end
 
 --[[
@@ -162,27 +229,21 @@ function Async.CWait(Time, Condition, Event)
     return true
 end
 
-function Async.Wait(Time, Event)
+function Async.Wait(Time)
     Time = Time or 1/30
 
     local InitialTime = tick()
-    local AwaitEvent = IsServer and Async.ServerWait or RunService[Event or "Stepped"]
 
-    if (Time <= 1/59) then
-        AwaitEvent:Wait()
-    else
-        while (tick() - InitialTime < Time) do
-            AwaitEvent:Wait(Time)
-        end
+    if (Time <= (1/60 + 0.001)) then
+        WaitEvent:Wait()
+        return true
+    end
+
+    while (tick() - InitialTime < Time) do
+        WaitEvent:Wait()
     end
 
     return true
 end
-
-Async.ServerWait = {
-    Wait = function()
-        wait()
-    end;
-};
 
 return Async
