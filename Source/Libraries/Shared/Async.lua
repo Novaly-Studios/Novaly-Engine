@@ -3,7 +3,9 @@
 ]]
 
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
+local Action = Novarine:Get("Action")
 local Promise = Novarine:Get("Promise")
+local TestService = game:GetService("TestService")
 local RunService = game:GetService("RunService")
 local IsServer = RunService:IsServer()
 local WaitEvent = RunService.Heartbeat
@@ -53,6 +55,27 @@ function Async.WaitForChild(Parent, Name, Timeout)
     end)
 end
 
+function Async.WaitForChildAction(Object, Child, Timeout)
+    -- Case 1: a timeout is specified, and deparenting won't matter
+    if Timeout then
+        local Got = Object:WaitForChild(Child, Timeout)
+        return Got and "Success" or "Timeout", Got
+    end
+
+    -- Case 2: a timeout is unspecified, so indefinitely wait unless object is deparented
+    while (Object.Parent) do
+        local Got = Object:WaitForChild(Child, 1)
+
+        if Got then
+            return "Success", Got
+        end
+    end
+
+    return "Deparent"
+end
+
+Async.WaitForChildAction = Action.Wrap(Async.WaitForChildAction, "Success")
+
 --[[
     @function Delay
 
@@ -68,10 +91,18 @@ end
         end)
 ]]
 function Async.Delay(Time, Callback)
-    Async.Wrap(function()
+    Async.Spawn(function()
         wait(Time)
         Callback()
-    end)()
+    end)
+end
+
+local function Finish(Thread, Success, ...)
+    if (not Success) then
+        TestService:Error("[Async Error]\n" .. debug.traceback(Thread, tostring((...))))
+    end
+
+    return Success, ...
 end
 
 --[[
@@ -81,8 +112,7 @@ end
     correct tracebacks.
 ]]
 function Async.Spawn(Call, ...)
-    local Args = {...}
-    local BindableEvent = Instance.new("BindableEvent")
+    --[[ local Args = {...}
     local Profile
 
     if (type(Call) == "string") then
@@ -90,6 +120,7 @@ function Async.Spawn(Call, ...)
         Call = Args[1]
     end
 
+    local BindableEvent = Instance.new("BindableEvent")
     BindableEvent.Event:Connect(function()
         if Profile then
             debug.profilebegin(Profile)
@@ -103,8 +134,12 @@ function Async.Spawn(Call, ...)
     end)
 
     BindableEvent:Fire()
-    BindableEvent:Destroy()
+    BindableEvent:Destroy() ]]
+
     --coroutine.wrap(Call)(...)
+
+    local Thread = coroutine.create(Call)
+    return Finish(Thread, coroutine.resume(Thread, ...))
 end
 
 --[[
@@ -116,7 +151,7 @@ end
     @tparam Call Function The function to wrap.
     @return A function which will begin the wrapped function.
 ]]
-function Async.Wrap(Call, Name)    
+function Async.Wrap(Call, Name)
     return function(...)
         if Name then
             Async.Spawn(Name, Call, ...)

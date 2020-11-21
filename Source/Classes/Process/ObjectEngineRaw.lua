@@ -32,9 +32,9 @@ local function InternalDiff(ToTree, FromTree, Constructing, OnSame, OnDifferent,
 
         if (FromTreeSubject and ToTreeSubject) then
             if (FromTreeIsTable or (FromTreeSubject == ToTreeSubject)) then
-                OnSame(Key, NewPath)
+                OnSame(Key, NewPath, ToTreeSubject)
             else
-                OnDifferent(Key, NewPath)
+                OnDifferent(Key, NewPath, ToTreeSubject)
             end
 
             if FromTreeIsTable then
@@ -45,10 +45,10 @@ local function InternalDiff(ToTree, FromTree, Constructing, OnSame, OnDifferent,
                 Constructing[Key] = ToTreeSubject
             end
         elseif (not FromTreeSubject and ToTreeSubject) then
-            OnDestroy(Key, NewPath)
+            OnDestroy(Key, NewPath, ToTreeSubject)
             Constructing[Key] = nil
         elseif (FromTreeSubject and not ToTreeSubject) then
-            OnCreate(Key, NewPath)
+            OnCreate(Key, NewPath, ToTreeSubject)
             if FromTreeIsTable then
                 local New = {}
                 Constructing[Key] = New

@@ -154,13 +154,20 @@ function InputLibrary.Init()
         end
     end)
 
+    --[[ local function ResetXY()
+        InputData.XY = Vector3.new(0, 0, 0)
+    end
+
+    UpLeftClick:Connect(ResetXY)
+    UpRightClick:Connect(ResetXY) ]]
+
 --[[     RunService:BindToRenderStep("MouseInput", Enum.RenderPriority.Input.Value + 1, function()
         InputLibrary:UpdateMouse()
     end) ]]
 
-    RunService.--[[ Render ]]Stepped:Connect(function()
+    --[[ RunService.Stepped:Connect(function()
         InputLibrary:UpdateMouse()
-    end)
+    end) ]]
 end
 
 function InputLibrary:FireReleaseEvents()
@@ -233,10 +240,9 @@ function InputLibrary:UpdateMouse()
             Mouse.TargetFilter = self.IgnoreFolder
         end
     else
-        local XY = InputData.XY
-        local MouseRay = Novarine:Get("Graphics").Camera:ScreenPointToRay(XY.X + 0.5, XY.Y + 0.5)
-
         if (self.MouseRaycast > 0) then
+            local XY = InputData.XY
+            local MouseRay = Novarine:Get("Graphics").Camera:ScreenPointToRay(XY.X + 0.5, XY.Y + 0.5)
             local Ignore = CollectionService:GetTagged("MouseRaycastIgnore")
             table.insert(Ignore, Player.Character)
 

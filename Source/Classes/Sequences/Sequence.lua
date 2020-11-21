@@ -17,6 +17,7 @@ function Sequence:Sequence(Properties)
         StaticAnimate = false; -- User-signified: only set to true to avoid performance issues when the animation is dependent on a condition and when no dynamic control points are being used
         AutoStop = true;  -- Automatically stops the sequence when done
         Play = false; -- When true, allows the sequence to step
+        Name = "Unknown";
     };
 
     for Key, Value in pairs(Properties) do
@@ -32,7 +33,7 @@ end
 
 -- Adds an animation object to the current sequence
 function Sequence:AddAnimation(AnimationObject)
-    assert(AnimationObject[Class.NameKey] == CHECK_ANIMATION_TYPE,
+    assert(AnimationObject.ClassName == CHECK_ANIMATION_TYPE,
         string.format("Animation object is an incorrect type (%s)", CHECK_ANIMATION_TYPE))
     self.Animations[AnimationObject] = AnimationObject
     return self

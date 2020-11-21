@@ -25,9 +25,11 @@ local Core = {}
 ]]
 function Core.Count(Items)
     local Count = 0
+
     for _ in pairs(Items) do
         Count = Count + 1
     end
+
     return Count
 end
 
@@ -222,8 +224,8 @@ end
 ]]
 function Core.Switch(Value)
     return function(Cases)
-        local Target = Cases[Value] or Cases["Default"]
-        local Final = Cases["Finally"]
+        local Target = Cases[Value] or Cases.Default
+        local Final = Cases.Finally
         if Target then
             Target()
         end
@@ -297,18 +299,6 @@ end
     Fairly self-explanatory functions
     @todo: Move or deprecate
 ]]
-
-function Core.RenderWait()
-    RunService.RenderStepped:Wait()
-end
-
-function Core.HeartbeatWait()
-    RunService.Heartbeat:Wait()
-end
-
-function Core.SteppedWait()
-    RunService.Stepped:Wait()
-end
 
 function Core.printf(Str, ...)
     print(string.format(Str, ...))

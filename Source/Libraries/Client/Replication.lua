@@ -1,98 +1,135 @@
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
-local InstancePerformanceWrapper = Novarine:Get("InstancePerformanceWrapper")
+local Communication = Novarine:Get("Communication")
 local Table = Novarine:Get("Table")
 local Async = Novarine:Get("Async")
+local Core = Novarine:Get("Core")
 
 local Replication = {
     ReplicatedData = {};
-    LoggedTime = 0;
-    LoggedCount = 0;
-    Unchanging = {};
-    Downloaded = {};
-    Wrapper = InstancePerformanceWrapper.New();
+    ChangedEventsUpwardsPropogate = {};
+    ChangedEvents = {};
 };
 
 function Replication:Init()
-    local ReplicationFolder = game:GetService("ReplicatedStorage"):WaitForChild("ReplicationFolder")
+    Communication.BindRemoteEvent("ReplicationSync", function(Data)
+        -- Deep copy since we don't want to change while recursing
+        local function DeepCopyWithNumericalKeys(Item)
+            local Result = {}
+        
+            for Key, Value in pairs(Item) do
+                Key = tonumber(Key) or Key
 
-    Async.Wrap(function()
-        while (Async.Wait(1/--[[ 20 ]]60)) do
-            self:Update(ReplicationFolder, self.ReplicatedData, 0)
+                if (type(Value) == "table") then
+                    Result[Key] = DeepCopyWithNumericalKeys(Value)
+                    continue
+                end
+
+                Result[Key] = Value
+            end
+        
+            return Result
         end
-    end)()
-end
 
---[[
-    Stops client re-searching the whole tree
-    each iteration, performance benefit.
-]]
-function Replication:SetUnchangingKeyAbsolute(Key)
-    self.Unchanging[Key] = true
-end
-
-function Replication:Update(InstanceRoot, VirtualRoot, Level)
-    --InstanceRoot = self.Wrapper:Wrap(InstanceRoot)
-
-    if (self.Unchanging[InstanceRoot.Name] and self.Downloaded[InstanceRoot.Name]) then
-        return
-    end
-
-    if (Level == 2) then
-        debug.profilebegin("NReplicate(" .. InstanceRoot.Name .. ")")
-    end
+        for Key, Value in pairs(DeepCopyWithNumericalKeys(Data)) do
+            self.ReplicatedData[Key] = Value
+        end
+    end)
 
     --[[
-        Remove items which are in the virtual tree
-        but not in the Instance tree.
+        The server has sent a path in the table to update,
+        and a corresponding value. This will index down the
+        path, set the value, and fire any events associated
+        with that path changing.
     ]]
-    for Key in pairs(VirtualRoot) do
-        Key = tostring(Key) -- Account for numerical indices
+    Communication.BindRemoteEvent("ReplicationUpdate", function(Path, Value)
+        debug.profilebegin("NReplicate(" .. Path[#Path] .. ")")
 
-        if (not InstanceRoot:FindFirstChild(Key)) then
-            VirtualRoot[Key] = nil
+        -- Set value corresponding to the given path
+        self:SetReplicationValue(Path, Value)
+
+        --[[ -- Fire singular events
+        local SingularEvent = self.ChangedEvents[table.concat(Path, ".")]
+
+        if SingularEvent then
+            SingularEvent:Fire(Value)
         end
-    end
 
-    --[[
-        Update the virtual tree to reflect the Instance
-        tree.
-    ]]
-    for _, Item in pairs(InstanceRoot:GetChildren()) do
-        --Item = Replication.Wrapper:Wrap(Item)
+        -- Fire upwards propogated events (i.e. to all tables which
+        -- contain this value directly or in an indirect sub-table)
+        if (Core.Count(self.ChangedEventsUpwardsPropogate) == 0) then
+            debug.profileend()
+            return
+        end
 
-        local Name = Item.Name
-        local Key = tonumber(Name) or Name -- Account for numerical indices
+        local RunningPath = {}
+        local Updates = {}
 
-        if (VirtualRoot[Key]) then
-            if (Item.ClassName == "Folder") then
-                -- Recurse already existing tree
-                self:Update(Item, VirtualRoot[Key], Level + 1)
-            else
-                -- Change already existing endpoint
-                VirtualRoot[Key] = Item.Value
-            end
-        else
-            --[[
-                If it has children, it maps to a table and
-                is not an end-point.
-            ]]
-            if (Item.ClassName == "Folder") then
-                local Virtual = {}
-                VirtualRoot[Key] = Virtual
-                -- Recurse to add next layers
-                self:Update(Item, Virtual, Level + 1)
-            else
-                -- Else it's an endpoint and we can map the value
-                VirtualRoot[Key] = Item.Value
+        for Index = 1, #Path do
+            table.insert(RunningPath, Path[Index])
+
+            local PropogatedEvent = self.ChangedEventsUpwardsPropogate[table.concat(RunningPath, ".")]
+
+            if PropogatedEvent then
+                table.insert(Updates, PropogatedEvent)
             end
         end
+
+        -- "Propogate upwards" pattern, starting with the exact thing which was changed
+        for Index = #Updates, 1, -1 do
+            Updates[Index]:Fire(Value)
+        end
+
+        -- TODO: top level GetChangedEvent({""}) trigger
+        debug.profileend() ]]
+    end)
+
+    Communication.FireRemoteEvent("ReplicationSync")
+
+    local Player = Novarine:Get("Player")
+
+    Player.Chatted:Connect(function(Msg)
+        if (Msg == "data") then
+            Table.Print(self.ReplicatedData)
+        end
+    end)
+end
+
+function Replication:GetChangedEventUpwardsPropogate(Path)
+    local PathString = table.concat(Path, ".")
+    local Target = self.ChangedEventsUpwardsPropogate[PathString]
+
+    if (not Target) then
+        Target = Instance.new("BindableEvent")
+        self.ChangedEventsUpwardsPropogate[PathString] = Target
     end
 
-    self.Downloaded[InstanceRoot.Name] = true
+    return Target
+end
 
-    if (Level == 2) then
-        Async.Wait(1/60)
+function Replication:SetReplicationValue(Path, Value)
+    local Last = self.ReplicatedData
+
+    for Index = 1, #Path - 1 do
+        local Key = Path[Index]
+        Key = tonumber(Key) or Key
+
+        local Next = Last[Key]
+
+        if (Next == nil or type(Next) ~= "table") then
+            Next = {}
+            Last[Key] = Next
+        end
+
+        Last = Next
     end
+    
+    local LastKey = Path[#Path]
+    LastKey = tonumber(LastKey) or LastKey
+    Last[LastKey] = Value
+end
+
+function Replication:SetUnchangingKeyAbsolute(_Key)
+    -- Deprecated
 end
 
 function Replication:WaitFor(...)

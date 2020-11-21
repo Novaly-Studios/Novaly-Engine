@@ -74,7 +74,7 @@ function Time.GetData(Str, Delimiter)
         Index = Index + 1
     end
 
-    return Time.new(Split[1], Split[2], Split[3])
+    return Time.New(Split[1], Split[2], Split[3])
 end
 
 function Time.AddTime(First, Other)
@@ -82,7 +82,7 @@ function Time.AddTime(First, Other)
 end
 
 function Time.FromSeconds(Seconds)
-    return Time.new(
+    return Time.New(
         math.floor(Seconds / Time.SecondsInHour) % 24,
         math.floor(Seconds / Time.SecondsInMinute) % 60,
         Seconds % 60

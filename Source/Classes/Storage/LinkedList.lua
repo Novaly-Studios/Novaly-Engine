@@ -17,7 +17,7 @@ function LinkedList:PushTail(Value)
 
     local FirstNode = self.FirstNode
     local PreviousNode = self.PreviousNode
-    local NewNode = LinkedNode.new(PreviousNode, FirstNode, Value)
+    local NewNode = LinkedNode.New(PreviousNode, FirstNode, Value)
 
     if (FirstNode == nil) then
         FirstNode = NewNode

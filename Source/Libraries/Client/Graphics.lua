@@ -45,16 +45,6 @@ local Graphics                  = {
     EffectsEnabled              = true;
 };
 
---[[
-    @function Graphics.UpdateScreenValues
-
-    Updates the relevant screen information
-    used by some other processes.
-
-    @usage
-        Graphics:UpdateScreenValues()
-]]
-
 function Graphics:UpdateScreenValues()
 
     -- Screen Values and Aspect Ratio
@@ -62,7 +52,9 @@ function Graphics:UpdateScreenValues()
     Graphics.ScreenSize     = ScreenSize
     Graphics.ScreenCentre   = ScreenSize / 2
     Graphics.AspectRatio    = ScreenSize.X / ScreenSize.Y
+end
 
+function Graphics:UpdateHorizontalFoV()
     -- Horizontal Field of View
     Graphics.HalfHorizontalFoV = math.atan(math.tan(math.rad(Graphics.Camera.FieldOfView / 2)) * Graphics.AspectRatio)
 end
@@ -255,7 +247,7 @@ function Graphics:Init()
             end
         end)
 
-    local Bloom = Instance.new("BloomEffect", Lighting)
+    --[[ local Bloom = Instance.new("BloomEffect", Lighting)
     local Blur = Instance.new("BlurEffect", Lighting)
     local Tint = Instance.new("ColorCorrectionEffect", Lighting)
     local SunRays = Instance.new("SunRaysEffect", Lighting)
@@ -272,17 +264,17 @@ function Graphics:Init()
     Graphics.Bloom      = Bloom
     Graphics.Blur       = Blur
     Graphics.Tint       = Tint
-    Graphics.SunRays    = SunRays
+    Graphics.SunRays    = SunRays ]]
 
     Graphics.Camera = workspace.CurrentCamera
     Graphics.UpdateScreenValues()
 
     Graphics.AnimateItems   = {
         ["Lighting"]        = Lighting;
-        ["Bloom"]           = Bloom;
+--[[         ["Bloom"]           = Bloom;
         ["Blur"]            = Blur;
         ["Tint"]            = Tint;
-        ["SunRays"]         = SunRays;
+        ["SunRays"]         = SunRays; ]]
         ["Terrain"]         = workspace:WaitForChild("Terrain");
     }
 
@@ -290,9 +282,9 @@ function Graphics:Init()
         Graphics.Camera = workspace.CurrentCamera
     end)
 
-    local function Clean(_, Value)
+    --[[ local function Clean(_, Value)
         return not Value
-    end
+    end ]]
 
     --[[ Async.Timer(1/60, function(Step)
         local PartIters = math.floor(Configuration.gTransparentPartsPerFrame * (1 / Step) / Configuration._TargetFramerate)
@@ -301,11 +293,11 @@ function Graphics:Init()
         TransparentPartHandler:Clean(Clean, PartIters)
     end, "GraphicsStep") ]]
 
-    CollectionService:GetInstanceAddedSignal(Graphics.Tags.TransparentPart):Connect(function(Part)
+    --[[ CollectionService:GetInstanceAddedSignal(Graphics.Tags.TransparentPart):Connect(function(Part)
         TransparentPartHandler:Add(Part)
-    end)
+    end) ]]
 
-    CollectiveObjectRegistry:Register("Graphics:SurfaceBillboard", {NewSurfaceBillboard}, function(_, Item)
+    CollectiveObjectRegistry.Register("Graphics:SurfaceBillboard", {NewSurfaceBillboard}, function(_, Item)
         if (Workspace:IsAncestorOf(Item)) then
             local Object = NewSurfaceBillboard.New(Item)
             Object:Initial()
@@ -313,14 +305,16 @@ function Graphics:Init()
         end
     end)
 
-    for _, Part in pairs(CollectionService:GetTagged(Graphics.Tags.TransparentPart)) do
+    --[[ for _, Part in pairs(CollectionService:GetTagged(Graphics.Tags.TransparentPart)) do
         TransparentPartHandler:Add(Part)
-    end
+    end ]]
 
-    Graphics.Camera.Changed:Connect(function(Property)
-        if (Property == "ViewportSize" or Property == "FieldOfView") then
-            Graphics:UpdateScreenValues()
-        end
+    Graphics.Camera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
+        Graphics:UpdateScreenValues()
+    end)
+
+    Graphics.Camera:GetPropertyChangedSignal("FieldOfView"):Connect(function()
+        Graphics:UpdateHorizontalFoV()
     end)
 end
 

@@ -36,10 +36,10 @@ GameServer                  = (GameServer and GameServer.Parent or ServerScriptS
 
 local LogLevel              = (ReplicatedFirst:FindFirstChild("LOG_LEVEL") and ReplicatedFirst.LOG_LEVEL.Value or 10)
 
-Engine["ClientFolder"] = GameClient
-Engine["SharedFolder"] = GameShared
-Engine["ServerFolder"] = GameServer
-Engine["LogLevel"] = LogLevel
+Engine.ClientFolder = GameClient
+Engine.SharedFolder = GameShared
+Engine.ServerFolder = GameServer
+Engine.LogLevel = LogLevel
 
 function Loader:Get(Name, Tabs)
 
@@ -200,7 +200,7 @@ function Loader:Init()
             Assets.Parent = ReplicatedStorage
         end
 
-        Engine["Assets"] = Assets
+        Engine.Assets = Assets
 
         local RemoteEvent = ReplicatedStorage:FindFirstChild("RemoteEvent")
 
@@ -219,12 +219,12 @@ function Loader:Init()
         end
     else
         coroutine.wrap(function()
-            Engine["Assets"] = ReplicatedStorage:WaitForChild("Assets")
+            Engine.Assets = ReplicatedStorage:WaitForChild("Assets")
         end)()
     end
 
-    Engine["Modules"] = Parent.Modules
-    Engine["Configuration"] = require(Parent.Configuration.Config)
+    Engine.Modules = Parent.Modules
+    Engine.Configuration = require(Parent.Configuration.Config)
 
     for _, Name in pairs(Services) do
         Engine[Name] = game:GetService(Name)

@@ -14,7 +14,7 @@ end
 
 function Quaternion.Neg(Subject)
 
-    return Quaternion.new(Subject.W, -Subject.X, -Subject.Y, -Subject.Z)
+    return Quaternion.New(Subject.W, -Subject.X, -Subject.Y, -Subject.Z)
 
 end
 
@@ -88,7 +88,7 @@ end
 
 function Quaternion:__add(Other)
 
-    return Quaternion.new(
+    return Quaternion.New(
         self.W + Other.W,
         self.X + Other.X,
         self.Y + Other.Y,
@@ -107,11 +107,11 @@ function Quaternion:__mul(Other)
 
     if type(Other) == "number" then
 
-        return Quaternion.new(self.W * Other, self.X * Other, self.Y * Other, self.Z * Other)
+        return Quaternion.New(self.W * Other, self.X * Other, self.Y * Other, self.Z * Other)
 
     elseif type(self) == "number" then
 
-        return Quaternion.new(self * Other.W, self * Other.X, self * Other.Y, self * Other.Z)
+        return Quaternion.New(self * Other.W, self * Other.X, self * Other.Y, self * Other.Z)
 
     else
 
@@ -141,7 +141,7 @@ end
 
 function Quaternion.FromVector(W, Vec)
 
-    return Quaternion.new(W, Vec.x, Vec.y, Vec.z)
+    return Quaternion.New(W, Vec.x, Vec.y, Vec.z)
 
 end
 
@@ -154,7 +154,7 @@ function Quaternion.FromCFrame(CFObject)
 
         local r = math.sqrt(1 + Sum)
         local s = 0.5 / r
-        return Quaternion.new(0.5 * r, (M21 - M12) * s, (M02 - M20) * s, (M10 - M01) * s)
+        return Quaternion.New(0.5 * r, (M21 - M12) * s, (M02 - M20) * s, (M10 - M01) * s)
 
     else
 
@@ -162,19 +162,19 @@ function Quaternion.FromCFrame(CFObject)
 
             local r = math.sqrt(1 + M00 - M11 - M22)
             local s = 0.5 / r
-            return Quaternion.new((M21 - M12) * s, 0.5 * r, (M01 + M10) * s, (M02 + M20) * s)
+            return Quaternion.New((M21 - M12) * s, 0.5 * r, (M01 + M10) * s, (M02 + M20) * s)
 
         elseif M11 > M00 and M11 > M22 then
 
             local r = math.sqrt(1 - M00 + M11 - M22)
             local s = 0.5 / r
-            return Quaternion.new((M02 - M20) * s, (M01 + M10) * s, 0.5 * r, (M12 + M21) * s)
+            return Quaternion.New((M02 - M20) * s, (M01 + M10) * s, 0.5 * r, (M12 + M21) * s)
 
         else
 
             local r = math.sqrt(1 - M00 - M11 + M22)
             local s = 0.5 / r
-            return Quaternion.new((M10 - M01) * s, (M02 + M20) * s, (M12 + M21) * s, 0.5 * r)
+            return Quaternion.New((M10 - M01) * s, (M02 + M20) * s, (M12 + M21) * s, 0.5 * r)
 
         end
     end

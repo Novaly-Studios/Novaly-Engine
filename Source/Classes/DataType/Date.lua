@@ -123,11 +123,11 @@ function Date.GetData(Str, Delimiter, UseInferiorNotation)
         Index = Index + 1
     end
 
-    return (UseInferiorNotation and Date.new(Split[2], Split[1], Split[3]) or Date.new(Split[1], Split[2], Split[3]))
+    return (UseInferiorNotation and Date.New(Split[2], Split[1], Split[3]) or Date.New(Split[1], Split[2], Split[3]))
 end
 
 function Date.GetCurrentDate(Time)
-    return Date.new(1, 1, 1970) + Date.new(math.floor(Time / (60 * 60 * 24)))
+    return Date.New(1, 1, 1970) + Date.New(math.floor(Time / (60 * 60 * 24)))
 end
 
 function Date.IsLeapYear(Year)
@@ -169,7 +169,7 @@ function Date.Add(Subject, Days)
         end
     end
 
-    return Date.new(DayValue, MonthValue, YearValue)
+    return Date.New(DayValue, MonthValue, YearValue)
 end
 
 function Date.YearsToDays(Year)

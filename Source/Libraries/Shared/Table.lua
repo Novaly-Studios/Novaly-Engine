@@ -261,7 +261,7 @@ function Table.WaitFor(YieldFunction, Target, ...)
     local MissCount = 0
 
     while (not Value) do
-        MissCount = MissCount + 1
+        MissCount += 1
 
         if (MissCount == 60) then
             warn(string.format("Possible endless wait on '%s' for property '%s'.", tostring(Target), tostring(LastKey)))
@@ -270,6 +270,29 @@ function Table.WaitFor(YieldFunction, Target, ...)
 
         YieldFunction()
         Value, LastKey = Table.TryIndex(Target, ...)
+    end
+
+    return Value
+end
+
+function Table.WaitForTimeout(Timeout, YieldFunction, Target, ...)
+    if (YieldFunction == wait) then
+        YieldFunction = function()
+            wait(0.05)
+        end
+    end
+
+    local Value, _ = Table.TryIndex(Target, ...)
+    local Start = os.time()
+
+    while (not Value) do
+        if ((os.time() - Start) > Timeout) then
+            warn("Table wait timed out.\n" .. debug.traceback())
+            break
+        end
+
+        YieldFunction()
+        Value, _ = Table.TryIndex(Target, ...)
     end
 
     return Value

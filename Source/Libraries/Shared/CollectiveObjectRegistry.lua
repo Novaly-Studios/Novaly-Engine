@@ -3,8 +3,10 @@ local Async = Novarine:Get("Async")
 
 local CollectionService = game:GetService("CollectionService")
 local CollectiveObjectRegistry = {
-    InstanceToComponentCollection = {}; -- Instance -> {Component1 = true, Component2 = true, ...}
-    ComponentToInstanceCollection = {}; -- Component Class -> {Component1 = Instance1, Component2 = Instance2, ...}
+    InstanceToComponentCollection = {}; -- InstanceToComponentCollection = {Instance -> {ComponentInstance1 = true, ComponentInstance2 = true, ...}, ...}
+    ComponentToInstanceCollection = {}; -- ComponentToInstanceCollection = {ComponentClass -> {Instance1 = Instance1, Instance2 = Instance2, ...}, ...}
+    ComponentClassToComponentCollection = {}; -- ComponentClassToComponentCollection = {ComponentClass -> {ComponentInstance1 = true, ComponentInstance2 = true, ...}, ...}
+    BaseComponentRefs = {}; -- BaseComponentRefs = {ComponentInstance1 -> ComponentClass1, ...}
     RegisteredObjects = {};
     Registered = {};
 
@@ -12,38 +14,82 @@ local CollectiveObjectRegistry = {
 };
 
 --[[ coroutine.wrap(function()
-    if (game:GetService("RunService"):IsClient()) then
-        return
-    end
+    while wait(30) do
+        local Counts = {}
 
-    while wait(60) do
-        local Unparented1 = 0
+        for Item in pairs(CollectiveObjectRegistry.InstanceToComponentCollection) do
+            local Components = CollectiveObjectRegistry.GetComponents(Item)
+            
+            if (not Components) then
+                continue
+            end
 
-        for Instance in pairs(CollectiveObjectRegistry.InstanceToComponentCollection) do
-            if (not Instance.Parent) then
-                Unparented1 = Unparented1 + 1
+            for _, Component in pairs(Components) do
+                Component = Component._COMPONENT_REF
+                Counts[tostring(Component)] = (Counts[tostring(Component)] or 0) + 1
             end
         end
 
-        print("Unparented1: " .. Unparented1)
+        -- Ensure it matches
+        local OtherCounts = {}
 
-        local Unparented2 = 0
-
-        for _, Instances in pairs(CollectiveObjectRegistry.ComponentToInstanceCollection) do
-            for _, Instance in pairs(Instances) do
-                if (not Instance.Parent) then
-                    Unparented2 = Unparented2 + 1
-                end
+         -- ComponentClassToComponentCollection = {ComponentClass -> {ComponentInstance1 = true, ComponentInstance2 = true, ...}, ...}
+        for ComponentClass, Instances in pairs(CollectiveObjectRegistry.ComponentClassToComponentCollection) do
+            for _ in pairs(Instances) do
+                OtherCounts[tostring(ComponentClass)] = (OtherCounts[tostring(ComponentClass)] or 0) + 1
             end
         end
 
-        print("Unparented2: " .. Unparented2)
+        for Key, Value in pairs(OtherCounts) do
+            local SameObjectCount = Counts[Key]
+
+            if SameObjectCount then
+                assert(SameObjectCount == Value, "Mismatch in count: " .. Key .. " (" .. SameObjectCount .. "/" .. Value .. ")")
+            end
+        end
+
+        -- Sort and show most used components
+        local KVP = {}
+
+        for Key, Value in pairs(Counts) do
+            table.insert(KVP, {Key, Value})
+        end
+
+        table.sort(KVP, function(Initial, Other)
+            return Initial[2] > Other[2]
+        end)
+
+        print("Top 10 active components...")
+
+        for Index = 1, 10 do
+            local Data = KVP[Index]
+
+            if (not Data) then
+                continue
+            end
+
+            print(Data[1] .. ": " .. Data[2])
+        end
+
+        print("---------------------")
     end
 end)() ]]
 
-function CollectiveObjectRegistry:Register(Tag, Components, CreationHandler, DestructionHandler, AncestorTarget)
+function CollectiveObjectRegistry.SetComponentToInstanceCollectionValue(Object, ComponentClass, Value, RealComponentInstance)
+    -- ComponentToInstanceCollection = {ComponentClass -> {Instance1 = Instance1, Instance2 = Instance2, ...}, ...}
+    local TargetComponentToInstanceCollection = CollectiveObjectRegistry.ComponentToInstanceCollection[ComponentClass] or {} -- setmetatable({}, {__mode = "kv"})
+    TargetComponentToInstanceCollection[Object] = Value -- ComponentInstance here is = Object always; rename/fix
+    CollectiveObjectRegistry.ComponentToInstanceCollection[ComponentClass] = TargetComponentToInstanceCollection
 
-    if (self.Registered[Tag]) then
+    -- ComponentClassToComponentCollection = {ComponentClass -> {ComponentInstance1 = true, ComponentInstance2 = true, ...}, ...}
+    local TargetComponentClassToComponentCollection = CollectiveObjectRegistry.ComponentClassToComponentCollection[ComponentClass] or {}
+    TargetComponentClassToComponentCollection[RealComponentInstance] = (Value ~= nil and true or nil)
+    CollectiveObjectRegistry.ComponentClassToComponentCollection[ComponentClass] = TargetComponentClassToComponentCollection
+end
+
+function CollectiveObjectRegistry.Register(Tag, Components, CreationHandler, DestructionHandler, AncestorTarget)
+
+    if (CollectiveObjectRegistry.Registered[Tag]) then
         warn(string.format("Tag already registered: '%s'", Tag))
         return
     end
@@ -53,46 +99,56 @@ function CollectiveObjectRegistry:Register(Tag, Components, CreationHandler, Des
     assert(#Components > 0, "Components list empty!")
 
     AncestorTarget = AncestorTarget or game
-    CreationHandler = CreationHandler or self.StandardConstruct
-    DestructionHandler = DestructionHandler or self.StandardDestroy
-
-    local function SetComponentToInstanceCollectionValue(Object, Component, Value)
-        local TargetComponentToInstanceCollection = self.ComponentToInstanceCollection[Component] or {}
-        TargetComponentToInstanceCollection[Object] = Value
-        self.ComponentToInstanceCollection[Component] = TargetComponentToInstanceCollection
-    end
+    CreationHandler = CreationHandler or CollectiveObjectRegistry.StandardConstruct
+    DestructionHandler = DestructionHandler or CollectiveObjectRegistry.StandardDestroy
 
     local function HandleObjectCreation(Object)
         if (not AncestorTarget:IsAncestorOf(Object)) then
+            -- Only instantiate if the ancestor of the Instance is correct to the specification
             return
         end
 
-        local InstanceComponents = self.InstanceToComponentCollection[Object] or {}
-        local HadValidComponent = false
+        local InstanceComponents = CollectiveObjectRegistry.InstanceToComponentCollection[Object] or {}
+        --local HadValidComponent = false
 
         for Index = 1, #Components do -- Maintain order
+
             local Component = Components[Index]
             assert(Component, "No component found at index for " .. Tag .. "!")
-            SetComponentToInstanceCollectionValue(Object, Component, Object)
-
+            
             if (InstanceComponents[Component]) then
+                -- Two or more 'Register' calls could have caused
                 --warn("Instance component already assigned: " .. tostring(Component))
                 continue
             end
 
-            local ComponentObject = CreationHandler(Component, Object)
+            Async.Spawn(function()
+                -- Spawn async because if the creation handler yields then we have a race condition
+                -- with setting CollectiveObjectRegistry.InstanceToComponentCollection[Object] for objects with multiple Register calls.
+                --local Clock = os.clock()
+                local ComponentObject = CreationHandler(Component, Object)
 
-            if ComponentObject then
-                ComponentObject._COMPONENT_REF = Component -- TODO: use BaseComponentRefs in singleton instead to assoc component object to class
-                InstanceComponents[Component] = ComponentObject
-                HadValidComponent = true
-            end
-        end
+                --[[ if (os.clock() - Clock >= 1/60) then
+                    warn("Warning: constructor yielded, therefore Destroy may be called before construction finishes: " .. tostring(Component))
+                end ]]
 
-        if HadValidComponent then
-            self.InstanceToComponentCollection[Object] = InstanceComponents
-            self.RegisteredObjects[Object] = true
+                if ComponentObject then
+                    --SetComponentToInstanceCollectionValue(Object, Component, Object)
+                    --CollectiveObjectRegistry.SetComponentToInstanceCollectionValue(Object, Component, ComponentObject)
+                    --CollectiveObjectRegistry.BaseComponentRefs[ComponentObject] = Component
+                    CollectiveObjectRegistry.SetComponentToInstanceCollectionValue(Object, Component, Object, ComponentObject)
+                    ComponentObject._COMPONENT_REF = Component -- TODO: use BaseComponentRefs in singleton instead to assoc component object to class
+                    InstanceComponents[Component] = ComponentObject
+                    --HadValidComponent = true
+                    CollectiveObjectRegistry.RegisteredObjects[Object] = true
+                end
+            end)
         end
+        
+        CollectiveObjectRegistry.InstanceToComponentCollection[Object] = InstanceComponents
+        --if HadValidComponent then
+            --CollectiveObjectRegistry.RegisteredObjects[Object] = true
+        --end
     end
 
     local function HandleObjectDestruction(Object)
@@ -100,22 +156,25 @@ function CollectiveObjectRegistry:Register(Tag, Components, CreationHandler, Des
             return
         end
 
-        if (not self.RegisteredObjects[Object]) then
+        if (not CollectiveObjectRegistry.RegisteredObjects[Object]) then
             return
         end
 
-        local InstanceComponents = self.InstanceToComponentCollection[Object]
+        local InstanceComponents = CollectiveObjectRegistry.InstanceToComponentCollection[Object]
         assert(InstanceComponents, string.format("No instance components for object '%s'!", Object:GetFullName()))
 
         for _, ComponentObject in pairs(InstanceComponents) do
-            SetComponentToInstanceCollectionValue(Object, ComponentObject._COMPONENT_REF, nil)
+            --CollectiveObjectRegistry.SetComponentToInstanceCollectionValue(Object, --[[ ComponentObject._COMPONENT_REF ]]assert(CollectiveObjectRegistry.BaseComponentRefs[ComponentObject]), nil)
+            CollectiveObjectRegistry.SetComponentToInstanceCollectionValue(Object, ComponentObject._COMPONENT_REF, nil, ComponentObject)
+            CollectiveObjectRegistry.BaseComponentRefs[ComponentObject] = nil
             Async.Wrap(DestructionHandler)(ComponentObject)
         end
 
-        self.InstanceToComponentCollection[Object] = nil
-        self.RegisteredObjects[Object] = nil
+        CollectiveObjectRegistry.InstanceToComponentCollection[Object] = nil
+        CollectiveObjectRegistry.RegisteredObjects[Object] = nil
     end
 
+    -- Issue: this fires and then GetInstanceAddedSignal
     for _, Item in pairs(CollectionService:GetTagged(Tag)) do
         HandleObjectCreation(Item)
     end
@@ -123,18 +182,18 @@ function CollectiveObjectRegistry:Register(Tag, Components, CreationHandler, Des
     CollectionService:GetInstanceAddedSignal(Tag):Connect(HandleObjectCreation)
     CollectionService:GetInstanceRemovedSignal(Tag):Connect(HandleObjectDestruction)
 
-    self.Registered[Tag] = true
+    CollectiveObjectRegistry.Registered[Tag] = true
 end
 
 -- Misc
 
-function CollectiveObjectRegistry:UpFlowExplicitComponent(Origin, ComponentIdentity, Data)
+function CollectiveObjectRegistry.UpFlowExplicitComponent(Origin, ComponentIdentity, Data)
     assert(Origin, "No origin given.")
     assert(Origin.Parent, "Unparented object passed.")
 
     while (Origin.Parent) do
 
-        local Components = self.InstanceToComponentCollection[Origin]
+        local Components = CollectiveObjectRegistry.InstanceToComponentCollection[Origin]
 
         if Components then
             local Target = Components[ComponentIdentity]
@@ -149,13 +208,13 @@ function CollectiveObjectRegistry:UpFlowExplicitComponent(Origin, ComponentIdent
     end
 end
 
-function CollectiveObjectRegistry:UpFlow(Origin, Data)
+function CollectiveObjectRegistry.UpFlow(Origin, Data)
     assert(Origin, "No origin given.")
     assert(Origin.Parent, "Unparented object passed.")
 
     while (Origin.Parent) do
 
-        local Components = self.InstanceToComponentCollection[Origin]
+        local Components = CollectiveObjectRegistry.InstanceToComponentCollection[Origin]
 
         if Components then
             for _, Target in pairs(Components) do
@@ -168,81 +227,168 @@ function CollectiveObjectRegistry:UpFlow(Origin, Data)
     end
 end
 
+--[[
+    Used for quick efficient collective updates
+    of a component type.
+]]
+function CollectiveObjectRegistry.UpdateAllComponentsOfType(Component)
+    for _, Object in pairs(CollectiveObjectRegistry.GetInstances(Component)) do
+        local ComponentToUpdate = CollectiveObjectRegistry.GetComponent(Object, Component)
+
+        if (not ComponentToUpdate) then
+            continue
+        end
+
+        ComponentToUpdate:Update()
+    end
+end
+
 -- Information retrieval
 
-function CollectiveObjectRegistry:GetComponents(Object)
+function CollectiveObjectRegistry.GetComponents(Object)
     assert(Object, "No object given!")
 
-    return self.InstanceToComponentCollection[Object]
+    return CollectiveObjectRegistry.InstanceToComponentCollection[Object]
 end
 
-function CollectiveObjectRegistry:GetComponent(Object, ComponentClass)
+function CollectiveObjectRegistry.GetComponent(Object, ComponentClass)
     assert(Object, "No object given!")
     assert(ComponentClass, "No component class given!")
 
-    return self:GetComponents(Object) and self:GetComponents(Object)[ComponentClass] or nil
+    local ComponentsForObject = CollectiveObjectRegistry.GetComponents(Object)
+    return ComponentsForObject and ComponentsForObject[ComponentClass] or nil
 end
 
-function CollectiveObjectRegistry:WaitForComponent(Object, ComponentClass)
+function CollectiveObjectRegistry.WaitForComponent(Object, ComponentClass)
     local Trace = debug.traceback()
     assert(Object, "No object given!")
     assert(ComponentClass, "No component class given!")
 
-    local Got = self:GetComponent(Object, ComponentClass)
+    local Got = CollectiveObjectRegistry.GetComponent(Object, ComponentClass)
 
-    Async.Spawn(function()
+    coroutine.wrap(function()
+        wait(5)
+
+        if (Got == nil) then
+            warn(string.format("Potential infinite wait on (\n    Object = '%s';\n    Component = '%s';\n)\n%s",
+                                Object:GetFullName(), tostring(ComponentClass), Trace))
+        end
+    end)()
+
+    local Break
+
+    coroutine.wrap(function()
+        wait(60)
+
+        if (Got == nil) then
+            Break = true -- Terminate polling loop
+            error("Wait timeout.\n" .. Trace)
+        end
+    end)()
+
+    while (Got == nil and not Break) do
+        Got = CollectiveObjectRegistry.GetComponent(Object, ComponentClass)
+
+        if (Object.Parent == nil) then
+            -- Prevent infinite waits on objects which are removed
+            return
+        end
+
+        Async.Wait(1/30)
+    end
+
+    return Got
+end
+
+function CollectiveObjectRegistry.WaitForComponentUnsafe(Object, ComponentClass)
+    local Trace = debug.traceback()
+    assert(Object, "No object given!")
+    assert(ComponentClass, "No component class given!")
+
+    local Got = CollectiveObjectRegistry.GetComponent(Object, ComponentClass)
+
+    coroutine.wrap(function()
+        wait(30)
+
+        if (Got == nil) then
+            warn(string.format("Potential infinite wait on (\n    Object = '%s';\n    Component = '%s';\n)\n%s",
+                                Object:GetFullName(), tostring(ComponentClass), Trace))
+        end
+    end)()
+
+    while (Got == nil) do
+        Got = CollectiveObjectRegistry.GetComponent(Object, ComponentClass)
+
+        if (Object.Parent == nil) then
+            -- Prevent infinite waits on objects which are removed
+            return
+        end
+
+        Async.Wait(1/30)
+    end
+
+    return Got
+end
+
+function CollectiveObjectRegistry.WaitForComponentFromDescendant(Object, ComponentClass)
+    local Trace = debug.traceback()
+    assert(Object, "No object given!")
+    assert(ComponentClass, "No component class given!")
+
+    local Got = CollectiveObjectRegistry.GetComponentFromDescendant(Object, ComponentClass)
+
+    coroutine.wrap(function()
         wait(5)
 
         if (Got == nil) then
             warn(string.format("Potential infinite wait on (\n    Object = '%s';\n    Component = '%s'\n)\n%s",
                                 Object:GetFullName(), tostring(ComponentClass), Trace))
         end
-    end)
+    end)()
 
-    while (Got == nil) do
-        Got = self:GetComponent(Object, ComponentClass)
-        wait()
-    end
+    local Break
 
-    return Got
-end
-
-function CollectiveObjectRegistry:WaitForComponentFromDescendant(Object, ComponentClass)
-    local Trace = debug.traceback()
-    assert(Object, "No object given!")
-    assert(ComponentClass, "No component class given!")
-
-    local Got = self:GetComponentFromDescendant(Object, ComponentClass)
-
-    Async.Spawn(function()
-        wait(5)
+    coroutine.wrap(function()
+        wait(60)
 
         if (Got == nil) then
-            warn(string.format("Potential infinite wait on (\n    Object = '%s';\n    Component = '%s'\n)\n%s",
-                                Object:GetFullName(), tostring(ComponentClass), Trace))
+            Break = true -- Terminate polling loop
+            error("Wait timeout.\n" .. Trace)
         end
-    end)
+    end)()
 
-    while (Got == nil) do
-        Got = self:GetComponentFromDescendant(Object, ComponentClass)
-        wait()
+    while (Got == nil and not Break) do
+        Got = CollectiveObjectRegistry.GetComponentFromDescendant(Object, ComponentClass)
+
+        if (Object.Parent == nil) then
+            -- Prevent infinite waits on objects which are removed
+            return
+        end
+
+        Async.Wait(1/30)
     end
 
     return Got
 end
 
-function CollectiveObjectRegistry:GetInstances(ComponentClass)
+function CollectiveObjectRegistry.GetInstances(ComponentClass)
     assert(ComponentClass, "No component class given!")
 
-    return self.ComponentToInstanceCollection[ComponentClass] or {}
+    return CollectiveObjectRegistry.ComponentToInstanceCollection[ComponentClass] or {}
 end
 
-function CollectiveObjectRegistry:GetComponentFromDescendant(Object, ComponentClass)
+function CollectiveObjectRegistry.GetComponentsOfClass(ComponentClass)
+    assert(ComponentClass, "No component class given!")
+
+    return CollectiveObjectRegistry.ComponentClassToComponentCollection[ComponentClass] or {}
+end
+
+function CollectiveObjectRegistry.GetComponentFromDescendant(Object, ComponentClass)
     assert(Object, "No object given!")
     assert(ComponentClass, "No component class given!")
 
     while Object do
-        local Component = self:GetComponent(Object, ComponentClass)
+        local Component = CollectiveObjectRegistry.GetComponent(Object, ComponentClass)
 
         if Component then
             return Component
@@ -263,10 +409,11 @@ end
 
 function CollectiveObjectRegistry.AsyncInitial(Component, InstanceObject)
     local Object = Component.New(InstanceObject)
+    assert(Object.Initial, string.format("No 'Initial' found in '%s'!", tostring(Component)))
 
-    Async.Wrap(function()
+    Async.Spawn(function()
         Object:Initial()
-    end)()
+    end)
 
     return Object
 end
@@ -305,7 +452,7 @@ function CollectiveObjectRegistry.Tests.TestGetComponent(Accept, Fail, OnCleanup
     local TestClass1 = GetTestClass()
     local TestClass2 = GetTestClass()
 
-    CollectiveObjectRegistry:Register(TestTag, {TestClass1, TestClass2})
+    CollectiveObjectRegistry.Register(TestTag, {TestClass1, TestClass2})
 
     local TestModel = Instance.new("Model")
     CollectionService:AddTag(TestModel, TestTag)
@@ -315,11 +462,11 @@ function CollectiveObjectRegistry.Tests.TestGetComponent(Accept, Fail, OnCleanup
         TestModel:Destroy()
     end)
 
-    if (not CollectiveObjectRegistry:GetComponent(TestModel, TestClass1)) then
+    if (not CollectiveObjectRegistry.GetComponent(TestModel, TestClass1)) then
         Fail("did not get first object")
     end
 
-    if (not CollectiveObjectRegistry:GetComponent(TestModel, TestClass2)) then
+    if (not CollectiveObjectRegistry.GetComponent(TestModel, TestClass2)) then
         Fail("did not get second object")
     end
 
@@ -337,7 +484,7 @@ function CollectiveObjectRegistry.Tests.TestGetInstances(Accept, Fail, OnCleanup
 
     local TestTag = "Test2"
 
-    CollectiveObjectRegistry:Register(TestTag, {TestClass})
+    CollectiveObjectRegistry.Register(TestTag, {TestClass})
 
     local TestModel1 = Instance.new("Model")
     CollectionService:AddTag(TestModel1, TestTag)
@@ -352,7 +499,7 @@ function CollectiveObjectRegistry.Tests.TestGetInstances(Accept, Fail, OnCleanup
         TestModel2:Destroy()
     end)
 
-    local Instances = CollectiveObjectRegistry:GetInstances(TestClass)
+    local Instances = CollectiveObjectRegistry.GetInstances(TestClass)
 
     if (not Instances) then
         Fail("no Instances obtained")
@@ -381,7 +528,7 @@ function CollectiveObjectRegistry.Tests.TestGetInstancesCleansUp(Accept, Fail, O
     end
 
     local TestTag = "Test3"
-    CollectiveObjectRegistry:Register(TestTag, {TestClass})
+    CollectiveObjectRegistry.Register(TestTag, {TestClass})
 
     local TestModel1 = Instance.new("Model")
     CollectionService:AddTag(TestModel1, TestTag)
@@ -397,7 +544,7 @@ function CollectiveObjectRegistry.Tests.TestGetInstancesCleansUp(Accept, Fail, O
         TestModel2:Destroy()
     end)
 
-    local Instances = CollectiveObjectRegistry:GetInstances(TestClass)
+    local Instances = CollectiveObjectRegistry.GetInstances(TestClass)
     local Mappings = {}
 
     for _, Value in pairs(Instances) do
@@ -432,18 +579,18 @@ function CollectiveObjectRegistry.Tests.TestGetComponentCleansUp(Accept, Fail)
     local TestClass1 = GetTestClass()
     local TestClass2 = GetTestClass()
 
-    CollectiveObjectRegistry:Register(TestTag, {TestClass1, TestClass2})
+    CollectiveObjectRegistry.Register(TestTag, {TestClass1, TestClass2})
 
     local TestModel = Instance.new("Model")
     CollectionService:AddTag(TestModel, TestTag)
     TestModel.Parent = game:GetService("Workspace")
     TestModel:Destroy()
 
-    if (CollectiveObjectRegistry:GetComponent(TestModel, TestClass1)) then
+    if (CollectiveObjectRegistry.GetComponent(TestModel, TestClass1)) then
         Fail("did not clean up for first item")
     end
 
-    if (CollectiveObjectRegistry:GetComponent(TestModel, TestClass2)) then
+    if (CollectiveObjectRegistry.GetComponent(TestModel, TestClass2)) then
         Fail("did not clean up for second item")
     end
 
@@ -467,7 +614,7 @@ function CollectiveObjectRegistry.Tests.TestGetComponentFromDescendant(Accept, F
     local TestClass1 = GetTestClass()
     local TestClass2 = GetTestClass()
 
-    CollectiveObjectRegistry:Register(TestTag, {TestClass1, TestClass2})
+    CollectiveObjectRegistry.Register(TestTag, {TestClass1, TestClass2})
 
     local TestModel = Instance.new("Model")
     CollectionService:AddTag(TestModel, TestTag)
@@ -483,27 +630,27 @@ function CollectiveObjectRegistry.Tests.TestGetComponentFromDescendant(Accept, F
         TestModel:Destroy()
     end)
 
-    if (not CollectiveObjectRegistry:GetComponentFromDescendant(TestModel, TestClass1)) then
+    if (not CollectiveObjectRegistry.GetComponentFromDescendant(TestModel, TestClass1)) then
         Fail("not inclusive for first object")
     end
 
-    if (not CollectiveObjectRegistry:GetComponentFromDescendant(TestModel, TestClass2)) then
+    if (not CollectiveObjectRegistry.GetComponentFromDescendant(TestModel, TestClass2)) then
         Fail("not inclusive for second object")
     end
 
-    if (not CollectiveObjectRegistry:GetComponentFromDescendant(SubTestModel, TestClass1)) then
+    if (not CollectiveObjectRegistry.GetComponentFromDescendant(SubTestModel, TestClass1)) then
         Fail("did not get first object in sub-model")
     end
 
-    if (not CollectiveObjectRegistry:GetComponentFromDescendant(SubSubTestModel, TestClass2)) then
+    if (not CollectiveObjectRegistry.GetComponentFromDescendant(SubSubTestModel, TestClass2)) then
         Fail("did not get second object in sub-model")
     end
 
-    if (not CollectiveObjectRegistry:GetComponentFromDescendant(SubSubTestModel, TestClass1)) then
+    if (not CollectiveObjectRegistry.GetComponentFromDescendant(SubSubTestModel, TestClass1)) then
         Fail("did not get first object in sub-sub-model")
     end
 
-    if (not CollectiveObjectRegistry:GetComponentFromDescendant(SubTestModel, TestClass2)) then
+    if (not CollectiveObjectRegistry.GetComponentFromDescendant(SubTestModel, TestClass2)) then
         Fail("did not get second object in sub-sub-model")
     end
 
@@ -547,7 +694,7 @@ end
         TestModel3:Destroy()
     end)
 
-    CollectiveObjectRegistry:Register(, {TestClass1, TestClass2})
+    CollectiveObjectRegistry.Register(, {TestClass1, TestClass2})
 
     local DataTC1 = {}
     local DataTC2 = {}
@@ -563,8 +710,8 @@ end
         DataFoundTC2[Data] = true
     end
 
-    CollectiveObjectRegistry:UpFlow(CollectiveObjectRegistry:GetComponent(TestModel3), DataTC1)
-    CollectiveObjectRegistry:UpFlow(CollectiveObjectRegistry:GetComponent(TestModel3), DataTC1)
+    CollectiveObjectRegistry.UpFlow(CollectiveObjectRegistry.GetComponent(TestModel3), DataTC1)
+    CollectiveObjectRegistry.UpFlow(CollectiveObjectRegistry.GetComponent(TestModel3), DataTC1)
 
     if (DataFoundTC1[DataTC1] and DataFoundTC2[DataTC1] and DataFoundTC2[DataTC2]) then
         Accept()

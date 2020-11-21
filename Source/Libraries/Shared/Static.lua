@@ -105,7 +105,7 @@ function Static.Reverse(Table)
     local Result = {}
     local Length = #Table
 
-    for Index = 1, Table do
+    for Index = 1, Length do
         Result[Length - Index + 1] = Table[Index]
     end
 

@@ -54,11 +54,13 @@ end
 function Sequencer.Init()
 
     -- Main update event
+    local Sequences = Sequencer.Sequences
+
     Async.Timer(1/60, function(Step)
         local SequenceCount = 0
         local ActiveSequenceCount = 0
 
-        for Subject in pairs(Sequencer.Sequences) do
+        for Subject in pairs(Sequences) do
             if (Subject.Play) then
                 Subject:Step(Step)
                 ActiveSequenceCount = ActiveSequenceCount + 1
@@ -69,11 +71,20 @@ function Sequencer.Init()
 
         Sequencer.SequenceCount = SequenceCount
         Sequencer.ActiveSequenceCount = ActiveSequenceCount
-    end, "SequenceBatch")
+    end, "AnimationBatch")
 
     for Name, Properties in pairs(Sequencer.PresetEasing) do
         Sequencer:AddEasingStyle(Name, TimeSpring.New(Properties))
     end
+
+    Async.Timer(10, function()
+        Sequencer:Stats()
+    end)
+end
+
+function Sequencer:Stats()
+    local ActivePercent = self.SequenceCount == 0 and 100 or math.floor((self.ActiveSequenceCount / self.SequenceCount) * 1000) / 10
+    print("[Sequencer]\nActive: " .. self.ActiveSequenceCount .. "\nTotal: " .. self.SequenceCount .. " (" .. ActivePercent .. "%)")
 end
 
 return Sequencer

@@ -152,7 +152,6 @@ end
 ]]
 
 function DataStructures:GetType(Var)
-
     local Found = type(Var)
 
     if (Found ~= "userdata" and Found ~= "table") then
@@ -191,7 +190,7 @@ end
 
 function DataStructures:Serialise(Item)
 
-    local ItemType = self:GetType(Item)
+    local ItemType = typeof(Item)
     local Handler = self.SerialiseFunctions[ItemType]
     assert(Handler, string.format("No serialisation function exists for %s!", ItemType))
 

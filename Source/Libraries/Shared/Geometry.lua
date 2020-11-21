@@ -14,7 +14,7 @@ local Geometry = {}
     Checks whether a point is within the bounds of a 2D polygon.
 
     @usage
-        local Intersecting = Geometry:PointIsWithinPolygon(
+        local Intersecting = Geometry.PointIsWithinPolygon(
             Vector2.new(5, 5);
             {
                 Vector3.new(0, 0);
@@ -27,7 +27,7 @@ local Geometry = {}
     @param Point The Vector2 point to check intersection.
     @param Polygon A table of Vector2 points defining the vertices of the polygon.
 ]]
-function Geometry:PointIsWithinPolygon(Point, Polygon)
+function Geometry.PointIsWithinPolygon(Point, Polygon)
     assert(typeof(Point) == "Vector2")
     assert(typeof(Polygon) == "table")
 

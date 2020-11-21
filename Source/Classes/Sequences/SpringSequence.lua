@@ -18,7 +18,7 @@ end
 
 -- Adds an animation object to the current sequence
 function SpringSequence:AddAnimation(AnimationObject)
-    assert(AnimationObject[Class.NameKey] == CHECK_ANIMATION_TYPE,
+    assert(AnimationObject.ClassName == CHECK_ANIMATION_TYPE,
         string.format("Animation object is an incorrect type (%s)", CHECK_ANIMATION_TYPE))
     self.Animations[AnimationObject] = AnimationObject
     return self

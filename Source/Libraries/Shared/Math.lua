@@ -264,9 +264,9 @@ end
 
 -- Mathematical Constants
 
-Maths["NaN"]            = 0/0
-Maths["Inf"]            = 1/0
-Maths["Radian"]         = math.pi / 180
-Maths["Tau"]            = 2 * math.pi
+Maths.NaN = 0/0
+Maths.Inf = 1/0
+Maths.Tau = 2 * math.pi
+Maths.Radian = math.pi / 180
 
 return Maths

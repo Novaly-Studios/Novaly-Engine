@@ -7,14 +7,10 @@
 ]]
 
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
-local Static = Novarine:Get("Static")
 local Table = Novarine:Get("Table")
 
 local Class = {
-    NameKey             = "ClassName";
-    ClassRefKey         = "Class";
-    ConstructorNames    = {"new", "New", "Create"};
-    ClassMetatable      = {
+    ClassMetatable  = {
         __call = function(self, Global)
             assert(type(Global) == "table", "Global vars must be a table.")
 
@@ -24,8 +20,11 @@ local Class = {
 
             return self
         end;
+        __tostring = function(self)
+            return "Class (" .. self.ClassName .. ")"
+        end;
     };
-}
+};
 
 --[[
     @function New
@@ -68,37 +67,20 @@ function Class:New(Name, ClassTable)
             Table.MergeKey(Result, Object)
         end
 
-        Result[self.ClassRefKey] = ClassTable
-
-        function Result:__tostring()
-            --[[ local Stringed = Name .. " (\n"
-
-            for Key, Item in pairs(self) do
-                Stringed = Stringed .. "    " .. tostring(Key) .. " = " .. tostring(Item) .. ";\n"
-            end
-
-            return Stringed .. "\n)" ]]
+        --[[ function Result.__tostring()
             return Name .. "(Object)"
-        end
+        end ]]
 
         setmetatable(Result, ClassTable)
 
         return Result
     end
 
-    for _, Value in pairs(self.ConstructorNames) do
-        ClassTable[Value] = Constructor
-    end
-
-    ClassTable[self.NameKey] = Name
+    ClassTable.New = Constructor
+    ClassTable.ClassName = Name
     ClassTable.__index = ClassTable
 
-    setmetatable(ClassTable, Static.Fuse1D(self.ClassMetatable, {
-        __tostring = function()
-            return "Class (" .. Name .. ")"
-        end
-    }))
-
+    setmetatable(ClassTable, self.ClassMetatable)
     return ClassTable
 end
 

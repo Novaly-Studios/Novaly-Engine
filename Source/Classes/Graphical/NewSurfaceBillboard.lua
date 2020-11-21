@@ -1,4 +1,5 @@
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
+local CollectiveObjectRegistry = Novarine:Get("CollectiveObjectRegistry")
 local RunService = Novarine:Get("RunService")
 local Class = Novarine:Get("Class")
 local Misc = Novarine:Get("Misc")
@@ -31,18 +32,41 @@ function NewSurfaceBillboard:NewSurfaceBillboard(Part)
         DistanceScale = SettingsAsTable.DistanceScale;
         DistanceMultiplier = SettingsAsTable.DistanceMultiplier or 0.5;
         RotationOffset = SettingsAsTable.RotationOffset or CFrame.new();
+        Graphics = Novarine:Get("Graphics");
         Enabled = true;
     };
 end
 
+function NewSurfaceBillboard:Init()
+    RunService.RenderStepped:Connect(function()
+        debug.profilebegin("SurfaceBillboard")
+
+        --[[ for _, Item in pairs(CollectiveObjectRegistry.GetInstances(NewSurfaceBillboard)) do
+            local Component = CollectiveObjectRegistry.GetComponent(Item, NewSurfaceBillboard) ]]
+        for Component in pairs(CollectiveObjectRegistry.GetComponentsOfClass(NewSurfaceBillboard)) do
+            if (not Component) then
+                continue
+            end
+
+            if (not Component.Graphics) then
+                Component.Graphics = Novarine:Get("Graphics")
+            end
+    
+            Component:Update()
+        end
+
+        debug.profileend()
+    end)
+end
+
 function NewSurfaceBillboard:Initial()
-    self.Connection = RunService.RenderStepped:Connect(function()
+    --[[ self.Connection = RunService.RenderStepped:Connect(function()
         if (not self.Graphics) then
             self.Graphics = Novarine:Get("Graphics")
         end
 
         self:Update()
-    end)
+    end) ]]
 
     local Part = self.Part
     local GUI = Part:FindFirstChildWhichIsA("SurfaceGui", true)
@@ -56,14 +80,15 @@ function NewSurfaceBillboard:Initial()
 end
 
 function NewSurfaceBillboard:Destroy()
-    self.Connection:Disconnect()
+    --self.Connection:Disconnect()
+    self.Part = nil
 end
 
 function NewSurfaceBillboard:Update()
     local Part = self.Part
 
     if (not Part) then
-        self:Destroy()
+        --self:Destroy()
         return
     end
 
@@ -99,10 +124,6 @@ function NewSurfaceBillboard:Update()
     end
 
     Part.CFrame = CFrame.new(From, To) * self.RotationOffset
-end
-
-function NewSurfaceBillboard:Destroy()
-    self.Part = nil
 end
 
 return NewSurfaceBillboard

@@ -1,24 +1,24 @@
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
-local Players = Novarine:Get("Players")
+local ReplicatedStorage = Novarine:Get("ReplicatedStorage")
+local DataStoreService = Novarine:Get("DataStoreService")
+local DataStructures = Novarine:Get("DataStructures")
 local Communication = Novarine:Get("Communication")
 local Replication = Novarine:Get("Replication")
-local Table = Novarine:Get("Table")
-local DataStructures = Novarine:Get("DataStructures")
-local DataStoreService = Novarine:Get("DataStoreService")
-local ReplicatedStorage = Novarine:Get("ReplicatedStorage")
 local RunService = Novarine:Get("RunService")
 local Logging = Novarine:Get("Logging")
+local Players = Novarine:Get("Players")
+local Static = Novarine:Get("Static")
+local Table = Novarine:Get("Table")
 local Async = Novarine:Get("Async")
 
 local ReplicatedData = Replication.ReplicatedData
 local DataStoreFake
 
---local PlayerData                = {}
-local Server                    = {
-    PlayerDataManagement        = {Saving = {}};
-    PlayerData                  = {};
-    LastSaveTimes               = {};
-}
+local Server = {
+    PlayerData = {};
+    LastSaveTimes = {};
+    PlayerDataManagement = {Saving = {}};
+};
 
 function Server.PlayerDataManagement.WaitForDataStore()
     Table.WaitFor(wait, Server, "PlayerDataStore")
@@ -91,7 +91,7 @@ function Server.PlayerDataManagement.LeaveSave(Player)
         return
     end
 
-    Server.PlayerDataManagement.Save(ID)
+    Server.PlayerDataManagement.Save(ID) -- TODO: save async instead?
 
     ReplicatedData.PlayerData[ID] = nil
     Server.PlayerData[ID] = nil
@@ -107,22 +107,87 @@ function Server.PlayerDataManagement.Save(ID, Player)
     end
 
     Server.PlayerDataManagement.Saving[ID] = true
-    Logging.Debug(0, "Saving data for player %d(%s)...", ID, (Player and Player.Name or "Unknown"))
+    Logging.Debug(5, "Saving data for player %d(%s)...", ID, (Player and Player.Name or "Unknown"))
 
-    Server.PlayerDataStore:UpdateAsync(ID, function()
-        return Server.PlayerData[ID]
+    local Success = ypcall(function()
+        local Data = Server.PlayerData[ID]
+
+        if (not Data) then
+            return
+        end
+
+        Server.PlayerDataStore:UpdateAsync(ID, function()
+            return Server.PlayerDataManagement.RecursiveSerialise(Static.CopyNested(Data))
+        end)
     end)
 
-    Logging.Debug(0, "Successfully saved data for player %d(%s)", ID, (Player and Player.Name or "Unknown"))
+    if (not Success) then
+        -- Could be due to bad data type, so check all
+        local function Types(Data, List)
+            local DataType = typeof(Data)
+        
+            if (DataType == "table") then
+                for _, Item in pairs(Data) do
+                    Types(Item, List)
+                end
+            end
+        
+            List[DataType] = true
+        end
+
+        print("--- Bad save, types in table:")
+
+        local DataTypes = {}
+        Types(Server.PlayerData[ID], DataTypes)
+
+        for Type in pairs(DataTypes) do
+            print(">" .. Type)
+        end
+
+        print("End display. ---")
+    end
+
+    Logging.Debug(5, "Successfully saved data for player %d(%s)", ID, (Player and Player.Name or "Unknown"))
     Server.PlayerDataManagement.Saving[ID] = false
 end
 
 function Server.PlayerDataManagement.Load(Player)
     local ID = Player.UserId
 
-    Logging.Debug(0, "Attempting to get data for player %d(%s)...", ID, Player.Name)
-    Server.PlayerData[ID] = Server.PlayerDataStore:GetAsync(ID) or {}
-    Logging.Debug(0, "Got data for player %d(%s)", ID, Player.Name)
+    Logging.Debug(5, "Attempting to get data for player %d(%s)...", ID, Player.Name)
+
+    local NewData = false
+    local DataMigrate = Novarine:Get("DataMigrate")
+    local Attempted = Server.PlayerDataStore:GetAsync(ID)
+
+    if (not Attempted) then
+        NewData = true
+        Attempted = {}
+    end
+
+    local Built = Server.PlayerDataManagement.RecursiveBuild(Attempted)
+    Logging.Debug(5, "Got data for player %d(%s)", ID, Player.Name)
+
+    if NewData then
+        -- No need to migrate new data, just put up latest version
+        Built = DataMigrate.Template({})
+        Built.Version = #DataMigrate.Versions -- Set to latest version
+        Server.PlayerData[ID] = Built
+        return
+    end
+
+    local NextVersion = (Built.Version or 0) + 1
+    local VersionTransitioners = DataMigrate.Versions
+
+    for Index = NextVersion, #VersionTransitioners do
+        Built = VersionTransitioners[Index](Built)
+        Built.Version = Index
+        Logging.Debug(0, "\t-> Version" .. Index)
+    end
+
+    Built = DataMigrate.Template(Built)
+    Server.PlayerData[ID] = Built
+    Logging.Debug(0, "Migrated data for player %d(%s)", ID, Player.Name)
 end
 
 --[[
@@ -134,7 +199,11 @@ function Server.Init()
     local DataStore
 
     ypcall(function()
-        DataStore = DataStoreService:GetDataStore(ReplicatedStorage.DataStoreVersion.Value)
+        local DataStoreVersions = ReplicatedStorage.DataStoreVersions
+        local DataStoreTarget = DataStoreVersions:FindFirstChild(game.PlaceId) or DataStoreVersions.Default
+        Logging.Debug(0, "Found DataStore version '%s'.", DataStoreTarget.Value)
+
+        DataStore = DataStoreService:GetDataStore(DataStoreTarget.Value --[[ ReplicatedStorage.DataStoreVersion.Value ]])
         Logging.Debug(0, "Got datastore.")
     end)
 
@@ -148,7 +217,15 @@ function Server.Init()
     ReplicatedData.PlayerData = Server.PlayerData
 
     Players.PlayerAdded:Connect(function(Player)
-        Server.PlayerDataManagement.Load(Player)
+        local Success, Result = ypcall(function()
+            Server.PlayerDataManagement.Load(Player)
+        end)
+
+        if (not Success) then
+            Logging.Debug(0, "Error loading player data: " .. Result)
+            -- Todo: warn player
+            return
+        end
 
         game:BindToClose(function()
             Server.PlayerDataManagement.LeaveSave(Player)

@@ -22,7 +22,7 @@ local CollectionHelper = {
     Finds any descendant objects with specified tag.
     
     @usage
-        for _, Item in pairs(CollectionHelper:GetDescendantsWithTag(Workspace, "MakeTransparent")) do
+        for _, Item in pairs(CollectionHelper.GetDescendantsWithTag(Workspace, "MakeTransparent")) do
             Item.Transparency = 1
         end
 
@@ -31,15 +31,17 @@ local CollectionHelper = {
 
     @return A table of items found by the search.
 ]]
-function CollectionHelper:GetDescendantsWithTag(Root, Tag)
+function CollectionHelper.GetDescendantsWithTag(Root, Tag)
 
     local Result = {}
 
+    debug.profilebegin("GDWT")
     for _, Object in pairs(Root:GetDescendants()) do
         if (CollectionService:HasTag(Object, Tag)) then
             table.insert(Result, Object)
         end
     end
+    debug.profileend()
 
     return Result
 end
@@ -51,7 +53,7 @@ end
     specified tag.
 
     @usage
-        for _, Item in pairs(CollectionHelper:GetChildrenWithTag(Workspace, "MakeTransparent")) do
+        for _, Item in pairs(CollectionHelper.GetChildrenWithTag(Workspace, "MakeTransparent")) do
             Item.Transparency = 1
         end
 
@@ -60,15 +62,17 @@ end
 
     @return A table of items found by the search.
 ]]
-function CollectionHelper:GetChildrenWithTag(Root, Tag)
+function CollectionHelper.GetChildrenWithTag(Root, Tag)
 
     local Result = {}
 
+    debug.profilebegin("GCWT")
     for _, Object in pairs(Root:GetChildren()) do
         if (CollectionService:HasTag(Object, Tag)) then
             table.insert(Result, Object)
         end
     end
+    debug.profileend()
 
     return Result
 end
@@ -79,20 +83,23 @@ end
     Finds the first descendant with any given tag.
 
     @usage
-        CollectionHelper:FindFirstDescendantWithTag(Workspace, "MakeThisUniquePartTransparent").Transparency = 1
+        CollectionHelper.FindFirstDescendantWithTag(Workspace, "MakeThisUniquePartTransparent").Transparency = 1
 
     @param Root The top-level instance to search.
     @param Tag The tag to check for.
 
     @return An instance with the specified tag, if one was found.
 ]]
-function CollectionHelper:FindFirstDescendantWithTag(Root, Tag)
+function CollectionHelper.FindFirstDescendantWithTag(Root, Tag)
 
+    debug.profilebegin("FFD")
     for _, Object in pairs(Root:GetDescendants()) do
         if (CollectionService:HasTag(Object, Tag)) then
+            debug.profileend()
             return Object
         end
     end
+    debug.profileend()
 end
 
 --[[
@@ -102,8 +109,8 @@ end
     Use for performance-intensive searches where the
     hierarchy cannot change.
 ]]
-function CollectionHelper:FindFirstDescendantWithTagPerformanceCached(Root, Tag)
-    local Cache = self.Cache
+function CollectionHelper.FindFirstDescendantWithTagPerformanceCached(Root, Tag)
+    local Cache = CollectionHelper.Cache
     local ForThis = Cache[Root]
 
     if ForThis then
@@ -116,6 +123,7 @@ function CollectionHelper:FindFirstDescendantWithTagPerformanceCached(Root, Tag)
         Cache[Root] = {}
     end
 
+    debug.profilebegin("FFDCached")
     for _, Object in pairs(Root:GetDescendants()) do
         if (CollectionService:HasTag(Object, Tag)) then
             Cache[Root][Tag] = Object
@@ -128,9 +136,11 @@ function CollectionHelper:FindFirstDescendantWithTagPerformanceCached(Root, Tag)
                 Connection:Disconnect()
             end)
 
+            debug.profileend()
             return Object
         end
     end
+    debug.profileend()
 end
 
 --[[
@@ -140,8 +150,8 @@ end
     Use for performance-intensive searches where the
     hierarchy cannot change.
 ]]
-function CollectionHelper:FindFirstChildWithTagPerformanceCached(Root, Tag)
-    local Cache = self.ChildCache
+function CollectionHelper.FindFirstChildWithTagPerformanceCached(Root, Tag)
+    local Cache = CollectionHelper.ChildCache
     local ForThis = Cache[Root]
 
     if ForThis then
@@ -154,6 +164,7 @@ function CollectionHelper:FindFirstChildWithTagPerformanceCached(Root, Tag)
         Cache[Root] = {}
     end
 
+    debug.profilebegin("FFCCached")
     for _, Object in pairs(Root:GetChildren()) do
         if (CollectionService:HasTag(Object, Tag)) then
             Cache[Root][Tag] = Object
@@ -166,9 +177,11 @@ function CollectionHelper:FindFirstChildWithTagPerformanceCached(Root, Tag)
                 Connection:Disconnect()
             end)
 
+            debug.profileend()
             return Object
         end
     end
+    debug.profileend()
 end
 
 --[[
@@ -178,8 +191,8 @@ end
     Use for performance-intensive searches where the
     hierarchy cannot change.
 ]]
-function CollectionHelper:GetDescendantsWithTagPerformanceCached(Root, Tag)
-    local DescendantCache = self.DescendantCache
+function CollectionHelper.GetDescendantsWithTagPerformanceCached(Root, Tag)
+    local DescendantCache = CollectionHelper.DescendantCache
     local ForThis = DescendantCache[Root]
 
     if ForThis then
@@ -193,6 +206,7 @@ function CollectionHelper:GetDescendantsWithTagPerformanceCached(Root, Tag)
         DescendantCache[Root][Tag] = {}
     end
 
+    debug.profilebegin("GDWTCached")
     for _, Object in pairs(Root:GetDescendants()) do
         if (CollectionService:HasTag(Object, Tag)) then
             local Connection; Connection = Object.Parent.ChildRemoved:Connect(function(Child)
@@ -206,6 +220,7 @@ function CollectionHelper:GetDescendantsWithTagPerformanceCached(Root, Tag)
             table.insert(DescendantCache[Root][Tag], Object)
         end
     end
+    debug.profileend()
 
     return DescendantCache[Root][Tag]
 end
@@ -216,20 +231,23 @@ end
     Finds the first child with any given tag.
 
     @usage
-        CollectionHelper:FindFirstChildWithTag(Workspace, "MakeThisUniquePartTransparent").Transparency = 1
+        CollectionHelper.FindFirstChildWithTag(Workspace, "MakeThisUniquePartTransparent").Transparency = 1
 
     @param Root The top-level instance to search.
     @param Tag The tag to check for.
 
     @return An instance with the specified tag, if one was found.
 ]]
-function CollectionHelper:FindFirstChildWithTag(Root, Tag)
+function CollectionHelper.FindFirstChildWithTag(Root, Tag)
 
+    debug.profilebegin("FFCWT")
     for _, Object in pairs(Root:GetChildren()) do
         if (CollectionService:HasTag(Object, Tag)) then
+            debug.profileend()
             return Object
         end
     end
+    debug.profileend()
 end
 
 --[[
@@ -239,7 +257,7 @@ end
     by a certain string.
 
     @usage
-        if (CollectionHelper:TagHasPrefix(Workspace.Test, "Car")) then
+        if (CollectionHelper.TagHasPrefix(Workspace.Test, "Car")) then
             Workspace.Test:Destroy()
         end
 
@@ -248,7 +266,7 @@ end
 
     @return A boolean denoting whether the object had any tags prefixed as specified.
 ]]
-function CollectionHelper:TagHasPrefix(Object, Prefix)
+function CollectionHelper.TagHasPrefix(Object, Prefix)
 
     local PrefixLength = #Prefix
 
@@ -267,11 +285,11 @@ end
     Removes all tags from a given object.
 
     @usage
-        CollectionHelper:RemoveTags(Workspace.Test)
+        CollectionHelper.RemoveTags(Workspace.Test)
 
     @param Object The Instance to remove tags from.
 ]]
-function CollectionHelper:RemoveTags(Object)
+function CollectionHelper.RemoveTags(Object)
     for _, Tag in pairs(CollectionService:GetTags(Object)) do
         CollectionService:RemoveTag(Object, Tag)
     end
@@ -286,7 +304,7 @@ end
     @param Tag The tag to search for.
     @return Any item found with the given tag.
 ]]
-function CollectionHelper:GetFirstTagged(Tag)
+function CollectionHelper.GetFirstTagged(Tag)
     return CollectionService:GetTagged(Tag)[1]
 end
 

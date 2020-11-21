@@ -7,12 +7,20 @@ function Cleaner:Cleaner()
     return {
         ToProcess = {};
         Index = 1;
+        HasCleaned = false;
     };
 end
 
-function Cleaner:Add(Item)
-    self.ToProcess[self.Index] = Item
-    self.Index = self.Index + 1
+function Cleaner:Add(...)
+    for _, Item in pairs({...}) do
+        self.ToProcess[self.Index] = Item
+        self.Index = self.Index + 1
+    end
+
+    if (self.HasCleaned) then
+        -- Add after Clean called? Likely result of bad yielding, so clean up whatever is doing this.
+        self:Clean()
+    end
 end
 
 function Cleaner:Clean()
@@ -39,6 +47,7 @@ function Cleaner:Clean()
     end
 
     self.Index = 0
+    self.HasCleaned = true
 end
 
 return Cleaner

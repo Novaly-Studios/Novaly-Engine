@@ -10,7 +10,6 @@
 
 local Novarine = require(game:GetService("ReplicatedFirst").Novarine.Loader)
 local ReplicatedStorage = Novarine:Get("ReplicatedStorage")
-local Event = Novarine:Get("Event")
 local Configuration = Novarine:Get("Configuration")
 local Players = Novarine:Get("Players")
 local Async = Novarine:Get("Async")
@@ -19,25 +18,37 @@ local Server = {
     TransmissionReady = {};
     EventsReady = {};
 };
-local Binds = {
-    Events = {};
-    Functions = {}
-};
 
 local function BindRemoteEvent(Name, Handler)
-    local Events = Binds.Events
-    local Found = Events[Name] or Event.New()
-    local Connection = Found:Connect(Handler)
-    Events[Name] = Found
-    return Connection
+    local RemoteEvent = Server.RemoteEvents:FindFirstChild(Name)
+
+    if (not RemoteEvent) then
+        RemoteEvent = Instance.new("RemoteEvent")
+        RemoteEvent.Parent = Server.RemoteEvents
+        RemoteEvent.Name = Name
+    end
+
+    return RemoteEvent.OnServerEvent:Connect(Handler)
 end
 
 local function BindRemoteFunction(Name, Handler)
-    Binds.Functions[Name] = Handler
+    local RemoteFunction = Server.RemoteFunctions:FindFirstChild(Name)
+
+    if (not RemoteFunction) then
+        RemoteFunction = Instance.new("RemoteFunction")
+        RemoteFunction.Parent = Server.RemoteFunctions
+        RemoteFunction.Name = Name
+    end
+
+    RemoteFunction.OnServerInvoke = Handler
+
+    return function()
+        RemoteFunction.OnServerInvoke = nil
+    end
 end
 
-Server.BindRemoteEvent      = BindRemoteEvent
-Server.BindRemoteFunction   = BindRemoteFunction
+Server.BindRemoteEvent = BindRemoteEvent
+Server.BindRemoteFunction = BindRemoteFunction
 
 function Server.WaitForTransmissionReady(Player, Callback)
 
@@ -52,12 +63,48 @@ function Server.WaitForTransmissionReady(Player, Callback)
     end)()
 end
 
+function Server.MakeEvents(Names)
+    for _, Name in pairs(Names) do
+        if (not Server.RemoteEvents:FindFirstChild(Name)) then
+            local RemoteEvent = Instance.new("RemoteEvent")
+            RemoteEvent.Parent = Server.RemoteEvents
+            RemoteEvent.Name = Name
+        end
+    end
+end
+
+function Server.MakeFunctions(Names)
+    for _, Name in pairs(Names) do
+        if (not Server.RemoteFunctions:FindFirstChild(Name)) then
+            local RemoteFunction = Instance.new("RemoteFunction")
+            RemoteFunction.Parent = Server.RemoteFunctions
+            RemoteFunction.Name = Name
+        end
+    end
+end
+
 function Server.FireRemoteEvent(Name, Player, ...)
-    Server.RemoteEvent:FireClient(Player, Name, ...)
+    local RemoteEvent = Server.RemoteEvents:FindFirstChild(Name)
+
+    if (not RemoteEvent) then
+        RemoteEvent = Instance.new("RemoteEvent")
+        RemoteEvent.Parent = Server.RemoteEvents
+        RemoteEvent.Name = Name
+    end
+
+    RemoteEvent:FireClient(Player, ...)
 end
 
 function Server.InvokeRemoteFunction(Name, Player, ...)
-    return Server.RemoteFunction:InvokeClient(Player, Name, ...)
+    local RemoteFunction = Server.RemoteFunctions:FindFirstChild(Name)
+
+    if (not RemoteFunction) then
+        RemoteFunction = Instance.new("RemoteFunction")
+        RemoteFunction.Parent = Server.RemoteFunctions
+        RemoteFunction.Name = Name
+    end
+
+    return RemoteFunction:InvokeClient(Player, ...)
 end
 
 function Server.FireRemoteEventWhenAvailable(Name, Player, ...)
@@ -91,24 +138,21 @@ function Server.FireRemoteEventWhenAvailable(Name, Player, ...)
     end)()
 end
 
-function Server.Broadcast(...)
-    Server.RemoteEvent:FireAllClients(...)
+function Server.Broadcast(Name, ...)
+    Server.RemoteEvents:WaitForChild(Name):FireAllClients(...)
 end
 
 function Server.Init()
 
-    local RemoteEvent = ReplicatedStorage:FindFirstChild("RemoteEvent") or
-                            Instance.new("RemoteEvent", ReplicatedStorage)
-    local RemoteFunction = ReplicatedStorage:FindFirstChild("RemoteFunction") or
-                            Instance.new("RemoteFunction", ReplicatedStorage)
+    local RemoteEvents = ReplicatedStorage:WaitForChild("RemoteEvents")
+    local RemoteFunctions = ReplicatedStorage:WaitForChild("RemoteFunctions")
     local ReadyEvent = ReplicatedStorage:FindFirstChild("ReadyEvent") or
                             Instance.new("RemoteEvent", ReplicatedStorage)
 
     ReadyEvent.Name = "ReadyEvent"
-
-    Server.RemoteEvent = RemoteEvent
-    Server.RemoteFunction = RemoteFunction
     Server.ReadyEvent = ReadyEvent
+    Server.RemoteEvents = RemoteEvents
+    Server.RemoteFunctions = RemoteFunctions
 
     ReadyEvent.OnServerEvent:Connect(function(Player, Name)
         assert(typeof(Name) == "string")
@@ -116,39 +160,11 @@ function Server.Init()
         Server.EventsReady[Player.UserId][Name] = true
     end)
 
-    RemoteEvent.OnServerEvent:Connect(function(Player, Name, ...)
-
-        if not Player then return end
-        local Event = Binds.Events[Name]
-
-        if (type(Name) ~= "string") then
-            warn("Warning, client " .. Player.Name .. " has sent an empty or non-string request name.")
-        elseif (Event == nil) then
-            warn("Warning, no event '" .. Name .. "' found in event collection.")
-        else
-            Event:Fire(Player, ...)
-        end
-    end)
-
-    RemoteFunction.OnServerInvoke = function(Player, Name, ...)
-
-        if not Player then return end
-        local Function = Binds.Functions[Name]
-
-        if (type(Name) ~= "string") then
-            warn("Warning, client " .. Player.Name .. " has sent an empty or non-string request name.")
-            return false
-        elseif (Function == nil) then
-            warn("Warning, no function '" .. Name .. "' found in function collection.")
-        else
-            return Function(Player, ...)
-        end
-    end
-
     Players.PlayerAdded:Connect(function(Player)
         while (Server.InvokeRemoteFunction("Ready", Player) == nil) do
             wait(Configuration.coPollInterval)
         end
+
         Server.TransmissionReady[Player.Name] = true
     end)
 end
